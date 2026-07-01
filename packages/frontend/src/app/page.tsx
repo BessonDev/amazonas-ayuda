@@ -1,9 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <main className="flex flex-col items-center gap-8 text-center max-w-2xl">
+        <Image src="/logo.png" alt="Logo" width={96} height={96} priority />
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           Donaciones Amazonas
         </h1>

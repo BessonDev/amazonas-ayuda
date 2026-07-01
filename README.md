@@ -94,30 +94,32 @@ amazonas-ayuda/
 │   ├── 📁 backend/          # API REST — NestJS + Prisma
 │   │   ├── src/
 │   │   │   ├── auth/        # Autenticación y autorización
+│   │   │   ├── usuarios/    # Gestión de usuarios
 │   │   │   ├── campanias/   # Gestión de campañas
 │   │   │   ├── ubicaciones/ # Puntos de acopio y destino
 │   │   │   ├── categorias/  # Categorías de productos
 │   │   │   ├── productos/   # Catálogo de productos
 │   │   │   ├── donantes/    # Registro de donantes
-│   │   │   ├── lotes/       # Lotes de donaciones con QR
-│   │   │   ├── movimientos/ # Control de inventario
+│   │   │   ├── lotes/       # Lotes con códigos QR
+│   │   │   ├── movimientos-inventario/ # Control de inventario
+│   │   │   ├── viajes/      # Planificación de transporte
+│   │   │   ├── recepciones/ # Recepción en destino
+│   │   │   ├── solicitudes/ # Pedidos desde destino
+│   │   │   ├── archivos/    # Adjuntos multifacéticos
+│   │   │   ├── configuracion/ # Configuración clave-valor
 │   │   │   └── reportes/    # Exportación PDF/Excel
 │   │   └── prisma/          # Schema y migraciones
 │   │
 │   ├── 📁 frontend/         # UI — Next.js 16 + Tailwind v4
 │   │   └── src/
 │   │       ├── app/         # Páginas y layouts
+│   │       │   └── admin/   # Panel admin con 14 páginas
 │   │       ├── components/  # Componentes shadcn/ui
 │   │       ├── lib/         # Utilidades y API client
 │   │       └── contexts/    # Auth, Query, etc.
 │   │
 │   └── 📁 shared/           # Tipos y enums compartidos
 │       └── src/
-│           ├── enums.ts     # Enums del dominio
-│           └── types.ts     # Interfaces compartidas
-│
-├── 📦 minio/                # Almacenamiento de archivos
-└── ⚙️ infra/                # Configuración de infraestructura
 ```
 
 ### 🔁 Flujo de Datos
@@ -141,9 +143,9 @@ Donante ──> Lote (QR) ──> Centro de Acopio ──> Viaje ──> Destino
 | [NestJS](https://nestjs.com/) | 11 | Framework backend modular |
 | [Prisma](https://www.prisma.io/) | 6 | ORM con type-safety |
 | [PostgreSQL](https://www.postgresql.org/) | 18 | Base de datos relacional |
-| [JWT](https://jwt.io/) + Passport | — | Autenticación segura |
-| [MinIO](https://min.io/) | — | Almacenamiento S3-compatible |
+| [JWT](https://jwt.io/) + Passport | — | Autenticación segura (HttpOnly cookies) |
 | [Swagger](https://swagger.io/) | — | Documentación de API |
+| [Multer](https://github.com/expressjs/multer) | — | Upload de archivos |
 
 ### Frontend
 
@@ -151,8 +153,10 @@ Donante ──> Lote (QR) ──> Centro de Acopio ──> Viaje ──> Destino
 |:-----------|:--------|:----------|
 | [Next.js](https://nextjs.org/) | 16 | Framework React App Router |
 | [Tailwind CSS](https://tailwindcss.com/) | 4 | Estilos utilitarios |
-| [shadcn/ui](https://ui.shadcn.com/) | — | Componentes accesibles |
+| [shadcn/ui](https://ui.shadcn.com/) | — | Componentes base-nova |
 | [TanStack Query](https://tanstack.com/query) | 5 | Manejo de estado asíncrono |
+| [React Hook Form](https://react-hook-form.com/) | 7 | Formularios performantes |
+| [Zod](https://zod.dev/) | 3 | Validación de esquemas |
 | [Recharts](https://recharts.org/) | — | Visualización de datos |
 
 ### Infraestructura
@@ -161,8 +165,7 @@ Donante ──> Lote (QR) ──> Centro de Acopio ──> Viaje ──> Destino
 |:------------|:----------|
 | [Turborepo](https://turbo.build/) | Monorepo orchestrator |
 | [pnpm](https://pnpm.io/) | Package manager |
-| [Docker](https://www.docker.com/) | Contenedores (MinIO) |
-| [VPS](https://www.digitalocean.com/) | Servidor de producción |
+| [Node.js](https://nodejs.org/) | Entorno de ejecución |
 
 ---
 
@@ -237,22 +240,44 @@ pnpm dev
 
 ## 📦 Módulos
 
+### Backend — CRUD completo (14 módulos)
+
 | Módulo | Estado | Descripción |
 |:-------|:------:|:------------|
-| 🔐 **Auth** | ✅ | Login, registro, refresh tokens, roles |
-| 👥 **Usuarios** | ✅ | CRUD de usuarios con asignación de roles |
-| 📢 **Campañas** | ✅ | Creación y gestión de campañas de recolección |
+| 🔐 **Auth** | ✅ | JWT HttpOnly + refresh tokens |
+| 👥 **Usuarios** | ✅ | CRUD con roles y guards |
+| 📢 **Campañas** | ✅ | Campañas de recolección |
 | 📍 **Ubicaciones** | ✅ | Centros de acopio, hospitales, refugios |
 | 🏷️ **Categorías** | ✅ | Clasificación de productos |
 | 📦 **Productos** | ✅ | Catálogo de productos donables |
-| 🤝 **Donantes** | ⏳ | Registro y gestión de donantes |
-| 🏷️ **Lotes** | ⏳ | Lotes con códigos QR |
-| 📊 **Inventario** | ⏳ | Control de movimientos y stock |
-| 🚚 **Viajes** | ⏳ | Planificación de transporte |
-| 📋 **Solicitudes** | ⏳ | Pedidos desde destino |
-| 📄 **Reportes** | ⏳ | Exportación PDF y Excel |
+| 🤝 **Donantes** | ✅ | Registro de personas, empresas, orgs |
+| 🏷️ **Lotes** | ✅ | Código único + QR generado |
+| 📊 **Mov. Inventario** | ✅ | Saldos automáticos por lote+ubicación |
+| 🚚 **Viajes** | ✅ | Viajes con detalle y estados |
+| 📋 **Recepciones** | ✅ | Crea inventario automáticamente |
+| 📝 **Solicitudes** | ✅ | Pedidos con prioridad y estados |
+| 📎 **Archivos** | ✅ | Upload multipart con metadatos |
+| ⚙️ **Configuración** | ✅ | Pares clave-valor |
 
-**Leyenda:** ✅ Completado · ⏳ Pendiente · 🔧 En progreso
+### Frontend — Admin panel (14 páginas)
+
+| Página | Descripción |
+|:-------|:------------|
+| 📊 **Dashboard** | Resumen con cards por entidad |
+| 📢 **Campañas** | Listado, búsqueda, eliminación |
+| 📍 **Ubicaciones** | Listado con tipo de ubicación |
+| 🏷️ **Categorías** | Listado básico |
+| 📦 **Productos** | Listado con categoría |
+| 🤝 **Donantes** | Listado con tipo y contacto |
+| 🏷️ **Lotes** | Listado + QR modal + estados |
+| 📊 **Movimientos** | Listado con saldos y tipo badge |
+| 🚚 **Viajes** | Listado con origen/destino |
+| 📋 **Recepciones** | Listado por viaje |
+| 📝 **Solicitudes** | Listado con prioridad color-coded |
+| 📎 **Archivos** | Listado con descarga directa |
+| ⚙️ **Configuración** | Listado clave-valor |
+
+**Leyenda:** ✅ Completado · 🔧 En progreso · ⏳ Pendiente
 
 ---
 
@@ -260,34 +285,34 @@ pnpm dev
 
 ### Fase 1 — Base 🏗️
 - [x] Monorepo con Turborepo
-- [x] Schema de base de datos (Prisma)
-- [x] Autenticación JWT con roles
-- [x] CRUD de usuarios
-- [x] Login funcional + Dashboard básico
+- [x] Schema de base de datos (Prisma, 21+ modelos)
+- [x] Autenticación JWT HttpOnly + refresh tokens
+- [x] CRUD de usuarios con roles y guards
 
-### Fase 2 — Catálogo 📋
-- [x] CRUD de campañas
-- [x] CRUD de ubicaciones
-- [x] CRUD de categorías y productos
-- [ ] CRUD de donantes
-- [ ] CRUD de lotes con QR
+### Fase 2 — Backend CRUD 📦
+- [x] Catálogo: Campañas, Ubicaciones, Categorías, Productos, Donantes
+- [x] Lotes con código único y QR (data URL)
+- [x] Movimientos de inventario con saldos automáticos
+- [x] Viajes con detalle anidado
+- [x] Recepciones (crea inventario automáticamente en transacción)
+- [x] Solicitudes con prioridad y estados
+- [x] Archivos (upload multipart + descarga)
+- [x] Configuración clave-valor
 
-### Fase 3 — Logística 🚚
-- [ ] Movimientos de inventario
-- [ ] Viajes y transporte
-- [ ] Recepción en destino
-- [ ] Alertas de stock
+### Fase 3 — Frontend Admin 🖥️
+- [x] Login funcional con sidebar colapsable
+- [x] Dashboard con stats por entidad
+- [x] Páginas de listado para todos los módulos
+- [ ] Formularios de creación/edición
+- [ ] Página pública de consulta
 
 ### Fase 4 — Reportes 📊
-- [ ] Exportación PDF
-- [ ] Exportación Excel
-- [ ] Dashboard administrativo
-- [ ] Métricas en tiempo real
+- [ ] Exportación PDF (pdfkit instalado)
+- [ ] Exportación Excel (exceljs instalado)
 
 ### Fase 5 — Producción 🚀
-- [ ] Despliegue VPS
-- [ ] CI/CD
-- [ ] Documentación de usuario
+- [ ] Despliegue
+- [ ] Auditoría y registros
 - [ ] Pruebas E2E
 
 ---

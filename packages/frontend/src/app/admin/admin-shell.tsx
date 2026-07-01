@@ -35,6 +35,7 @@ import {
   SidebarTrigger,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
@@ -116,9 +117,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
             href="/admin/dashboard"
             className="flex items-center gap-2 px-2 py-1"
           >
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
-              DA
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="size-8 rounded-lg"
+              priority
+            />
             <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
               Donaciones Amazonas
             </span>

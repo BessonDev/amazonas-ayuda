@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
+          <div className="flex justify-center mb-2">
+            <Image src="/logo.png" alt="Logo" width={64} height={64} priority />
+          </div>
           <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
           <CardDescription>Portal Administrativo - Donaciones Amazonas</CardDescription>
         </CardHeader>
