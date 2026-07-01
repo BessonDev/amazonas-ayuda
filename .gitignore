@@ -6,3 +6,5 @@ dist/
 *.log
 .next/
 coverage/
+backend-*.txt
+logs.txt
