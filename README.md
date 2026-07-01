@@ -107,9 +107,11 @@ amazonas-ayuda/
 │   │   │   ├── viajes/      # Planificación de transporte
 │   │   │   ├── recepciones/ # Recepción en destino
 │   │   │   ├── solicitudes/ # Pedidos desde destino
+│   │   │   ├── publico/     # Portal público (stats, progreso, viajes)
 │   │   │   ├── archivos/    # Adjuntos multifacéticos
 │   │   │   ├── configuracion/ # Configuración clave-valor
-│   │   │   └── reportes/    # Exportación PDF/Excel
+│   │   │   ├── reportes/    # Exportación PDF/Excel (esqueleto)
+│   │   │   └── auditoria/   # Registro de auditoría (esqueleto)
 │   │   └── prisma/          # Schema y migraciones
 │   │
 │   ├── 📁 frontend/         # UI — Next.js 16 + Tailwind v4
@@ -221,6 +223,9 @@ MINIO_SECRET_KEY="minioadmin"
 # Ejecutar migraciones y seed
 pnpm --filter @donaciones/backend prisma:migrate
 pnpm --filter @donaciones/backend prisma:seed
+
+# Seed con datos demo (solicitudes, viajes, lotes con progreso)
+npx tsx packages/backend/prisma/seed-demo.ts
 ```
 
 ### Desarrollo
@@ -242,7 +247,7 @@ pnpm dev
 
 ## 📦 Módulos
 
-### Backend — CRUD completo (14 módulos)
+### Backend — CRUD completo (16 módulos)
 
 | Módulo | Estado | Descripción |
 |:-------|:------:|:------------|
@@ -258,11 +263,23 @@ pnpm dev
 | 🚚 **Viajes** | ✅ | Viajes con detalle y estados + auto-movimiento ENVIO |
 | 📋 **Recepciones** | ✅ | Crea inventario automáticamente + actualiza lote |
 | 📝 **Solicitudes** | ✅ | Pedidos con prioridad y estados |
-| 🌐 **Público** | ✅ | Stats y rastreo de lotes sin autenticación |
+| 🌐 **Público** | ✅ | Stats, solicitudes con progreso (recibido/meta), viajes activos y rastreo de lotes |
 | 📎 **Archivos** | ✅ | Upload multipart con metadatos |
 | ⚙️ **Configuración** | ✅ | Pares clave-valor |
+| 📊 **Reportes** | ✅ | PDF (pdfkit) y Excel (exceljs): inventario, donaciones, viajes |
+| 📋 **Auditoría** | ✅ | Auto-logging de acciones + consulta con filtros |
 
-### Frontend — Admin panel (15 páginas, todos con form dialog) + Portal público
+### Backend — Tests
+
+```bash
+# Unit tests con Jest
+pnpm --filter @donaciones/backend test
+
+# Coverage
+pnpm --filter @donaciones/backend test:coverage
+```
+
+### Frontend — Admin panel (16 páginas, todos con form dialog) + Portal público
 
 | Página | Descripción |
 |:-------|:------------|
@@ -279,8 +296,10 @@ pnpm dev
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
 | 📎 **Archivos** | Listado con descarga directa |
+| 📊 **Reportes** | Generación PDF/Excel (inventario, donaciones, viajes) |
+| 📋 **Auditoría** | Registro de acciones con filtros |
 | ⚙️ **Configuración** | Listado clave-valor |
-| 🌐 **Portal público** | Página visual con stats, rastreo de lotes y línea de tiempo |
+| 🌐 **Portal público** | Página visual con stats, solicitudes con barras de progreso (GoFundMe-style), viajes activos, rastreo de lotes y timeline |
 
 **Leyenda:** ✅ Completado · 🔧 En progreso · ⏳ Pendiente
 
@@ -314,14 +333,15 @@ pnpm dev
 - [x] Portal público con stats y rastreo de lotes por código
 - [x] CRUD de usuarios del sistema
 
-### Fase 4 — Reportes 📊
-- [ ] Exportación PDF (pdfkit instalado)
-- [ ] Exportación Excel (exceljs instalado)
+### Fase 4 — Reportes & Auditoría 📊
+- [x] Exportación PDF (inventario, donaciones, viajes)
+- [x] Exportación Excel (inventario, donaciones, viajes)
+- [x] Auditoría (auto-logging login/logout + consulta con filtros)
+- [x] Tests unitarios (Jest + ts-jest, 8 tests)
+- [ ] Pruebas E2E
 
 ### Fase 5 — Producción 🚀
-- [ ] Despliegue
-- [ ] Auditoría y registros
-- [ ] Pruebas E2E
+- [ ] Despliegue (Docker Compose full)
 
 ---
 

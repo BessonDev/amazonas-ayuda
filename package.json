@@ -6,6 +6,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,json}\"",
+    "test": "turbo test",
     "db:migrate": "pnpm --filter @donaciones/backend exec prisma migrate dev",
     "db:seed": "pnpm --filter @donaciones/backend exec prisma db seed",
     "db:studio": "pnpm --filter @donaciones/backend exec prisma studio"

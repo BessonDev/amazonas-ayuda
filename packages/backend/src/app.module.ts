@@ -17,6 +17,8 @@ import { SolicitudesModule } from './solicitudes/solicitudes.module'
 import { ArchivosModule } from './archivos/archivos.module'
 import { ConfiguracionModule } from './configuracion/configuracion.module'
 import { PublicoModule } from './publico/publico.module';
+import { ReportesModule } from './reportes/reportes.module';
+import { AuditoriaModule } from './auditoria/auditoria.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { PublicoModule } from './publico/publico.module';
     ArchivosModule,
     ConfiguracionModule,
     PublicoModule,
+    ReportesModule,
+    AuditoriaModule,
   ],
 })
 export class AppModule {}

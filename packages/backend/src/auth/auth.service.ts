@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt'
 import * as bcrypt from 'bcrypt'
 import { Response } from 'express'
 import { PrismaService } from '../prisma/prisma.service'
+import { AuditoriaService } from '../auditoria/auditoria.service'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 
@@ -20,6 +21,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private auditoria: AuditoriaService,
   ) {
     this.accessTokenExp = 15 * 60 // 15 min en segundos
     this.refreshTokenExp = 7 * 24 * 60 * 60 // 7 días en segundos
@@ -43,6 +45,13 @@ export class AuthService {
     await this.prisma.usuario.update({
       where: { id: usuario.id },
       data: { ultimoAcceso: new Date() },
+    })
+
+    await this.auditoria.crear({
+      usuarioId: usuario.id,
+      accion: 'INICIO_SESION',
+      entidadTipo: 'usuario',
+      entidadId: usuario.id,
     })
 
     return this.generarTokens(usuario, res)
@@ -106,6 +115,11 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
+    })
+
+    await this.auditoria.crear({
+      accion: 'CIERRE_SESION',
+      entidadTipo: 'usuario',
     })
 
     return { mensaje: 'Sesión cerrada exitosamente' }
