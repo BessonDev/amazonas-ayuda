@@ -157,19 +157,9 @@ export default function PublicoPage() {
         <div className="relative z-10 pb-16">
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {statsData.map((s) => {
-                const Icon = s.icon
-                const val = busy ? 0 : s.value
-                return (
-                  <div key={s.label} className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/5">
-                    <Icon className="size-5 mx-auto mb-2 text-[#D4A373]" />
-                    <p className="heading text-2xl sm:text-3xl text-white">
-                      {busy ? '...' : useCountUp(typeof val === 'number' ? val : 0)}
-                    </p>
-                    <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{s.label}</p>
-                  </div>
-                )
-              })}
+              {statsData.map((s) => (
+                <StatCard key={s.label} icon={s.icon} value={busy ? 0 : s.value} label={s.label} busy={busy} />
+              ))}
             </div>
           </div>
         </div>
@@ -346,3 +336,20 @@ export default function PublicoPage() {
     </div>
   )
 }
+
+// ─── StatCard ─────────────────────────────────────────
+
+function StatCard({ icon: Icon, value, label, busy }: { icon: any; value: number; label: string; busy: boolean }) {
+  const animated = useCountUp(value)
+  return (
+    <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/5">
+      <Icon className="size-5 mx-auto mb-2 text-[#D4A373]" />
+      <p className="heading text-2xl sm:text-3xl text-white">
+        {busy ? '...' : animated}
+      </p>
+      <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{label}</p>
+    </div>
+  )
+}
+
+
