@@ -47,4 +47,9 @@ export class ProductosService {
       include: { categoria: true },
     })
   }
+
+  async eliminar(id: number) {
+    await this.obtener(id)
+    return this.prisma.producto.delete({ where: { id } })
+  }
 }

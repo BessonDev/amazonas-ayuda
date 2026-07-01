@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DonanteForm } from './donante-form'
 
 interface Donante {
   id: number
@@ -20,6 +21,8 @@ interface Donante {
 
 export default function DonantesPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<Donante | null>(null)
   const queryClient = useQueryClient()
 
   const { data: donantes = [], isLoading } = useQuery({
@@ -39,6 +42,16 @@ export default function DonantesPage() {
     (d.documento ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const openCreate = () => {
+    setSelected(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (donante: Donante) => {
+    setSelected(donante)
+    setFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -46,7 +59,7 @@ export default function DonantesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Donantes</h1>
           <p className="text-muted-foreground">Gestión de donantes</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="size-4" />
           Nuevo Donante
         </Button>
@@ -107,7 +120,7 @@ export default function DonantesPage() {
                     <TableCell>{donante.telefono ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(donante)}>
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -130,6 +143,12 @@ export default function DonantesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <DonanteForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        donante={selected}
+      />
     </div>
   )
 }

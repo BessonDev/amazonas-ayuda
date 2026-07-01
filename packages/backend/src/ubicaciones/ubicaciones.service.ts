@@ -30,6 +30,10 @@ export class UbicacionesService {
     })
   }
 
+  listarTipos() {
+    return this.prisma.tipoUbicacion.findMany({ orderBy: { nombre: 'asc' } })
+  }
+
   async actualizar(id: number, dto: UpdateUbicacionDto) {
     await this.obtener(id)
     return this.prisma.ubicacion.update({
@@ -37,5 +41,10 @@ export class UbicacionesService {
       data: dto,
       include: { tipo: true },
     })
+  }
+
+  async eliminar(id: number) {
+    await this.obtener(id)
+    return this.prisma.ubicacion.delete({ where: { id } })
   }
 }

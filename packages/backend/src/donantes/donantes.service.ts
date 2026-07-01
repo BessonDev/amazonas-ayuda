@@ -42,4 +42,9 @@ export class DonantesService {
       },
     })
   }
+
+  async eliminar(id: number) {
+    await this.obtener(id)
+    return this.prisma.donante.delete({ where: { id } })
+  }
 }

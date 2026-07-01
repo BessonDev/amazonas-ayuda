@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param, Body,
+  Controller, Get, Post, Patch, Delete, Param, Body,
   ParseIntPipe, UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -24,6 +24,13 @@ export class UbicacionesController {
     return this.ubicacionesService.listar()
   }
 
+  @Get('tipos')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @ApiOperation({ summary: 'Listar tipos de ubicación' })
+  listarTipos() {
+    return this.ubicacionesService.listarTipos()
+  }
+
   @Get(':id')
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Obtener ubicación por ID' })
@@ -43,5 +50,12 @@ export class UbicacionesController {
   @ApiOperation({ summary: 'Actualizar ubicación' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUbicacionDto) {
     return this.ubicacionesService.actualizar(id, dto)
+  }
+
+  @Delete(':id')
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Eliminar ubicación' })
+  eliminar(@Param('id', ParseIntPipe) id: number) {
+    return this.ubicacionesService.eliminar(id)
   }
 }

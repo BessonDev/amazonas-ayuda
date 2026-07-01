@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param, Body,
+  Controller, Get, Post, Patch, Delete, Param, Body,
   ParseIntPipe, UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -43,5 +43,12 @@ export class CategoriasController {
   @ApiOperation({ summary: 'Actualizar categoría' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoriaDto) {
     return this.categoriasService.actualizar(id, dto)
+  }
+
+  @Delete(':id')
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Eliminar categoría' })
+  eliminar(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriasService.eliminar(id)
   }
 }

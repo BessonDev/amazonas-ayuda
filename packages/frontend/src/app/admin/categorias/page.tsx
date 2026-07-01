@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CategoriaForm } from './categoria-form'
 
 interface Categoria {
   id: number
@@ -17,6 +18,8 @@ interface Categoria {
 
 export default function CategoriasPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<Categoria | null>(null)
   const queryClient = useQueryClient()
 
   const { data: categorias = [], isLoading } = useQuery({
@@ -35,6 +38,16 @@ export default function CategoriasPage() {
     c.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openCreate = () => {
+    setSelected(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (categoria: Categoria) => {
+    setSelected(categoria)
+    setFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -42,7 +55,7 @@ export default function CategoriasPage() {
           <h1 className="text-2xl font-bold tracking-tight">Categorías</h1>
           <p className="text-muted-foreground">Gestión de categorías de productos</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="size-4" />
           Nueva Categoría
         </Button>
@@ -97,7 +110,7 @@ export default function CategoriasPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(categoria)}>
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -120,6 +133,12 @@ export default function CategoriasPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <CategoriaForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        categoria={selected}
+      />
     </div>
   )
 }

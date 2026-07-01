@@ -25,4 +25,9 @@ export class CategoriasService {
     await this.obtener(id)
     return this.prisma.categoria.update({ where: { id }, data: dto })
   }
+
+  async eliminar(id: number) {
+    await this.obtener(id)
+    return this.prisma.categoria.delete({ where: { id } })
+  }
 }

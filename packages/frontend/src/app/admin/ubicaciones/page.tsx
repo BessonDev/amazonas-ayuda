@@ -8,16 +8,26 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { UbicacionForm } from './ubicacion-form'
 
 interface Ubicacion {
   id: number
   nombre: string
   direccion: string | null
+  ciudad: string | null
+  estado: string | null
+  pais: string | null
+  contacto: string | null
+  telefono: string | null
+  tipoId: number
+  campaniaId: number
   tipo?: { id: number; nombre: string; descripcion: string | null }
 }
 
 export default function UbicacionesPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<Ubicacion | null>(null)
   const queryClient = useQueryClient()
 
   const { data: ubicaciones = [], isLoading } = useQuery({
@@ -36,6 +46,16 @@ export default function UbicacionesPage() {
     u.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openCreate = () => {
+    setSelected(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (ubicacion: Ubicacion) => {
+    setSelected(ubicacion)
+    setFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -43,7 +63,7 @@ export default function UbicacionesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Ubicaciones</h1>
           <p className="text-muted-foreground">Gestión de ubicaciones de almacenamiento</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="size-4" />
           Nueva Ubicación
         </Button>
@@ -100,7 +120,7 @@ export default function UbicacionesPage() {
                     <TableCell>{ubicacion.tipo?.nombre ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(ubicacion)}>
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -121,8 +141,14 @@ export default function UbicacionesPage() {
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+      <UbicacionForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        ubicacion={selected}
+      />
     </div>
   )
 }

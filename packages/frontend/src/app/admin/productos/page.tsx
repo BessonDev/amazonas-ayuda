@@ -8,16 +8,21 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ProductoForm } from './producto-form'
 
 interface Producto {
   id: number
   nombre: string
   descripcion: string | null
+  unidad: string | null
+  categoriaId: number
   categoria?: { nombre?: string }
 }
 
 export default function ProductosPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<Producto | null>(null)
   const queryClient = useQueryClient()
 
   const { data: productos = [], isLoading } = useQuery({
@@ -36,6 +41,16 @@ export default function ProductosPage() {
     p.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openCreate = () => {
+    setSelected(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (producto: Producto) => {
+    setSelected(producto)
+    setFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -43,7 +58,7 @@ export default function ProductosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Productos</h1>
           <p className="text-muted-foreground">Gestión de productos</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="size-4" />
           Nuevo Producto
         </Button>
@@ -100,7 +115,7 @@ export default function ProductosPage() {
                     <TableCell>{producto.categoria?.nombre ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(producto)}>
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -123,6 +138,12 @@ export default function ProductosPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <ProductoForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        producto={selected}
+      />
     </div>
   )
 }
