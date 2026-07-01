@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { PublicoService } from './publico.service'
 
@@ -29,5 +29,11 @@ export class PublicoController {
   @ApiOperation({ summary: 'Buscar lote por código (público)' })
   buscarLote(@Param('codigo') codigo: string) {
     return this.publicoService.buscarLote(codigo)
+  }
+
+  @Get('recepciones/fotos')
+  @ApiOperation({ summary: 'Fotos de recepciones para galería pública' })
+  fotosRecepciones(@Query('limit') limit?: string) {
+    return this.publicoService.fotosRecepciones(limit ? parseInt(limit) : 15)
   }
 }

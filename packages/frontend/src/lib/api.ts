@@ -47,6 +47,13 @@ export const api = {
       body: body ? JSON.stringify(body) : undefined,
     }),
 
+  postForm: <T>(endpoint: string, body: FormData) =>
+    request<T>(endpoint, {
+      method: 'POST',
+      body,
+      headers: {}, // Let browser set Content-Type with boundary
+    }),
+
   patch: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
       method: 'PATCH',

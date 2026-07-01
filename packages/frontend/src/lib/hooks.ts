@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 
 export function useCountUp(end: number, duration = 2000) {
   const [count, setCount] = useState(0)
@@ -21,4 +23,22 @@ export function useCountUp(end: number, duration = 2000) {
   }, [end, duration])
 
   return count.toLocaleString()
+}
+
+export interface FotoRecepcion {
+  id: number
+  nombre: string
+  url: string
+  mimeType: string
+  createdAt: string
+  viajeCodigo: string | null
+  recepcionId: number
+}
+
+export function useFotosRecepciones(limit = 15) {
+  return useQuery<FotoRecepcion[]>({
+    queryKey: ['fotos-recepciones', limit],
+    queryFn: () => api.get(`/publico/recepciones/fotos?limit=${limit}`),
+    staleTime: 5 * 60 * 1000,
+  })
 }

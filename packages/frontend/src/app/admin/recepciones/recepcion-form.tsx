@@ -1,8 +1,6 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Image } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,6 +42,11 @@ interface DetalleRow {
   observaciones: string
 }
 
+interface RecepcionResponse {
+  id: number
+  [key: string]: unknown
+}
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -60,6 +63,7 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
   const [observaciones, setObservaciones] = useState('')
   const [detalles, setDetalles] = useState<DetalleRow[]>([createRow()])
   const [error, setError] = useState('')
+  const [fotoFile, setFotoFile] = useState<File | null>(null)
 
   const { data: viajes = [] } = useQuery<Viaje[]>({
     queryKey: ['viajes'],
@@ -77,15 +81,29 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
       setObservaciones('')
       setDetalles([createRow()])
       setError('')
+      setFotoFile(null)
     }
   }, [open, defaultViajeId])
 
-  const mutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      api.post('/recepciones', data),
-    onSuccess: () => {
+  const uploadFoto = async (recepcionId: number, viajeIdNum: number) => {
+    if (!fotoFile) return
+    const formData = new FormData()
+    formData.append('archivo', fotoFile)
+    formData.append('entidadTipo', 'Recepcion')
+    formData.append('entidadId', String(recepcionId))
+    formData.append('viajeId', String(viajeIdNum))
+    await api.postForm('/archivos/upload', formData)
+  }
+
+  const mutation = useMutation<RecepcionResponse, Error, Record<string, unknown>>({
+    mutationFn: (data) =>
+      api.post<RecepcionResponse>('/recepciones', data),
+    onSuccess: async (recepcion: RecepcionResponse) => {
       queryClient.invalidateQueries({ queryKey: ['recepciones'] })
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
+      if (fotoFile && viajeId) {
+        await uploadFoto(recepcion.id, Number(viajeId))
+      }
       onOpenChange(false)
     },
     onError: (err: Error) => {
@@ -260,6 +278,24 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
                 )}
               </div>
             ))}
+          </div>
+
+          <div className="space-y-2 border-t pt-4">
+            <Label className="flex items-center gap-2 text-base font-medium">
+              <Image className="size-4.5 text-[#1B4332]" />
+              Foto de la recepción (opcional)
+            </Label>
+            <input
+              type="file"
+              accept="image/*"
+              className="text-sm w-full"
+              onChange={(e) => setFotoFile(e.target.files?.[0] ?? null)}
+            />
+            {fotoFile && (
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <Image className="size-3.5" /> {fotoFile.name}
+              </p>
+            )}
           </div>
 
           {error && (

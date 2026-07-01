@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clock, ArrowRight, Users, Route, CheckCircle2, HandHeart } from 'lucide-react'
 import Link from 'next/link'
-import { useCountUp } from '@/lib/hooks'
+import { useCountUp, useFotosRecepciones, type FotoRecepcion } from '@/lib/hooks'
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
 
@@ -328,7 +328,7 @@ export default function PublicoPage() {
         )}
       </section>
 
-      {/* ══════════ IMPACTO ══════════ */}
+      {/* ══════════ IMPACTO - GALERÍA DE ENTREGAS ══════════ */}
       <section id="impact" className="relative py-24 sm:py-32 px-6 overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#1B4332]/5 via-transparent to-[#D4A373]/8" />
@@ -346,28 +346,7 @@ export default function PublicoPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {[
-              { icon: Users, value: stats?.ubicaciones?.toString() ?? '—', label: 'Comunidades alcanzadas' },
-              { icon: Package, value: stats?.lotes?.toString() ?? '—', label: 'Lotes registrados' },
-              { icon: Truck, value: stats?.viajesCompletados?.toString() ?? '—', label: 'Viajes completados' },
-              { icon: Heart, value: stats?.donantes?.toString() ?? '—', label: 'Donantes registrados' },
-            ].map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.label} className="group relative bg-white rounded-2xl p-7 border border-[#e8e0d0] hover:shadow-lg transition-all duration-300">
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1B4332]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative">
-                    <div className="size-11 rounded-xl bg-gradient-to-br from-[#1B4332] to-[#2D6A4F] flex items-center justify-center mb-4 shadow-sm">
-                      <Icon className="size-5 text-white" />
-                    </div>
-                    <p className="heading text-3xl text-[#1B4332] mb-1">{item.value}</p>
-                    <p className="text-xs text-[#5c4f3d]">{item.label}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <FotosCarrusel />
         </div>
       </section>
 
@@ -431,8 +410,120 @@ function StatCard({ icon: Icon, value, label, loading, accent }: {
             <span className="inline-block h-8 w-16 rounded bg-white/8 animate-pulse align-middle" />
           ) : animated}
         </p>
-        <p className="text-[11px] text-white/50 uppercase tracking-wider font-medium">{label}</p>
+<p className="text-[11px] text-white/50 uppercase tracking-wider font-medium">{label}</p>
+        </div>
       </div>
+  )
+}
+
+function formatFecha(fecha: string) {
+  return new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+// ═══════════ FOTOS CARRUSEL ═══════════
+function FotosCarrusel() {
+  const { data: fotos = [], isLoading, error } = useFotosRecepciones(15)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Autoplay
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const startAutoplay = () => {
+      intervalRef.current = setInterval(() => {
+        if (!containerRef.current) return
+        const scrollWidth = containerRef.current.scrollWidth - containerRef.current.clientWidth
+        if (containerRef.current.scrollLeft >= scrollWidth - 10) {
+          containerRef.current.scrollTo({ left: 0, behavior: 'smooth' })
+        } else {
+          containerRef.current.scrollBy({ left: 360, behavior: 'smooth' })
+        }
+      }, 5000)
+    }
+
+    const pauseAutoplay = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+
+    startAutoplay()
+    container.addEventListener('mouseenter', pauseAutoplay)
+    container.addEventListener('mouseleave', startAutoplay)
+
+    return () => {
+      pauseAutoplay()
+      container.removeEventListener('mouseenter', pauseAutoplay)
+      container.removeEventListener('mouseleave', startAutoplay)
+    }
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex gap-4 overflow-x-auto snap-x pb-4" role="region" aria-label="Galería de entregas">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex-shrink-0 w-full sm:w-[340px] snap-center animate-pulse">
+            <div className="aspect-[4/3] bg-[#e8e0d0] rounded-2xl" />
+            <div className="mt-3 h-4 bg-[#e8e0d0] rounded w-3/4" />
+            <div className="h-3 bg-[#e8e0d0] rounded w-1/2" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (error || fotos.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <svg
+          className="mx-auto size-16 text-[#c4b8a3]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="M21 15l-5-5L5 17" />
+        </svg>
+        <p className="mt-4 text-[#5c4f3d] text-lg">Aún no hay fotos de entregas</p>
+        <p className="mt-1 text-[#8b7d6b] text-sm">Las fotos aparecerán aquí cuando los coordinadores las suban al registrar recepciones</p>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex gap-4 overflow-x-auto snap-x pb-4"
+      role="region"
+      aria-label="Galería de entregas realizadas"
+    >
+      {fotos.map((foto: FotoRecepcion) => (
+        <article
+          key={foto.id}
+          className="flex-shrink-0 w-full sm:w-[340px] snap-center"
+        >
+          <div className="relative group">
+            <img
+              src={foto.url}
+              alt={foto.nombre}
+              loading="lazy"
+              className="w-full aspect-[4/3] object-cover rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <p className="text-sm font-medium truncate">
+                Recepción — {foto.viajeCodigo ?? `Viaje #${foto.recepcionId}`}
+              </p>
+              <p className="text-xs text-white/70 mt-0.5">{formatFecha(foto.createdAt)}</p>
+            </div>
+          </div>
+        </article>
+      ))}
     </div>
   )
 }

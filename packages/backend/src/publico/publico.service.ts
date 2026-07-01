@@ -113,4 +113,25 @@ export class PublicoService {
 
     return lote
   }
+
+  async fotosRecepciones(limit = 15) {
+    const archivos = await this.prisma.archivo.findMany({
+      where: { entidadTipo: 'Recepcion' },
+      include: {
+        viaje: { select: { codigo: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    })
+
+    return archivos.map((a) => ({
+      id: a.id,
+      nombre: a.nombre,
+      url: `/api/archivos/${a.id}/descargar`,
+      mimeType: a.mimeType,
+      createdAt: a.createdAt,
+      viajeCodigo: a.viaje?.codigo ?? null,
+      recepcionId: a.entidadId,
+    }))
+  }
 }

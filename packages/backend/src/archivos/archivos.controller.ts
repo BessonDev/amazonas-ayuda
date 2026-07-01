@@ -10,7 +10,7 @@ export class ArchivosController {
   constructor(private readonly archivosService: ArchivosService) {}
 
   @Post('upload')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA')
+  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'RECEPTOR')
   @ApiOperation({ summary: 'Subir archivo' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
