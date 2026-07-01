@@ -107,7 +107,12 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
             <Label htmlFor="tipo">Tipo de donante</Label>
             <Select value={tipo} onValueChange={(v) => setTipo(v ?? 'ANONIMO')}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar tipo..." />
+                <SelectValue>
+                  {(value: string | null) => {
+                    const t = TIPOS_DONANTE.find(t => t.value === value)
+                    return t?.label ?? value
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {TIPOS_DONANTE.map((t) => (

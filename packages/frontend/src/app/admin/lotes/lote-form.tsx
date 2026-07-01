@@ -146,9 +146,15 @@ export function LoteForm({ open, onOpenChange }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="producto">Producto</Label>
-              <Select value={productoId} onValueChange={(v) => setProductoId(v ?? '')}>
+                <Select value={productoId} onValueChange={(v) => setProductoId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const p = productos.find(p => p.id.toString() === value)
+                      return p?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {productos.map((p) => (
@@ -162,9 +168,15 @@ export function LoteForm({ open, onOpenChange }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="donante">Donante</Label>
-              <Select value={donanteId} onValueChange={(v) => setDonanteId(v ?? '')}>
+                <Select value={donanteId} onValueChange={(v) => setDonanteId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Opcional..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Opcional...'
+                      const d = donantes.find(d => d.id.toString() === value)
+                      return d?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {donantes.map((d) => (
@@ -178,9 +190,15 @@ export function LoteForm({ open, onOpenChange }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="ubicacion">Ubicación</Label>
-              <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
+                <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      return u?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ubicaciones.map((u) => (
@@ -194,9 +212,15 @@ export function LoteForm({ open, onOpenChange }: Props) {
 
             <div className="space-y-2 col-span-2">
               <Label htmlFor="campania">Campaña</Label>
-              <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
+                <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const c = campanias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {campanias.map((c) => (

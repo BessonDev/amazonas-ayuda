@@ -222,7 +222,13 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
               <Label htmlFor="tipo">Tipo de ubicación</Label>
               <Select value={tipoId} onValueChange={(v) => setTipoId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar tipo..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar tipo...'
+                      const t = tipos.find(t => t.id.toString() === value)
+                      return t ? (t.descripcion || t.nombre) : value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {tipos.map((t) => (
@@ -238,7 +244,13 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
               <Label htmlFor="campania">Campaña</Label>
               <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar campaña..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar campaña...'
+                      const c = campanias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {campanias.map((c) => (

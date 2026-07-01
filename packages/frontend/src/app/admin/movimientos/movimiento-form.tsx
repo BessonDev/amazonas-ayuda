@@ -138,7 +138,12 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
               <Label htmlFor="tipo">Tipo</Label>
               <Select value={tipo} onValueChange={(v) => setTipo(v ?? 'ENTRADA')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      const t = TIPOS_MOVIMIENTO.find(t => t.value === value)
+                      return t?.label ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {TIPOS_MOVIMIENTO.map((t) => (
@@ -166,7 +171,13 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
               <Label htmlFor="lote">Lote</Label>
               <Select value={loteId} onValueChange={(v) => setLoteId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar lote..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar lote...'
+                      const l = lotes.find(l => l.id.toString() === value)
+                      return l?.codigo ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {lotes.map((l) => (
@@ -182,7 +193,13 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
               <Label htmlFor="ubicacion">Ubicación</Label>
               <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar ubicación..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar ubicación...'
+                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      return u?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ubicaciones.map((u) => (
@@ -198,7 +215,13 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
               <Label htmlFor="campania">Campaña</Label>
               <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar campaña..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar campaña...'
+                      const c = campanias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {campanias.map((c) => (

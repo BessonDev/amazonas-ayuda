@@ -199,7 +199,12 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                   <Label htmlFor="prioridad">Prioridad</Label>
                   <Select value={prioridad} onValueChange={(v) => setPrioridad(v ?? 'MEDIA')}>
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          const p = PRIORIDADES.find(p => p.value === value)
+                          return p?.label ?? value
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {PRIORIDADES.map((p) => (
@@ -215,7 +220,13 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                   <Label htmlFor="campania">Campaña</Label>
                   <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar campaña..." />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          if (!value) return 'Seleccionar campaña...'
+                          const c = campanias.find(c => c.id.toString() === value)
+                          return c?.nombre ?? value
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {campanias.map((c) => (
@@ -231,7 +242,13 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                   <Label htmlFor="ubicacion">Ubicación</Label>
                   <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar ubicación..." />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          if (!value) return 'Seleccionar ubicación...'
+                          const u = ubicaciones.find(u => u.id.toString() === value)
+                          return u?.nombre ?? value
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {ubicaciones.map((u) => (
@@ -264,7 +281,13 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                     onValueChange={(v) => updateDetalle(d.key, 'productoId', v ?? '')}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar..." />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          if (!value) return 'Seleccionar...'
+                          const p = productos.find(p => p.id.toString() === value)
+                          return p?.nombre ?? value
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {productos.map((p) => (

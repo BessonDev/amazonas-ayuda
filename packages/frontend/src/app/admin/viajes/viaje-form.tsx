@@ -217,7 +217,13 @@ export function ViajeForm({ open, onOpenChange }: Props) {
               <Label htmlFor="campania">Campaña</Label>
               <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const c = campanias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {campanias.map((c) => (
@@ -233,7 +239,13 @@ export function ViajeForm({ open, onOpenChange }: Props) {
               <Label htmlFor="origen">Origen</Label>
               <Select value={origenId} onValueChange={(v) => setOrigenId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      return u?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ubicaciones.map((u) => (
@@ -249,7 +261,13 @@ export function ViajeForm({ open, onOpenChange }: Props) {
               <Label htmlFor="destino">Destino</Label>
               <Select value={destinoId} onValueChange={(v) => setDestinoId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      return u?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ubicaciones.map((u) => (
@@ -290,7 +308,14 @@ export function ViajeForm({ open, onOpenChange }: Props) {
                     onValueChange={(v) => updateDetalle(d.key, 'loteId', v ?? '')}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar..." />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          if (!value) return 'Seleccionar...'
+                          const l = lotes.find(l => l.id.toString() === value)
+                          if (!l) return value
+                          return `${l.codigo}${l.producto ? ` (${l.producto.nombre})` : ''}`
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {lotes.map((l) => (

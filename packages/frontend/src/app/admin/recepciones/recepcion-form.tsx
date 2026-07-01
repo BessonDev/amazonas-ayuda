@@ -142,7 +142,13 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
               <Label htmlFor="viaje">Viaje</Label>
               <Select value={viajeId} onValueChange={(v) => setViajeId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar viaje..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar viaje...'
+                      const v = viajes.find(v => v.id.toString() === value)
+                      return v?.codigo ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {viajes.map((v) => (
@@ -183,7 +189,14 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
                     onValueChange={(v) => updateDetalle(d.key, 'loteId', v ?? '')}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar..." />
+                      <SelectValue>
+                        {(value: string | null) => {
+                          if (!value) return 'Seleccionar...'
+                          const l = lotes.find(l => l.id.toString() === value)
+                          if (!l) return value
+                          return `${l.codigo}${l.producto ? ` (${l.producto.nombre})` : ''}`
+                        }}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {lotes.map((l) => (

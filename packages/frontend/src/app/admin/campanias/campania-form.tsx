@@ -142,7 +142,12 @@ export function CampaniaForm({ open, onOpenChange, campania }: Props) {
             <Label htmlFor="estado">Estado</Label>
             <Select value={estado} onValueChange={(v) => setEstado(v ?? 'PLANIFICADA')}>
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string | null) => {
+                    const e = ESTADOS.find(e => e.value === value)
+                    return e?.label ?? value
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {ESTADOS.map((e) => (

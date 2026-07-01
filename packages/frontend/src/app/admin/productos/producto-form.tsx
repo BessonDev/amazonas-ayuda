@@ -149,7 +149,13 @@ export function ProductoForm({ open, onOpenChange, producto }: Props) {
               <Label htmlFor="categoria">Categoría</Label>
               <Select value={categoriaId} onValueChange={(v) => setCategoriaId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const c = categorias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {categorias.map((c) => (
@@ -165,7 +171,13 @@ export function ProductoForm({ open, onOpenChange, producto }: Props) {
               <Label htmlFor="unidad">Unidad de medida</Label>
               <Select value={unidad} onValueChange={(v) => setUnidad(v ?? 'UNIDAD')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const u = UNIDADES.find(u => u.value === value)
+                      return u?.label ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {UNIDADES.map((u) => (

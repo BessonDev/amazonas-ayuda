@@ -131,7 +131,13 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
               <Label htmlFor="rol">Rol</Label>
               <Select value={rolId} onValueChange={(v) => setRolId(v ?? '')}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar...'
+                      const r = ROLES.find(r => r.id.toString() === value)
+                      return r?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ROLES.map((r) => (
