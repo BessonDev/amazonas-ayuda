@@ -1,0 +1,497 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RolNombre {
+  ADMINISTRADOR
+  COORDINADOR_LOGISTICO
+  OPERADOR_INVENTARIO
+  RESPONSABLE_DESTINO
+}
+
+enum EstadoCampania {
+  PLANIFICADA
+  ACTIVA
+  PAUSADA
+  FINALIZADA
+  CANCELADA
+}
+
+enum TipoDonante {
+  PERSONA
+  EMPRESA
+  IGLESIA
+  FUNDACION
+  ANONIMO
+}
+
+enum EstadoLote {
+  REGISTRADO
+  DISPONIBLE
+  RESERVADO
+  EN_TRANSITO
+  ENTREGADO
+  VERIFICADO
+  DISTRIBUIDO
+}
+
+enum TipoMovimiento {
+  ENTRADA
+  RESERVA
+  TRANSFERENCIA
+  ENVIO
+  RECEPCION
+  AJUSTE
+  DISTRIBUCION
+  CONSUMO
+}
+
+enum EstadoViaje {
+  PLANIFICADO
+  PREPARANDO_CARGA
+  EN_TRANSITO
+  LLEGO
+  RECEPCION_PARCIAL
+  COMPLETADO
+  CANCELADO
+}
+
+enum PrioridadSolicitud {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum EstadoSolicitud {
+  ABIERTA
+  EN_PROCESO
+  COMPLETADA
+  CANCELADA
+}
+
+enum UnidadMedida {
+  UNIDAD
+  KILO
+  LITRO
+  CAJA
+  BOLSA
+  PAQUETE
+  GALON
+  TONELADA
+  PAR
+  OTRO
+}
+
+model Campania {
+  id            Int             @id @default(autoincrement())
+  nombre        String
+  descripcion   String?
+  fechaInicio   DateTime        @default(now())
+  fechaFin      DateTime?
+  estado        EstadoCampania  @default(PLANIFICADA)
+  imagenUrl     String?
+  objetivo      String?
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  ubicaciones   Ubicacion[]
+  lotes         Lote[]
+  viajes        Viaje[]
+  solicitudes   Solicitud[]
+  movimientos   MovimientoInventario[]
+  archivos      Archivo[]
+  auditorias    Auditoria[]
+
+  @@map("campanias")
+}
+
+model Rol {
+  id        Int          @id @default(autoincrement())
+  nombre    RolNombre    @unique
+  descripcion String?
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  usuarios  Usuario[]
+  permisos  RolPermiso[]
+
+  @@map("roles")
+}
+
+model Permiso {
+  id          Int         @id @default(autoincrement())
+  codigo      String      @unique
+  nombre      String
+  descripcion String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  roles       RolPermiso[]
+
+  @@map("permisos")
+}
+
+model RolPermiso {
+  rolId     Int
+  permisoId Int
+
+  rol       Rol     @relation(fields: [rolId], references: [id], onDelete: Cascade)
+  permiso   Permiso @relation(fields: [permisoId], references: [id], onDelete: Cascade)
+
+  @@id([rolId, permisoId])
+  @@map("roles_permisos")
+}
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nombre        String
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  telefono      String?
+  activo        Boolean  @default(true)
+  ultimoAcceso  DateTime? @map("ultimo_acceso")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  rolId         Int
+  rol           Rol      @relation(fields: [rolId], references: [id])
+
+  ubicacionId   Int?
+  ubicacion     Ubicacion? @relation("ResponsableUbicacion", fields: [ubicacionId], references: [id])
+
+  lotes         Lote[]                  @relation("ResponsableLote")
+  movimientos   MovimientoInventario[] @relation("ResponsableMovimiento")
+  viajesCreados Viaje[]                 @relation("ResponsableViaje")
+  recepciones   Recepcion[]
+  auditorias    Auditoria[]
+
+  @@map("usuarios")
+}
+
+model TipoUbicacion {
+  id          Int         @id @default(autoincrement())
+  nombre      String      @unique
+  descripcion String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  ubicaciones Ubicacion[]
+
+  @@map("tipos_ubicacion")
+}
+
+model Ubicacion {
+  id            Int          @id @default(autoincrement())
+  nombre        String
+  direccion     String?
+  ciudad        String?
+  estado        String?
+  pais          String       @default("Venezuela")
+  contacto      String?
+  telefono      String?
+  activo        Boolean      @default(true)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  tipoId        Int
+  tipo          TipoUbicacion @relation(fields: [tipoId], references: [id])
+
+  campaniaId    Int
+  campania      Campania     @relation(fields: [campaniaId], references: [id])
+
+  responsables  Usuario[]    @relation("ResponsableUbicacion")
+  lotes         Lote[]
+  viajesOrigen  Viaje[]      @relation("OrigenViaje")
+  viajesDestino Viaje[]      @relation("DestinoViaje")
+  movimientos   MovimientoInventario[] @relation("UbicacionMovimiento")
+  solicitudes   Solicitud[]
+
+  @@map("ubicaciones")
+}
+
+model Categoria {
+  id          Int        @id @default(autoincrement())
+  nombre      String     @unique
+  descripcion String?
+  icono       String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  productos   Producto[]
+
+  @@map("categorias")
+}
+
+model Producto {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  unidad      UnidadMedida @default(UNIDAD)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  categoriaId Int
+  categoria   Categoria  @relation(fields: [categoriaId], references: [id])
+
+  lotes       Lote[]
+  detalleSolicitudes DetalleSolicitud[]
+
+  @@map("productos")
+}
+
+model Donante {
+  id        Int          @id @default(autoincrement())
+  tipo      TipoDonante  @default(ANONIMO)
+  nombre    String?
+  documento String?
+  email     String?
+  telefono  String?
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  lotes     Lote[]
+
+  @@map("donantes")
+}
+
+model Lote {
+  id          Int         @id @default(autoincrement())
+  codigo      String      @unique
+  cantidad    Int
+  fecha       DateTime    @default(now())
+  observaciones String?
+  estado      EstadoLote  @default(REGISTRADO)
+  qrUrl       String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  campaniaId  Int
+  campania    Campania    @relation(fields: [campaniaId], references: [id])
+
+  ubicacionId Int
+  ubicacion   Ubicacion   @relation(fields: [ubicacionId], references: [id])
+
+  productoId  Int
+  producto    Producto    @relation(fields: [productoId], references: [id])
+
+  donanteId   Int?
+  donante     Donante?    @relation(fields: [donanteId], references: [id])
+
+  responsableId Int?
+  responsable   Usuario?  @relation("ResponsableLote", fields: [responsableId], references: [id])
+
+  movimientos MovimientoInventario[]
+  detalleViajes DetalleViaje[]
+  detalleRecepciones DetalleRecepcion[]
+
+  @@index([campaniaId])
+  @@index([ubicacionId])
+  @@index([productoId])
+  @@index([estado])
+  @@map("lotes")
+}
+
+model MovimientoInventario {
+  id            Int             @id @default(autoincrement())
+  tipo          TipoMovimiento
+  cantidad      Int
+  saldoAnterior Int?            @map("saldo_anterior")
+  saldoNuevo    Int?            @map("saldo_nuevo")
+  observaciones String?
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  loteId        Int
+  lote          Lote            @relation(fields: [loteId], references: [id])
+
+  ubicacionId   Int
+  ubicacion     Ubicacion       @relation("UbicacionMovimiento", fields: [ubicacionId], references: [id])
+
+  responsableId Int?
+  responsable   Usuario?        @relation("ResponsableMovimiento", fields: [responsableId], references: [id])
+
+  campaniaId    Int
+  campania      Campania        @relation(fields: [campaniaId], references: [id])
+
+  viajeId       Int?
+
+  @@index([loteId])
+  @@index([ubicacionId])
+  @@index([tipo])
+  @@index([createdAt])
+  @@map("movimientos_inventario")
+}
+
+model Viaje {
+  id              Int          @id @default(autoincrement())
+  codigo          String       @unique
+  nombreResponsable String? @map("nombre_responsable")
+  vehiculo        String?
+  conductor       String?
+  fechaSalida     DateTime?
+  fechaEstimada   DateTime?
+  fechaLlegada    DateTime?
+  observaciones   String?
+  estado          EstadoViaje  @default(PLANIFICADO)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  campaniaId      Int
+  campania        Campania     @relation(fields: [campaniaId], references: [id])
+
+  origenId        Int
+  origen          Ubicacion    @relation("OrigenViaje", fields: [origenId], references: [id])
+
+  destinoId       Int
+  destino         Ubicacion    @relation("DestinoViaje", fields: [destinoId], references: [id])
+
+  responsableId   Int?
+  responsable     Usuario?     @relation("ResponsableViaje", fields: [responsableId], references: [id])
+
+  detalles        DetalleViaje[]
+  recepciones     Recepcion[]
+  archivos        Archivo[]
+
+  @@index([campaniaId])
+  @@index([estado])
+  @@map("viajes")
+}
+
+model DetalleViaje {
+  id        Int   @id @default(autoincrement())
+  cantidad  Int
+
+  viajeId   Int
+  viaje     Viaje @relation(fields: [viajeId], references: [id], onDelete: Cascade)
+
+  loteId    Int
+  lote      Lote  @relation(fields: [loteId], references: [id])
+
+  @@unique([viajeId, loteId])
+  @@map("detalles_viaje")
+}
+
+model Recepcion {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime @default(now())
+  observaciones String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  viajeId     Int
+  viaje       Viaje    @relation(fields: [viajeId], references: [id])
+
+  responsableId Int?
+  responsable   Usuario? @relation(fields: [responsableId], references: [id])
+
+  detalles    DetalleRecepcion[]
+
+  @@map("recepciones")
+}
+
+model DetalleRecepcion {
+  id              Int  @id @default(autoincrement())
+  cantidadRecibida Int @map("cantidad_recibida")
+  cantidadFaltante Int @default(0) @map("cantidad_faltante")
+  cantidadDanada   Int @default(0) @map("cantidad_danada")
+  observaciones   String?
+
+  recepcionId     Int
+  recepcion       Recepcion @relation(fields: [recepcionId], references: [id], onDelete: Cascade)
+
+  loteId          Int
+  lote            Lote      @relation(fields: [loteId], references: [id])
+
+  @@unique([recepcionId, loteId])
+  @@map("detalles_recepcion")
+}
+
+model Solicitud {
+  id              Int                @id @default(autoincrement())
+  titulo          String
+  descripcion     String?
+  prioridad       PrioridadSolicitud @default(MEDIA)
+  estado          EstadoSolicitud    @default(ABIERTA)
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  campaniaId      Int
+  campania        Campania           @relation(fields: [campaniaId], references: [id])
+
+  ubicacionId     Int
+  ubicacion       Ubicacion          @relation(fields: [ubicacionId], references: [id])
+
+  detalles        DetalleSolicitud[]
+
+  @@index([campaniaId])
+  @@index([estado])
+  @@map("solicitudes")
+}
+
+model DetalleSolicitud {
+  id          Int       @id @default(autoincrement())
+  meta        Int
+  recibido    Int       @default(0)
+  descripcion String?
+
+  solicitudId Int
+  solicitud   Solicitud @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+
+  productoId  Int
+  producto    Producto  @relation(fields: [productoId], references: [id])
+
+  @@unique([solicitudId, productoId])
+  @@map("detalles_solicitud")
+}
+
+model Archivo {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  url         String
+  mimeType    String   @map("mime_type")
+  tamanio     Int
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  entidadTipo String   @map("entidad_tipo")
+  entidadId   Int      @map("entidad_id")
+
+  campaniaId  Int?
+  campania    Campania? @relation(fields: [campaniaId], references: [id])
+
+  viajeId     Int?
+  viaje       Viaje?   @relation(fields: [viajeId], references: [id])
+
+  @@index([entidadTipo, entidadId])
+  @@map("archivos")
+}
+
+model Auditoria {
+  id            Int      @id @default(autoincrement())
+  usuarioId     Int?
+  usuario       Usuario? @relation(fields: [usuarioId], references: [id])
+  accion        String
+  entidadTipo   String   @map("entidad_tipo")
+  entidadId     Int?     @map("entidad_id")
+  valorAnterior String?  @map("valor_anterior")
+  valorNuevo    String?  @map("valor_nuevo")
+  ip            String?
+  dispositivo   String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  campaniaId    Int?
+  campania      Campania? @relation(fields: [campaniaId], references: [id])
+
+  @@index([entidadTipo, entidadId])
+  @@index([usuarioId])
+  @@index([createdAt])
+  @@map("auditoria")
+}
+
+model Configuracion {
+  id    Int    @id @default(autoincrement())
+  clave String @unique
+  valor String
+
+  @@map("configuracion")
+}
