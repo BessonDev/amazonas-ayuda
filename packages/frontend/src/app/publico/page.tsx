@@ -349,9 +349,9 @@ export default function PublicoPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {[
-              { icon: Package, value: stats?.unidadesDonadas?.toLocaleString() ?? '—', label: 'Unidades donadas' },
-              { icon: Warehouse, value: stats?.ubicaciones?.toString() ?? '—', label: 'Centros activos' },
-              { icon: BarChart3, value: stats?.lotes?.toLocaleString() ?? '—', label: 'Lotes registrados' },
+              { icon: Users, value: stats?.ubicaciones?.toString() ?? '—', label: 'Comunidades alcanzadas' },
+              { icon: Package, value: stats?.lotes?.toString() ?? '—', label: 'Lotes registrados' },
+              { icon: Truck, value: stats?.viajesCompletados?.toString() ?? '—', label: 'Viajes completados' },
               { icon: Heart, value: stats?.donantes?.toString() ?? '—', label: 'Donantes registrados' },
             ].map((item) => {
               const Icon = item.icon
