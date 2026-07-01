@@ -8,6 +8,7 @@ import { CampaniasModule } from './campanias/campanias.module'
 import { UbicacionesModule } from './ubicaciones/ubicaciones.module'
 import { CategoriasModule } from './categorias/categorias.module'
 import { ProductosModule } from './productos/productos.module'
+import { DonantesModule } from './donantes/donantes.module'
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ProductosModule } from './productos/productos.module'
     UbicacionesModule,
     CategoriasModule,
     ProductosModule,
+    DonantesModule,
   ],
 })
 export class AppModule {}
