@@ -653,11 +653,13 @@ function ViajesActivos({ API_BASE }: { API_BASE: string }) {
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-[#a09585] font-mono mb-1">{v.codigo}</p>
-                    <h3 className="heading text-lg text-[#1B4332] flex items-center gap-2">
-                      <span className="truncate min-w-0 flex-1">{v.origen}</span>
-                      <ArrowRight className="size-4 text-[#D4A373] shrink-0" />
-                      <span className="truncate min-w-0 flex-1">{v.destino}</span>
-                    </h3>
+                    <div className="text-[#1B4332]">
+                      <p className="heading text-lg truncate">{v.origen}</p>
+                      <p className="heading text-lg truncate flex items-center gap-1.5">
+                        <ArrowRight className="size-4 text-[#D4A373] shrink-0" />
+                        <span>{v.destino}</span>
+                      </p>
+                    </div>
                   </div>
                   {cfg && (
                     <span className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border ${cfg.color}`}>
