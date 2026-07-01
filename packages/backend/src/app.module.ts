@@ -10,6 +10,7 @@ import { CategoriasModule } from './categorias/categorias.module'
 import { ProductosModule } from './productos/productos.module'
 import { DonantesModule } from './donantes/donantes.module'
 import { LotesModule } from './lotes/lotes.module'
+import { MovimientosInventarioModule } from './movimientos-inventario/movimientos-inventario.module'
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LotesModule } from './lotes/lotes.module'
     ProductosModule,
     DonantesModule,
     LotesModule,
+    MovimientosInventarioModule,
   ],
 })
 export class AppModule {}
