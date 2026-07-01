@@ -71,6 +71,16 @@ export default function PublicoPage() {
           ) !important;
           animation: progress-stripe 1.2s linear infinite;
         }
+        .progress-striped-static {
+          background-size: 40px 40px !important;
+          background-image: repeating-linear-gradient(
+            135deg,
+            transparent,
+            transparent 10px,
+            rgba(255,255,255,0.18) 10px,
+            rgba(255,255,255,0.18) 20px
+          ) !important;
+        }
       `}</style>
       {/* ══════════ HERO ══════════ */}
       <section className="relative min-h-[90vh] flex flex-col bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] text-white">
@@ -567,14 +577,13 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                             <span className="text-[#a09585]">/{p.meta} {p.unidad.toLowerCase()}</span>
                           </span>
                         </div>
-                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
                           <div
-                            className="h-full rounded-full transition-all duration-700"
+                            className="h-full rounded-full transition-all duration-700 progress-striped-static"
                             style={{
                               width: `${Math.min(p.pct, 100)}%`,
-                              background: p.pct >= 100
-                                ? 'linear-gradient(90deg, #2D6A4F, #52B788)'
-                                : 'linear-gradient(90deg, #D4A373, #c4955f)',
+                              background: 'linear-gradient(90deg, #2D6A4F, #52B788)',
+                              boxShadow: '0 0 8px rgba(45,106,79,0.4)',
                             }}
                           />
                         </div>
