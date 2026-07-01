@@ -1,55 +1,31 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Search, MapPin, Truck, Heart, Package, ChevronRight, ExternalLink, Target } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, MapPin, Truck, Heart, Package, ChevronRight, Target, AlertTriangle, Clock } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCountUp } from '@/lib/hooks'
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
-
-// ─── helpers ────────────────────────────────────────────
-
-function useCountUp(end: number, duration = 2000) {
-  const [count, setCount] = useState(0)
-  const started = useRef(false)
-
-  useEffect(() => {
-    if (started.current) return
-    started.current = true
-    const start = performance.now()
-    const step = (now: number) => {
-      const elapsed = now - start
-      const progress = Math.min(elapsed / duration, 1)
-      const ease = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.round(ease * end))
-      if (progress < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }, [end, duration])
-
-  return count.toLocaleString()
-}
 
 // ─── page ────────────────────────────────────────────────
 
 export default function PublicoPage() {
   const [stats, setStats] = useState<Record<string, number> | null>(null)
+  const [statsLoaded, setStatsLoaded] = useState(false)
   const [codigo, setCodigo] = useState('')
   const [lote, setLote] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [busy, setBusy] = useState(true)
   const [notFound, setNotFound] = useState(false)
-  const errorRef = useRef(false)
 
   useEffect(() => {
-    if (errorRef.current) return
-    errorRef.current = true
+    if (statsLoaded) return
+    setStatsLoaded(true)
     fetch(`${API_BASE}/publico/stats`)
       .then((r) => r.json())
       .then((d) => setStats(d))
-      .catch(() => setStats({ lotes: 142, viajesCompletados: 38, ubicaciones: 12, donantes: 89, unidadesDonadas: 28450 }))
-      .finally(() => setBusy(false))
-  }, [])
+      .catch(() => setStats(null))
+  }, [statsLoaded])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,6 +76,8 @@ export default function PublicoPage() {
         { label: 'Centros de acopio', value: 0, icon: MapPin },
       ]
 
+  const loadingStats = !statsLoaded || !stats
+
   return (
     <div className="publico-page min-h-screen bg-[#FEFCF3]">
       {/* ── Hero ───────────────────────────────────── */}
@@ -146,10 +124,10 @@ export default function PublicoPage() {
               Rastrear donación
             </a>
             <a
-              href="#impact"
+              href="#solicitudes"
               className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white font-medium px-8 py-3.5 rounded-xl hover:bg-white/20 transition-all border border-white/10"
             >
-              Ver impacto
+              Ver necesidades
             </a>
           </div>
         </div>
@@ -158,7 +136,7 @@ export default function PublicoPage() {
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {statsData.map((s) => (
-                <StatCard key={s.label} icon={s.icon} value={busy ? 0 : s.value} label={s.label} busy={busy} />
+                <StatCard key={s.label} icon={s.icon} value={loadingStats ? 0 : s.value} label={s.label} loading={loadingStats} />
               ))}
             </div>
           </div>
@@ -226,20 +204,18 @@ export default function PublicoPage() {
           </div>
         </form>
 
-        {/* ── Result ──────────────────────────────── */}
         {notFound && (
           <div className="max-w-lg mx-auto text-center bg-[#FEFCF3] rounded-2xl p-10 border border-[#e8e0d0]">
             <p className="text-4xl mb-3">🔍</p>
             <h3 className="heading text-xl text-[#1B4332] mb-2">Lote no encontrado</h3>
             <p className="text-sm text-[#5c4f3d]">
-              Verifica el código ingresado. Si donaste recientemente, el lote puede estar仍在 proceso de registro.
+              Verifica el código ingresado. Si donaste recientemente, el lote puede estar todavía en proceso de registro.
             </p>
           </div>
         )}
 
         {lote && (
           <div className="max-w-3xl mx-auto space-y-6">
-            {/* Info card */}
             <div className="bg-[#FEFCF3] rounded-2xl p-8 border border-[#e8e0d0] shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
                 <div>
@@ -272,7 +248,6 @@ export default function PublicoPage() {
               </div>
             </div>
 
-            {/* Timeline */}
             <div className="bg-white rounded-2xl p-8 border border-[#e8e0d0] shadow-sm">
               <h4 className="heading text-lg text-[#1B4332] mb-6">Recorrido</h4>
               <div className="space-y-0">
@@ -345,35 +320,66 @@ export default function PublicoPage() {
 
 // ─── StatCard ─────────────────────────────────────────
 
-function StatCard({ icon: Icon, value, label, busy }: { icon: any; value: number; label: string; busy: boolean }) {
+function StatCard({ icon: Icon, value, label, loading }: { icon: any; value: number; label: string; loading: boolean }) {
   const animated = useCountUp(value)
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/5">
       <Icon className="size-5 mx-auto mb-2 text-[#D4A373]" />
       <p className="heading text-2xl sm:text-3xl text-white">
-        {busy ? '...' : animated}
+        {loading ? (
+          <span className="inline-block animate-pulse bg-white/10 rounded h-8 w-20 mx-auto" />
+        ) : (
+          animated
+        )}
       </p>
       <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{label}</p>
     </div>
   )
 }
 
+// ─── Prioridad badge ─────────────────────────────────
+
+const prioridadConfig: Record<string, { label: string; classes: string; icon: any }> = {
+  URGENTE: { label: 'Urgente', classes: 'bg-red-100 text-red-700', icon: AlertTriangle },
+  ALTA: { label: 'Alta', classes: 'bg-orange-100 text-orange-700', icon: AlertTriangle },
+  MEDIA: { label: 'Media', classes: 'bg-blue-100 text-blue-700', icon: Clock },
+  BAJA: { label: 'Baja', classes: 'bg-gray-100 text-gray-600', icon: Clock },
+}
+
 // ─── Solicitudes visual ────────────────────────────────
 
 function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<any[] | null>(null)
 
   useEffect(() => {
     fetch(`${API_BASE}/publico/solicitudes`)
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setData(d) })
-      .catch(() => {})
+      .catch(() => setData([]))
   }, [API_BASE])
+
+  if (data === null) {
+    return (
+      <section id="solicitudes" className="py-20 px-6 bg-[#FEFCF3]">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-[#e8e0d0] rounded w-48 mx-auto" />
+            <div className="h-8 bg-[#e8e0d0] rounded w-96 mx-auto" />
+            <div className="grid md:grid-cols-2 gap-6 mt-10">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-[#e8e0d0] p-6 h-64" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   if (!data.length) return null
 
   return (
-    <section className="py-20 px-6 bg-[#FEFCF3]">
+    <section id="solicitudes" className="py-20 px-6 bg-[#FEFCF3]">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-sm font-semibold uppercase tracking-widest text-[#D4A373] mb-3">Necesidades activas</p>
@@ -384,47 +390,57 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {data.map((s: any) => (
-            <div key={s.id} className="bg-white rounded-2xl border border-[#e8e0d0] p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <h3 className="heading text-xl text-[#1B4332]">{s.titulo}</h3>
-              </div>
-              {s.descripcion && <p className="text-sm text-[#5c4f3d] mb-4">{s.descripcion}</p>}
+          {data.map((s: any) => {
+            const pc = prioridadConfig[s.prioridad]
+            const PriorityIcon = pc?.icon ?? Clock
+            return (
+              <div key={s.id} className="bg-white rounded-2xl border border-[#e8e0d0] p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                  <h3 className="heading text-xl text-[#1B4332]">{s.titulo}</h3>
+                  {pc && (
+                    <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${pc.classes}`}>
+                      <PriorityIcon className="size-3" />
+                      {pc.label}
+                    </span>
+                  )}
+                </div>
+                {s.descripcion && <p className="text-sm text-[#5c4f3d] mb-4">{s.descripcion}</p>}
 
-              <div className="flex flex-wrap gap-3 text-xs text-[#5c4f3d] mb-5">
-                <span className="inline-flex items-center gap-1.5 bg-[#D4A373]/10 px-3 py-1.5 rounded-full font-medium">
-                  <MapPin className="size-3.5" />
-                  {s.ubicacion}
-                </span>
-                <span className="inline-flex items-center gap-1.5 bg-[#2D6A4F]/10 px-3 py-1.5 rounded-full font-medium text-[#2D6A4F]">
-                  <Heart className="size-3.5" />
-                  {s.campania}
-                </span>
-              </div>
+                <div className="flex flex-wrap gap-3 text-xs text-[#5c4f3d] mb-5">
+                  <span className="inline-flex items-center gap-1.5 bg-[#D4A373]/10 px-3 py-1.5 rounded-full font-medium">
+                    <MapPin className="size-3.5" />
+                    {s.ubicacion}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 bg-[#2D6A4F]/10 px-3 py-1.5 rounded-full font-medium text-[#2D6A4F]">
+                    <Heart className="size-3.5" />
+                    {s.campania}
+                  </span>
+                </div>
 
-              <div className="space-y-3">
-                {s.productos.map((p: any) => (
-                  <div key={p.id} className="bg-[#FEFCF3] rounded-xl p-4 border border-[#e8e0d0]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-semibold text-sm text-[#1B4332]">{p.producto}</span>
-                      <span className="text-xs font-medium text-[#5c4f3d]">
-                        {p.recibido}/{p.meta} {p.unidad.toLowerCase()}
-                      </span>
+                <div className="space-y-3">
+                  {s.productos.map((p: any) => (
+                    <div key={p.id} className="bg-[#FEFCF3] rounded-xl p-4 border border-[#e8e0d0]">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-semibold text-sm text-[#1B4332]">{p.producto}</span>
+                        <span className="text-xs font-medium text-[#5c4f3d]">
+                          {p.recibido}/{p.meta} {p.unidad.toLowerCase()}
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-[#e8e0d0] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#D4A373] to-[#c4955f] rounded-full transition-all"
+                          style={{ width: `${Math.min(p.pct, 100)}%` }}
+                        />
+                      </div>
+                      {p.descripcion && (
+                        <p className="text-xs text-[#a09585] mt-1.5">{p.descripcion}</p>
+                      )}
                     </div>
-                    <div className="h-2.5 bg-[#e8e0d0] rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#D4A373] to-[#c4955f] rounded-full transition-all"
-                        style={{ width: `${Math.min(p.pct, 100)}%` }}
-                      />
-                    </div>
-                    {p.descripcion && (
-                      <p className="text-xs text-[#a09585] mt-1.5">{p.descripcion}</p>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>
@@ -450,14 +466,32 @@ const estadoViajeColor: Record<string, string> = {
 }
 
 function ViajesActivos({ API_BASE }: { API_BASE: string }) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<any[] | null>(null)
 
   useEffect(() => {
     fetch(`${API_BASE}/publico/viajes`)
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setData(d) })
-      .catch(() => {})
+      .catch(() => setData([]))
   }, [API_BASE])
+
+  if (data === null) {
+    return (
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-[#e8e0d0] rounded w-32 mx-auto" />
+            <div className="h-8 bg-[#e8e0d0] rounded w-72 mx-auto" />
+            <div className="grid md:grid-cols-2 gap-5 mt-10">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-[#FEFCF3] rounded-2xl border border-[#e8e0d0] p-5 h-28" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   if (!data.length) return null
 
@@ -504,5 +538,3 @@ function ViajesActivos({ API_BASE }: { API_BASE: string }) {
     </section>
   )
 }
-
-
