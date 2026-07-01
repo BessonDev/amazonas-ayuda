@@ -77,7 +77,7 @@ export default function PublicoPage() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
           <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.5'%3E%3Cpath d='M50 50v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zm0-40v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zM10 50v-4H6v4H2v4h4v4h4v-4h4v-4h-4zM10 10V6H6v4H2v4h4v4h4v-4h4v-4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#FEFCF3] to-transparent" />
+
         </div>
 
         <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
@@ -567,17 +567,14 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                             <span className="text-[#a09585]">/{p.meta} {p.unidad.toLowerCase()}</span>
                           </span>
                         </div>
-                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
+                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-700 progress-striped"
+                            className="h-full rounded-full transition-all duration-700"
                             style={{
                               width: `${Math.min(p.pct, 100)}%`,
                               background: p.pct >= 100
                                 ? 'linear-gradient(90deg, #2D6A4F, #52B788)'
                                 : 'linear-gradient(90deg, #D4A373, #c4955f)',
-                              boxShadow: p.pct >= 100
-                                ? '0 0 10px rgba(45,106,79,0.4)'
-                                : '0 0 8px rgba(212,163,115,0.3)',
                             }}
                           />
                         </div>
@@ -647,10 +644,10 @@ function ViajesActivos({ API_BASE }: { API_BASE: string }) {
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-[#a09585] font-mono mb-1">{v.codigo}</p>
-                    <h3 className="heading text-lg text-[#1B4332] flex items-center gap-2 flex-wrap">
-                      <span className="truncate max-w-[45%]">{v.origen}</span>
+                    <h3 className="heading text-lg text-[#1B4332] flex items-center gap-2">
+                      <span className="truncate min-w-0 flex-1">{v.origen}</span>
                       <ArrowRight className="size-4 text-[#D4A373] shrink-0" />
-                      <span className="truncate max-w-[45%]">{v.destino}</span>
+                      <span className="truncate min-w-0 flex-1">{v.destino}</span>
                     </h3>
                   </div>
                   {cfg && (
