@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from 'react'
 
 export function useCountUp(end: number, duration = 2000) {
   const [count, setCount] = useState(0)
-  const started = useRef(false)
+  const prevEnd = useRef<number | undefined>(undefined)
 
   useEffect(() => {
-    if (started.current) return
-    started.current = true
+    if (prevEnd.current === end) return
+    prevEnd.current = end
     const start = performance.now()
     const step = (now: number) => {
       const elapsed = now - start
