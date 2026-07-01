@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class AuthResponseDto {
   @ApiProperty({ type: Number })
@@ -15,4 +15,7 @@ export class AuthResponseDto {
 
   @ApiProperty({ type: String })
   accessToken: string
+
+  @ApiPropertyOptional({ type: Number })
+  ubicacionId?: number
 }

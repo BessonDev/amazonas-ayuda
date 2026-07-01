@@ -81,7 +81,7 @@ export class ViajesService {
   }
 
   async actualizar(id: number, dto: UpdateViajeDto) {
-    await this.obtener(id)
+    const viaje = await this.obtener(id)
 
     const { detalles, ...rest } = dto
 
@@ -93,6 +93,62 @@ export class ViajesService {
       } else {
         data[key] = value
       }
+    }
+
+    const transito = rest.estado === 'EN_TRANSITO' && viaje.estado !== 'EN_TRANSITO'
+
+    if (transito) {
+      return this.prisma.$transaction(async (tx) => {
+        if (detalles !== undefined) {
+          await tx.detalleViaje.deleteMany({ where: { viajeId: id } })
+          await tx.detalleViaje.createMany({
+            data: detalles.map((d) => ({
+              viajeId: id,
+              cantidad: d.cantidad,
+              loteId: d.loteId,
+            })),
+          })
+        }
+
+        const updated = await tx.viaje.update({
+          where: { id },
+          data,
+          include: this.include,
+        })
+
+        const detallesList = detalles ?? viaje.detalles
+
+        for (const det of detallesList) {
+          const ultimo = await tx.movimientoInventario.findFirst({
+            where: { loteId: det.loteId, ubicacionId: viaje.origenId },
+            orderBy: { createdAt: 'desc' },
+          })
+
+          const saldoAnterior = ultimo?.saldoNuevo ?? 0
+          const saldoNuevo = Math.max(0, saldoAnterior - det.cantidad)
+
+          await tx.movimientoInventario.create({
+            data: {
+              tipo: 'ENVIO',
+              cantidad: det.cantidad,
+              saldoAnterior,
+              saldoNuevo,
+              observaciones: `Envío en viaje ${viaje.codigo}`,
+              loteId: det.loteId,
+              ubicacionId: viaje.origenId,
+              campaniaId: viaje.campaniaId,
+              viajeId: id,
+            },
+          })
+
+          await tx.lote.update({
+            where: { id: det.loteId },
+            data: { estado: 'EN_TRANSITO' },
+          })
+        }
+
+        return updated
+      })
     }
 
     if (detalles !== undefined) {

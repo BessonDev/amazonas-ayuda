@@ -3,6 +3,7 @@ export interface UsuarioSesion {
   nombre: string
   email: string
   rol: string
+  ubicacionId?: number
 }
 
 export interface LoginRequest {
@@ -16,4 +17,5 @@ export interface LoginResponse {
   email: string
   rol: string
   accessToken: string
+  ubicacionId?: number
 }

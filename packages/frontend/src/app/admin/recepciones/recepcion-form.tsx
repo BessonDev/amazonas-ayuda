@@ -47,13 +47,14 @@ interface DetalleRow {
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultViajeId?: number
 }
 
 function createRow(): DetalleRow {
   return { key: crypto.randomUUID(), loteId: '', cantidadRecibida: '1', cantidadFaltante: '0', cantidadDanada: '0', observaciones: '' }
 }
 
-export function RecepcionForm({ open, onOpenChange }: Props) {
+export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
   const queryClient = useQueryClient()
   const [viajeId, setViajeId] = useState('')
   const [observaciones, setObservaciones] = useState('')
@@ -72,18 +73,19 @@ export function RecepcionForm({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (open) {
-      setViajeId('')
+      setViajeId(defaultViajeId?.toString() ?? '')
       setObservaciones('')
       setDetalles([createRow()])
       setError('')
     }
-  }, [open])
+  }, [open, defaultViajeId])
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
       api.post('/recepciones', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recepciones'] })
+      queryClient.invalidateQueries({ queryKey: ['viajes'] })
       onOpenChange(false)
     },
     onError: (err: Error) => {

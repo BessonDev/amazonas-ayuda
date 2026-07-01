@@ -98,6 +98,14 @@ export class RecepcionesService {
             campaniaId,
           },
         })
+
+        await tx.lote.update({
+          where: { id: detalle.loteId },
+          data: {
+            estado: 'ENTREGADO',
+            ubicacionId,
+          },
+        })
       }
 
       return recepcion

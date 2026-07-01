@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2 } from 'lucide-react'
 import { api } from '@/lib/api'
+import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,6 +45,7 @@ interface Campania {
 interface Ubicacion {
   id: number
   nombre: string
+  campaniaId: number
 }
 
 interface DetalleRow {
@@ -64,6 +66,8 @@ function createRow(): DetalleRow {
 
 export function SolicitudForm({ open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
+  const { usuario } = useAuth()
+  const esReceptor = usuario?.rol === 'RESPONSABLE_DESTINO'
   const [titulo, setTitulo] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [prioridad, setPrioridad] = useState('MEDIA')
@@ -92,12 +96,21 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
       setTitulo('')
       setDescripcion('')
       setPrioridad('MEDIA')
-      setCampaniaId('')
-      setUbicacionId('')
       setDetalles([createRow()])
       setError('')
+
+      if (esReceptor && usuario?.ubicacionId) {
+        setUbicacionId(usuario.ubicacionId.toString())
+        const miUbicacion = ubicaciones.find((u) => u.id === usuario.ubicacionId)
+        if (miUbicacion) {
+          setCampaniaId(miUbicacion.campaniaId.toString())
+        }
+      } else {
+        setCampaniaId('')
+        setUbicacionId('')
+      }
     }
-  }, [open])
+  }, [open, esReceptor, usuario?.ubicacionId, ubicaciones])
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
@@ -124,8 +137,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!titulo.trim()) { setError('El título es obligatorio'); return }
-    if (!campaniaId) { setError('Selecciona una campaña'); return }
-    if (!ubicacionId) { setError('Selecciona una ubicación'); return }
+    if (!esReceptor && !campaniaId) { setError('Selecciona una campaña'); return }
+    if (!esReceptor && !ubicacionId) { setError('Selecciona una ubicación'); return }
 
     const detallesData = detalles
       .filter((d) => d.productoId)
@@ -180,53 +193,57 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="prioridad">Prioridad</Label>
-              <Select value={prioridad} onValueChange={(v) => setPrioridad(v ?? 'MEDIA')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIORIDADES.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!esReceptor && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="prioridad">Prioridad</Label>
+                  <Select value={prioridad} onValueChange={(v) => setPrioridad(v ?? 'MEDIA')}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRIORIDADES.map((p) => (
+                        <SelectItem key={p.value} value={p.value}>
+                          {p.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="campania">Campaña</Label>
-              <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar campaña..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {campanias.map((c) => (
-                    <SelectItem key={c.id} value={c.id.toString()}>
-                      {c.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="campania">Campaña</Label>
+                  <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar campaña..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {campanias.map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="ubicacion">Ubicación</Label>
-              <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccionar ubicación..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {ubicaciones.map((u) => (
-                    <SelectItem key={u.id} value={u.id.toString()}>
-                      {u.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="ubicacion">Ubicación</Label>
+                  <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar ubicación..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ubicaciones.map((u) => (
+                        <SelectItem key={u.id} value={u.id.toString()}>
+                          {u.nombre}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="space-y-3">

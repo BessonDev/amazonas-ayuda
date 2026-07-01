@@ -18,15 +18,36 @@ interface Recepcion {
   responsable?: { nombre: string }
 }
 
+interface TmpViaje {
+  id: number
+  codigo: string
+  estado: string
+  conductor: string | null
+  vehiculo: string | null
+  fechaEstimada: string | null
+  origen?: { nombre: string }
+  destino?: { nombre: string }
+}
+
+const VIAJES_EN_CAMINO = ['EN_TRANSITO', 'LLEGO']
+
 export default function RecepcionesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [recepcionarViajeId, setRecepcionarViajeId] = useState<number | undefined>()
   const queryClient = useQueryClient()
 
   const { data: recepciones = [], isLoading } = useQuery({
     queryKey: ['recepciones'],
     queryFn: () => api.get<Recepcion[]>('/recepciones'),
   })
+
+  const { data: viajes = [] } = useQuery({
+    queryKey: ['viajes'],
+    queryFn: () => api.get<TmpViaje[]>('/viajes'),
+  })
+
+  const viajesEnCamino = viajes.filter((v) => VIAJES_EN_CAMINO.includes(v.estado))
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/recepciones/${id}`),
@@ -53,7 +74,43 @@ export default function RecepcionesPage() {
         </Button>
       </div>
 
-      <RecepcionForm open={formOpen} onOpenChange={setFormOpen} />
+      <RecepcionForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setRecepcionarViajeId(undefined) }} defaultViajeId={recepcionarViajeId} />
+
+      {viajesEnCamino.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Viajes en camino</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {viajesEnCamino.map((viaje) => (
+              <Card key={viaje.id} className="border-primary/20">
+                <CardHeader className="pb-2">
+                  <CardTitle className="font-mono text-sm">{viaje.codigo}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    {viaje.conductor && <p>Conductor: {viaje.conductor}</p>}
+                    {viaje.vehiculo && <p>Vehículo: {viaje.vehiculo}</p>}
+                    {viaje.origen && viaje.destino && (
+                      <p>{viaje.origen.nombre} → {viaje.destino.nombre}</p>
+                    )}
+                    {viaje.fechaEstimada && (
+                      <p>Llegada estimada: {new Date(viaje.fechaEstimada).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                  <Button
+                    className="w-full mt-2"
+                    onClick={() => {
+                      setRecepcionarViajeId(viaje.id)
+                      setFormOpen(true)
+                    }}
+                  >
+                    Receptionar
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">

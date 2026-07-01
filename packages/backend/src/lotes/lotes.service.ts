@@ -43,18 +43,35 @@ export class LotesService {
     const qrData = `http://localhost:3000/lotes/${codigo}`
     const qrUrl = await QRCode.toDataURL(qrData)
 
-    return this.prisma.lote.create({
-      data: {
-        codigo,
-        cantidad: dto.cantidad,
-        observaciones: dto.observaciones,
-        qrUrl,
-        campaniaId: dto.campaniaId,
-        ubicacionId: dto.ubicacionId,
-        productoId: dto.productoId,
-        donanteId: dto.donanteId,
-      },
-      include: this.include,
+    return this.prisma.$transaction(async (tx) => {
+      const lote = await tx.lote.create({
+        data: {
+          codigo,
+          cantidad: dto.cantidad,
+          observaciones: dto.observaciones,
+          qrUrl,
+          campaniaId: dto.campaniaId,
+          ubicacionId: dto.ubicacionId,
+          productoId: dto.productoId,
+          donanteId: dto.donanteId,
+        },
+        include: this.include,
+      })
+
+      await tx.movimientoInventario.create({
+        data: {
+          tipo: 'ENTRADA',
+          cantidad: dto.cantidad,
+          saldoAnterior: 0,
+          saldoNuevo: dto.cantidad,
+          observaciones: `Entrada automática del lote ${codigo}`,
+          loteId: lote.id,
+          ubicacionId: dto.ubicacionId,
+          campaniaId: dto.campaniaId,
+        },
+      })
+
+      return lote
     })
   }
 

@@ -126,7 +126,7 @@ export function LoteForm({ open, onOpenChange }: Props) {
         <DialogHeader>
           <DialogTitle>Nuevo Lote</DialogTitle>
           <DialogDescription>
-            Registra un lote de productos — el código y QR se generan automáticamente
+            Ingresa los datos del lote — el código se genera automáticamente
           </DialogDescription>
         </DialogHeader>
 

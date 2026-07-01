@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         nombre: res.nombre,
         email: res.email,
         rol: res.rol,
+        ubicacionId: res.ubicacionId,
       })
     } catch {
       setUsuario(null)
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       nombre: res.nombre,
       email: res.email,
       rol: res.rol,
+      ubicacionId: res.ubicacionId,
     })
   }
 

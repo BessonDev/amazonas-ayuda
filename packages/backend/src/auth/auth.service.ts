@@ -150,6 +150,7 @@ export class AuthService {
       email: usuario.email,
       rol: usuario.rol.nombre,
       accessToken,
+      ubicacionId: usuario.ubicacionId ?? undefined,
     }
   }
 }
