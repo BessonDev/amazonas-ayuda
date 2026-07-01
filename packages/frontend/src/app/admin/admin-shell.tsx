@@ -75,6 +75,7 @@ const menuItems = [
   {
     label: 'Sistema',
     items: [
+      { label: 'Usuarios', href: '/admin/usuarios', icon: Users },
       { label: 'Archivos', href: '/admin/archivos', icon: FileText },
       { label: 'Configuración', href: '/admin/configuracion', icon: Settings },
     ],
@@ -185,7 +186,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-6" />
           <span className="text-sm text-muted-foreground">
-            {usuario.rol === 'admin' ? 'Administrador' : 'Usuario'}
+            {usuario.rol}
           </span>
         </header>
         <main className="flex-1 p-6">{children}</main>

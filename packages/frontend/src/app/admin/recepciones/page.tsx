@@ -68,17 +68,25 @@ export default function RecepcionesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Recepciones</h1>
           <p className="text-muted-foreground">Recepción de viajes y mercancía</p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="size-4 mr-2" />
-          Nueva recepción
-        </Button>
+        {viajesEnCamino.length === 0 && (
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4 mr-2" />
+            Nueva recepción
+          </Button>
+        )}
       </div>
 
       <RecepcionForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setRecepcionarViajeId(undefined) }} defaultViajeId={recepcionarViajeId} />
 
       {viajesEnCamino.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Viajes en camino</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Viajes en camino</h2>
+            <Button variant="outline" size="sm" onClick={() => setFormOpen(true)}>
+              <Plus className="size-4 mr-1" />
+              Nueva recepción
+            </Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {viajesEnCamino.map((viaje) => (
               <Card key={viaje.id} className="border-primary/20">

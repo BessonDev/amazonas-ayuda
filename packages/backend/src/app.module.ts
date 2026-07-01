@@ -16,6 +16,7 @@ import { RecepcionesModule } from './recepciones/recepciones.module'
 import { SolicitudesModule } from './solicitudes/solicitudes.module'
 import { ArchivosModule } from './archivos/archivos.module'
 import { ConfiguracionModule } from './configuracion/configuracion.module'
+import { PublicoModule } from './publico/publico.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ConfiguracionModule } from './configuracion/configuracion.module'
     SolicitudesModule,
     ArchivosModule,
     ConfiguracionModule,
+    PublicoModule,
   ],
 })
 export class AppModule {}
