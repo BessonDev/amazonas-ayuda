@@ -13,6 +13,18 @@ export class PublicoController {
     return this.publicoService.stats()
   }
 
+  @Get('solicitudes')
+  @ApiOperation({ summary: 'Solicitudes activas con progreso de recolección' })
+  solicitudes() {
+    return this.publicoService.solicitudes()
+  }
+
+  @Get('viajes')
+  @ApiOperation({ summary: 'Viajes activos y programados' })
+  viajes() {
+    return this.publicoService.viajes()
+  }
+
   @Get('lotes/:codigo')
   @ApiOperation({ summary: 'Buscar lote por código (público)' })
   buscarLote(@Param('codigo') codigo: string) {

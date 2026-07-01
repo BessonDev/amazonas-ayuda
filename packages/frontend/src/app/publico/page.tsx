@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, MapPin, Truck, Heart, Package, ChevronRight, ExternalLink } from 'lucide-react'
+import { Search, MapPin, Truck, Heart, Package, ChevronRight, ExternalLink, Target } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -192,6 +192,12 @@ export default function PublicoPage() {
         </div>
       </section>
 
+      {/* ── Solicitudes activas ─────────────────── */}
+      <SolicitudesVisual API_BASE={API_BASE} />
+
+      {/* ── Viajes activos ───────────────────────── */}
+      <ViajesActivos API_BASE={API_BASE} />
+
       {/* ── Track ──────────────────────────────────── */}
       <section id="track" className="py-20 px-6 bg-white">
         <div className="max-w-3xl mx-auto text-center mb-12">
@@ -349,6 +355,153 @@ function StatCard({ icon: Icon, value, label, busy }: { icon: any; value: number
       </p>
       <p className="text-xs text-white/60 mt-1 uppercase tracking-wider">{label}</p>
     </div>
+  )
+}
+
+// ─── Solicitudes visual ────────────────────────────────
+
+function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
+  const [data, setData] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch(`${API_BASE}/publico/solicitudes`)
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d)) setData(d) })
+      .catch(() => {})
+  }, [API_BASE])
+
+  if (!data.length) return null
+
+  return (
+    <section className="py-20 px-6 bg-[#FEFCF3]">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#D4A373] mb-3">Necesidades activas</p>
+          <h2 className="heading text-3xl sm:text-4xl text-[#1B4332]">Lo que están solicitando las comunidades</h2>
+          <p className="text-[#5c4f3d] mt-4 max-w-2xl mx-auto">
+            Cada solicitud muestra los productos necesarios y cuánto se ha recolectado hasta ahora.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {data.map((s: any) => (
+            <div key={s.id} className="bg-white rounded-2xl border border-[#e8e0d0] p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <h3 className="heading text-xl text-[#1B4332]">{s.titulo}</h3>
+              </div>
+              {s.descripcion && <p className="text-sm text-[#5c4f3d] mb-4">{s.descripcion}</p>}
+
+              <div className="flex flex-wrap gap-3 text-xs text-[#5c4f3d] mb-5">
+                <span className="inline-flex items-center gap-1.5 bg-[#D4A373]/10 px-3 py-1.5 rounded-full font-medium">
+                  <MapPin className="size-3.5" />
+                  {s.ubicacion}
+                </span>
+                <span className="inline-flex items-center gap-1.5 bg-[#2D6A4F]/10 px-3 py-1.5 rounded-full font-medium text-[#2D6A4F]">
+                  <Heart className="size-3.5" />
+                  {s.campania}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {s.productos.map((p: any) => (
+                  <div key={p.id} className="bg-[#FEFCF3] rounded-xl p-4 border border-[#e8e0d0]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-semibold text-sm text-[#1B4332]">{p.producto}</span>
+                      <span className="text-xs font-medium text-[#5c4f3d]">
+                        {p.recibido}/{p.meta} {p.unidad.toLowerCase()}
+                      </span>
+                    </div>
+                    <div className="h-2.5 bg-[#e8e0d0] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-[#D4A373] to-[#c4955f] rounded-full transition-all"
+                        style={{ width: `${Math.min(p.pct, 100)}%` }}
+                      />
+                    </div>
+                    {p.descripcion && (
+                      <p className="text-xs text-[#a09585] mt-1.5">{p.descripcion}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Viajes activos ────────────────────────────────────
+
+const estadoViajeLabel: Record<string, string> = {
+  PLANIFICADO: 'Planificado',
+  PREPARANDO_CARGA: 'Preparando carga',
+  EN_TRANSITO: 'En tránsito',
+  LLEGO: 'Llegó',
+  RECEPCION_PARCIAL: 'Recepción parcial',
+}
+
+const estadoViajeColor: Record<string, string> = {
+  PLANIFICADO: 'bg-blue-100 text-blue-700',
+  PREPARANDO_CARGA: 'bg-amber-100 text-amber-700',
+  EN_TRANSITO: 'bg-[#2D6A4F]/10 text-[#2D6A4F]',
+  LLEGO: 'bg-[#D4A373]/10 text-[#D4A373]',
+  RECEPCION_PARCIAL: 'bg-purple-100 text-purple-700',
+}
+
+function ViajesActivos({ API_BASE }: { API_BASE: string }) {
+  const [data, setData] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch(`${API_BASE}/publico/viajes`)
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d)) setData(d) })
+      .catch(() => {})
+  }, [API_BASE])
+
+  if (!data.length) return null
+
+  return (
+    <section className="py-20 px-6 bg-white">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#D4A373] mb-3">En movimiento</p>
+          <h2 className="heading text-3xl sm:text-4xl text-[#1B4332]">Viajes activos y programados</h2>
+          <p className="text-[#5c4f3d] mt-4 max-w-2xl mx-auto">
+            Conoce las rutas activas de distribución hacia las comunidades.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-5">
+          {data.map((v: any) => (
+            <div key={v.id} className="bg-[#FEFCF3] rounded-2xl border border-[#e8e0d0] p-5 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-xs text-[#a09585] font-mono mb-0.5">{v.codigo}</p>
+                  <h3 className="heading text-lg text-[#1B4332]">
+                    {v.origen} → {v.destino}
+                  </h3>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${estadoViajeColor[v.estado] ?? 'bg-gray-100 text-gray-600'}`}>
+                  {estadoViajeLabel[v.estado] ?? v.estado}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-[#5c4f3d]">
+                {v.vehiculo && <span>🚛 {v.vehiculo}</span>}
+                {v.conductor && <span>👤 {v.conductor}</span>}
+                {v.fechaSalida && (
+                  <span>📅 Sale: {new Date(v.fechaSalida).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                )}
+                {v.fechaEstimada && (
+                  <span>📅 Llega: {new Date(v.fechaEstimada).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
