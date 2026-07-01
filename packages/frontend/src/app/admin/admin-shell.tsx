@@ -84,6 +84,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { usuario, logout, cargando } = useAuth()
   const router = useRouter()
+  const isLoginPage = pathname === '/admin/login'
 
   if (cargando) {
     return (
@@ -91,6 +92,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <p className="text-muted-foreground animate-pulse">Cargando...</p>
       </div>
     )
+  }
+
+  // Login page → render sin sidebar (sin sesión o después de logout)
+  if (isLoginPage) {
+    return <>{children}</>
   }
 
   if (!usuario) {

@@ -13,7 +13,7 @@ interface Ubicacion {
   id: number
   nombre: string
   direccion: string | null
-  tipo: string | null
+  tipo?: { id: number; nombre: string; descripcion: string | null }
 }
 
 export default function UbicacionesPage() {
@@ -97,7 +97,7 @@ export default function UbicacionesPage() {
                     <TableCell className="max-w-[250px] truncate">
                       {ubicacion.direccion ?? '-'}
                     </TableCell>
-                    <TableCell>{ubicacion.tipo ?? '-'}</TableCell>
+                    <TableCell>{ubicacion.tipo?.nombre ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon-sm">

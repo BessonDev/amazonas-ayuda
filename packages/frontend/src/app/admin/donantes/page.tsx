@@ -11,12 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Donante {
   id: number
-  nombre: string
+  nombre: string | null
   tipo: string | null
-  contacto: string | null
+  documento: string | null
   email: string | null
   telefono: string | null
-  direccion: string | null
 }
 
 export default function DonantesPage() {
@@ -36,7 +35,8 @@ export default function DonantesPage() {
   })
 
   const filtered = donantes.filter((d) =>
-    d.nombre.toLowerCase().includes(search.toLowerCase())
+    (d.nombre ?? '').toLowerCase().includes(search.toLowerCase()) ||
+    (d.documento ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -76,7 +76,7 @@ export default function DonantesPage() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Contacto</TableHead>
+                <TableHead>Documento</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Teléfono</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -98,9 +98,9 @@ export default function DonantesPage() {
               ) : (
                 filtered.map((donante) => (
                   <TableRow key={donante.id}>
-                    <TableCell className="font-medium">{donante.nombre}</TableCell>
+                    <TableCell className="font-medium">{donante.nombre ?? '-'}</TableCell>
                     <TableCell>{donante.tipo ?? '-'}</TableCell>
-                    <TableCell>{donante.contacto ?? '-'}</TableCell>
+                    <TableCell>{donante.documento ?? '-'}</TableCell>
                     <TableCell className="max-w-[200px] truncate">
                       {donante.email ?? '-'}
                     </TableCell>
