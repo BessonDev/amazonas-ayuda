@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 export class AuthResponseDto {
-  @ApiProperty()
+  @ApiProperty({ type: Number })
   id: number
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   nombre: string
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   email: string
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   rol: string
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   accessToken: string
 }

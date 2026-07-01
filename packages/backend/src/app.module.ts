@@ -4,6 +4,10 @@ import { ThrottlerModule } from '@nestjs/throttler'
 import { PrismaModule } from './prisma/prisma.module'
 import { AuthModule } from './auth/auth.module'
 import { UsuariosModule } from './usuarios/usuarios.module'
+import { CampaniasModule } from './campanias/campanias.module'
+import { UbicacionesModule } from './ubicaciones/ubicaciones.module'
+import { CategoriasModule } from './categorias/categorias.module'
+import { ProductosModule } from './productos/productos.module'
 
 @Module({
   imports: [
@@ -14,6 +18,10 @@ import { UsuariosModule } from './usuarios/usuarios.module'
     PrismaModule,
     AuthModule,
     UsuariosModule,
+    CampaniasModule,
+    UbicacionesModule,
+    CategoriasModule,
+    ProductosModule,
   ],
 })
 export class AppModule {}

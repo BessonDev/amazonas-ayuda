@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "tsx watch src/main.ts",
     "build": "nest build",
-"start": "node dist/src/main",
-"start:prod": "node dist/src/main",
+    "start": "node dist/src/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,test}/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
@@ -35,13 +35,13 @@
     "exceljs": "^4.4.0",
     "mime-types": "^2.1.35",
     "minio": "^8.0.0",
+    "multer": "^2.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pdfkit": "^0.16.0",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "multer": "^2.0.0"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -60,6 +60,7 @@
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
     "typescript": "^5.8.0"
   }
 }
