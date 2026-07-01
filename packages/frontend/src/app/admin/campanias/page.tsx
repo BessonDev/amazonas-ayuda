@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { CampaniaForm } from './campania-form'
 
 interface Campania {
   id: number
@@ -16,11 +17,30 @@ interface Campania {
   descripcion: string | null
   fechaInicio: string
   fechaFin: string | null
-  activa: boolean
+  estado: string
+  objetivo: string | null
+}
+
+const badgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  ACTIVA: 'default',
+  PLANIFICADA: 'secondary',
+  PAUSADA: 'outline',
+  FINALIZADA: 'secondary',
+  CANCELADA: 'destructive',
+}
+
+const estadoLabel: Record<string, string> = {
+  ACTIVA: 'Activa',
+  PLANIFICADA: 'Planificada',
+  PAUSADA: 'Pausada',
+  FINALIZADA: 'Finalizada',
+  CANCELADA: 'Cancelada',
 }
 
 export default function CampaniasPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [selected, setSelected] = useState<Campania | null>(null)
   const queryClient = useQueryClient()
 
   const { data: campanias = [], isLoading } = useQuery({
@@ -39,6 +59,16 @@ export default function CampaniasPage() {
     c.nombre.toLowerCase().includes(search.toLowerCase())
   )
 
+  const openCreate = () => {
+    setSelected(null)
+    setFormOpen(true)
+  }
+
+  const openEdit = (campania: Campania) => {
+    setSelected(campania)
+    setFormOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -46,7 +76,7 @@ export default function CampaniasPage() {
           <h1 className="text-2xl font-bold tracking-tight">Campañas</h1>
           <p className="text-muted-foreground">Gestión de campañas de donación</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="size-4" />
           Nueva Campaña
         </Button>
@@ -78,7 +108,7 @@ export default function CampaniasPage() {
                 <TableHead>Descripción</TableHead>
                 <TableHead>Fecha Inicio</TableHead>
                 <TableHead>Fecha Fin</TableHead>
-                <TableHead>Activa</TableHead>
+                <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -111,13 +141,13 @@ export default function CampaniasPage() {
                         : '-'}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={campania.activa ? 'default' : 'secondary'}>
-                        {campania.activa ? 'Sí' : 'No'}
+                      <Badge variant={badgeVariant[campania.estado] ?? 'secondary'}>
+                        {estadoLabel[campania.estado] ?? campania.estado}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(campania)}>
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -140,6 +170,12 @@ export default function CampaniasPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <CampaniaForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        campania={selected}
+      />
     </div>
   )
 }

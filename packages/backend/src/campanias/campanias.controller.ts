@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Param, Body,
+  Controller, Get, Post, Patch, Delete, Param, Body,
   ParseIntPipe, UseGuards, Query,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -43,5 +43,12 @@ export class CampaniasController {
   @ApiOperation({ summary: 'Actualizar campaña' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCampaniaDto) {
     return this.campaniasService.actualizar(id, dto)
+  }
+
+  @Delete(':id')
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Eliminar campaña' })
+  eliminar(@Param('id', ParseIntPipe) id: number) {
+    return this.campaniasService.eliminar(id)
   }
 }

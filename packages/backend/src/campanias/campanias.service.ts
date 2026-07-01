@@ -50,4 +50,9 @@ export class CampaniasService {
       },
     })
   }
+
+  async eliminar(id: number) {
+    await this.obtener(id)
+    return this.prisma.campania.delete({ where: { id } })
+  }
 }
