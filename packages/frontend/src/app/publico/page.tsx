@@ -57,29 +57,8 @@ export default function PublicoPage() {
     <div className="publico-page min-h-screen bg-[#FEFCF3] overflow-x-hidden">
       <style>{`
         @keyframes progress-stripe {
-          0% { background-position: 0 0; }
-          100% { background-position: 40px 0; }
-        }
-        .progress-striped {
-          background-size: 40px 40px !important;
-          background-image: repeating-linear-gradient(
-            135deg,
-            transparent,
-            transparent 10px,
-            rgba(255,255,255,0.18) 10px,
-            rgba(255,255,255,0.18) 20px
-          ) !important;
-          animation: progress-stripe 1.2s linear infinite;
-        }
-        .progress-striped-static {
-          background-size: 40px 40px !important;
-          background-image: repeating-linear-gradient(
-            135deg,
-            transparent,
-            transparent 10px,
-            rgba(255,255,255,0.18) 10px,
-            rgba(255,255,255,0.18) 20px
-          ) !important;
+          0% { background-position: 40px 0, 0 0; }
+          100% { background-position: 0 0, 0 0; }
         }
       `}</style>
       {/* ══════════ HERO ══════════ */}
@@ -370,9 +349,9 @@ export default function PublicoPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {[
-              { icon: Users, value: '15+', label: 'Comunidades alcanzadas' },
+              { icon: Package, value: stats?.unidadesDonadas?.toLocaleString() ?? '—', label: 'Unidades donadas' },
               { icon: Warehouse, value: stats?.ubicaciones?.toString() ?? '—', label: 'Centros activos' },
-              { icon: BarChart3, value: '100%', label: 'Trazabilidad' },
+              { icon: BarChart3, value: stats?.lotes?.toLocaleString() ?? '—', label: 'Lotes registrados' },
               { icon: Heart, value: stats?.donantes?.toString() ?? '—', label: 'Donantes registrados' },
             ].map((item) => {
               const Icon = item.icon
@@ -553,12 +532,12 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                     </div>
                     <div className="h-2.5 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
                       <div
-                        className="h-full rounded-full transition-all duration-1000 ease-out progress-striped"
+                        className="h-full rounded-full transition-all duration-1000 ease-out"
                         style={{
                           width: `${Math.min(pct, 100)}%`,
-                          background: pct >= 100
-                            ? 'linear-gradient(90deg, #2D6A4F, #52B788)'
-                            : 'linear-gradient(90deg, #D4A373, #c4955f)',
+                          background: `repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(255,255,255,0.18) 10px, rgba(255,255,255,0.18) 20px), ${pct >= 100 ? 'linear-gradient(90deg, #2D6A4F, #52B788)' : 'linear-gradient(90deg, #D4A373, #c4955f)'}`,
+                          backgroundSize: '40px 40px, 100% 100%',
+                          animation: 'progress-stripe 1.2s linear infinite',
                           boxShadow: pct >= 100
                             ? '0 0 12px rgba(45,106,79,0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
                             : '0 0 10px rgba(212,163,115,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
@@ -579,10 +558,11 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                         </div>
                         <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
                           <div
-                            className="h-full rounded-full transition-all duration-700 progress-striped-static"
+                            className="h-full rounded-full transition-all duration-700"
                             style={{
                               width: `${Math.min(p.pct, 100)}%`,
-                              background: 'linear-gradient(90deg, #2D6A4F, #52B788)',
+                              background: 'repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(255,255,255,0.18) 10px, rgba(255,255,255,0.18) 20px), linear-gradient(90deg, #2D6A4F, #52B788)',
+                              backgroundSize: '40px 40px, 100% 100%',
                               boxShadow: '0 0 8px rgba(45,106,79,0.4)',
                             }}
                           />
