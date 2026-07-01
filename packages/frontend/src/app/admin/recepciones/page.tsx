@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
+import { RecepcionForm } from './recepcion-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +20,7 @@ interface Recepcion {
 
 export default function RecepcionesPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: recepciones = [], isLoading } = useQuery({
@@ -45,7 +47,13 @@ export default function RecepcionesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Recepciones</h1>
           <p className="text-muted-foreground">Recepción de viajes y mercancía</p>
         </div>
+        <Button onClick={() => setFormOpen(true)}>
+          <Plus className="size-4 mr-2" />
+          Nueva recepción
+        </Button>
       </div>
+
+      <RecepcionForm open={formOpen} onOpenChange={setFormOpen} />
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
