@@ -21,7 +21,7 @@ async function request<T>(
     ...options,
   })
 
-  const data = await res.json()
+  let data = await res.json()
 
   if (!res.ok) {
     const errorMsg =
@@ -29,7 +29,13 @@ async function request<T>(
     throw new Error(errorMsg)
   }
 
-  return data
+  // Unwrap RespuestaApi envelope if present
+  if (data && typeof data === 'object' && 'exito' in data) {
+    if (!data.exito) throw new Error(data.error || 'Error desconocido')
+    data = data.datos as T
+  }
+
+  return data as T
 }
 
 export const api = {
