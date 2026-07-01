@@ -14,6 +14,8 @@ import { MovimientosInventarioModule } from './movimientos-inventario/movimiento
 import { ViajesModule } from './viajes/viajes.module'
 import { RecepcionesModule } from './recepciones/recepciones.module'
 import { SolicitudesModule } from './solicitudes/solicitudes.module'
+import { ArchivosModule } from './archivos/archivos.module'
+import { ConfiguracionModule } from './configuracion/configuracion.module'
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { SolicitudesModule } from './solicitudes/solicitudes.module'
     ViajesModule,
     RecepcionesModule,
     SolicitudesModule,
+    ArchivosModule,
+    ConfiguracionModule,
   ],
 })
 export class AppModule {}
