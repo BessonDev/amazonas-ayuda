@@ -55,12 +55,29 @@ export default function PublicoPage() {
 
   return (
     <div className="publico-page min-h-screen bg-[#FEFCF3] overflow-x-hidden">
+      <style>{`
+        @keyframes progress-stripe {
+          0% { background-position: 0 0; }
+          100% { background-position: 40px 0; }
+        }
+        .progress-striped {
+          background-size: 40px 40px !important;
+          background-image: repeating-linear-gradient(
+            135deg,
+            transparent,
+            transparent 10px,
+            rgba(255,255,255,0.18) 10px,
+            rgba(255,255,255,0.18) 20px
+          ) !important;
+          animation: progress-stripe 1.2s linear infinite;
+        }
+      `}</style>
       {/* ══════════ HERO ══════════ */}
       <section className="relative min-h-[90vh] flex flex-col bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] text-white">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
           <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.5'%3E%3Cpath d='M50 50v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zm0-40v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zM10 50v-4H6v4H2v4h4v4h4v-4h4v-4h-4zM10 10V6H6v4H2v4h4v4h4v-4h4v-4h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FEFCF3] via-[#FEFCF3]/80 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#FEFCF3] to-transparent" />
         </div>
 
         <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
@@ -518,16 +535,24 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                     </span>
                   </div>
 
-                  {/* Overall progress */}
+                    {/* Overall progress */}
                   <div className="mb-5">
                     <div className="flex items-center justify-between text-xs mb-2">
                       <span className="text-[#5c4f3d] font-medium">Progreso general</span>
                       <span className="text-[#1B4332] font-bold">{pct}%</span>
                     </div>
-                    <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
                       <div
-                        className="h-full bg-gradient-to-r from-[#D4A373] to-[#c4955f] rounded-full transition-all duration-700"
-                        style={{ width: `${Math.min(pct, 100)}%` }}
+                        className="h-full rounded-full transition-all duration-1000 ease-out progress-striped"
+                        style={{
+                          width: `${Math.min(pct, 100)}%`,
+                          background: pct >= 100
+                            ? 'linear-gradient(90deg, #2D6A4F, #52B788)'
+                            : 'linear-gradient(90deg, #D4A373, #c4955f)',
+                          boxShadow: pct >= 100
+                            ? '0 0 12px rgba(45,106,79,0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
+                            : '0 0 10px rgba(212,163,115,0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                        }}
                       />
                     </div>
                   </div>
@@ -542,14 +567,17 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                             <span className="text-[#a09585]">/{p.meta} {p.unidad.toLowerCase()}</span>
                           </span>
                         </div>
-                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden">
+                        <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
                           <div
-                            className="h-full rounded-full transition-all duration-500"
+                            className="h-full rounded-full transition-all duration-700 progress-striped"
                             style={{
                               width: `${Math.min(p.pct, 100)}%`,
                               background: p.pct >= 100
                                 ? 'linear-gradient(90deg, #2D6A4F, #52B788)'
                                 : 'linear-gradient(90deg, #D4A373, #c4955f)',
+                              boxShadow: p.pct >= 100
+                                ? '0 0 10px rgba(45,106,79,0.4)'
+                                : '0 0 8px rgba(212,163,115,0.3)',
                             }}
                           />
                         </div>
@@ -571,12 +599,12 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
 
 // ═══════════ VIAJES ═══════════
 
-const estadoViajeCfg: Record<string, { label: string; color: string; dot: string }> = {
-  PLANIFICADO: { label: 'Planificado', color: 'text-blue-600 bg-blue-50 border-blue-200', dot: 'bg-blue-500' },
-  PREPARANDO_CARGA: { label: 'Preparando carga', color: 'text-amber-600 bg-amber-50 border-amber-200', dot: 'bg-amber-500' },
-  EN_TRANSITO: { label: 'En tránsito', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500' },
-  LLEGO: { label: 'Llegó a destino', color: 'text-[#D4A373] bg-[#D4A373]/10 border-[#D4A373]/20', dot: 'bg-[#D4A373]' },
-  RECEPCION_PARCIAL: { label: 'Recepción parcial', color: 'text-purple-600 bg-purple-50 border-purple-200', dot: 'bg-purple-500' },
+const estadoViajeCfg: Record<string, { label: string; color: string; dot: string; cardBg: string; border: string }> = {
+  PLANIFICADO: { label: 'Planificado', color: 'text-blue-600 bg-blue-50 border-blue-200', dot: 'bg-blue-500', cardBg: 'bg-blue-50/40', border: 'border-blue-200/50' },
+  PREPARANDO_CARGA: { label: 'Preparando carga', color: 'text-amber-600 bg-amber-50 border-amber-200', dot: 'bg-amber-500', cardBg: 'bg-amber-50/40', border: 'border-amber-200/50' },
+  EN_TRANSITO: { label: 'En tránsito', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500', cardBg: 'bg-emerald-50/40', border: 'border-emerald-200/50' },
+  LLEGO: { label: 'Llegó a destino', color: 'text-[#D4A373] bg-[#D4A373]/10 border-[#D4A373]/20', dot: 'bg-[#D4A373]', cardBg: 'bg-[#D4A373]/5', border: 'border-[#D4A373]/15' },
+  RECEPCION_PARCIAL: { label: 'Recepción parcial', color: 'text-purple-600 bg-purple-50 border-purple-200', dot: 'bg-purple-500', cardBg: 'bg-purple-50/40', border: 'border-purple-200/50' },
 }
 
 function ViajesActivos({ API_BASE }: { API_BASE: string }) {
@@ -615,14 +643,14 @@ function ViajesActivos({ API_BASE }: { API_BASE: string }) {
           {data.map((v: any) => {
             const cfg = estadoViajeCfg[v.estado]
             return (
-              <div key={v.id} className="group bg-[#FEFCF3] rounded-2xl border border-[#e8e0d0] hover:shadow-lg hover:border-[#D4A373]/20 transition-all duration-300 p-5 sm:p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
+              <div key={v.id} className={`group rounded-2xl border ${cfg?.cardBg || 'bg-[#FEFCF3]'} ${cfg?.border || 'border-[#e8e0d0]'} hover:shadow-lg transition-all duration-300 p-5 sm:p-6`}>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-[#a09585] font-mono mb-1">{v.codigo}</p>
-                    <h3 className="heading text-lg text-[#1B4332] flex items-center gap-2">
-                      <span className="truncate">{v.origen}</span>
+                    <h3 className="heading text-lg text-[#1B4332] flex items-center gap-2 flex-wrap">
+                      <span className="truncate max-w-[45%]">{v.origen}</span>
                       <ArrowRight className="size-4 text-[#D4A373] shrink-0" />
-                      <span className="truncate">{v.destino}</span>
+                      <span className="truncate max-w-[45%]">{v.destino}</span>
                     </h3>
                   </div>
                   {cfg && (
@@ -633,14 +661,19 @@ function ViajesActivos({ API_BASE }: { API_BASE: string }) {
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-[#5c4f3d] pt-4 border-t border-[#e8e0d0]">
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-[#5c4f3d] pt-4 border-t border-[#e8e0d0]/60">
                   {v.vehiculo && (
                     <span className="inline-flex items-center gap-1.5">
                       <Truck className="size-3.5 text-[#a09585]" />
                       {v.vehiculo}
                     </span>
                   )}
-                  {v.conductor && <span className="inline-flex items-center gap-1.5">👤 {v.conductor}</span>}
+                  {v.conductor && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Truck className="size-3.5 text-[#a09585]" />
+                      Conductor: {v.conductor}
+                    </span>
+                  )}
                   {v.fechaSalida && (
                     <span className="inline-flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#2D6A4F]" />
