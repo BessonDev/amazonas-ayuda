@@ -16,6 +16,7 @@ import {
   ClipboardList,
 } from 'lucide-react'
 import { api } from '@/lib/api'
+import { LoteForm } from './lote-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -50,6 +51,7 @@ interface Lote {
 export default function LotesPage() {
   const [search, setSearch] = useState('')
   const [qrLote, setQrLote] = useState<Lote | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: lotes = [], isLoading } = useQuery({
@@ -76,7 +78,7 @@ export default function LotesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Lotes</h1>
           <p className="text-muted-foreground">Gestión de lotes de productos</p>
         </div>
-        <Button>
+        <Button onClick={() => setFormOpen(true)}>
           <Plus className="size-4" />
           Nuevo Lote
         </Button>
@@ -181,6 +183,8 @@ export default function LotesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <LoteForm open={formOpen} onOpenChange={setFormOpen} />
 
       <Dialog open={!!qrLote} onOpenChange={(open) => !open && setQrLote(null)}>
         <DialogContent className="sm:max-w-sm">
