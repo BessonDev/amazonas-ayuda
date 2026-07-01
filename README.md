@@ -60,6 +60,7 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 |:--:|:---------------------------|
 | | Login seguro con JWT + Refresh Tokens en cookies HttpOnly |
 | | 4 roles con permisos granular: Administrador, Coordinador Logístico, Operador de Inventario, Responsable de Destino |
+| | Formularios adaptados por rol (RECEPTOR ve versión simplificada) |
 
 | 📦 | **Gestión de Donaciones** |
 |:--:|:---------------------------|
@@ -72,6 +73,7 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | | Planificación de viajes con rutas y responsables |
 | | Recepción y verificación en destino |
 | | Estados trazables: Registrado → En Tránsito → Entregado → Verificado |
+| | Inventario automático: movimientos ENTRADA/ENVIO/RECEPCION al crear lote, despachar viaje y recepcionar |
 
 | 📍 | **Inventario & Ubicaciones** |
 |:--:|:------------------------------|
@@ -259,21 +261,21 @@ pnpm dev
 | 📎 **Archivos** | ✅ | Upload multipart con metadatos |
 | ⚙️ **Configuración** | ✅ | Pares clave-valor |
 
-### Frontend — Admin panel (14 páginas)
+### Frontend — Admin panel (14 páginas, todos con form dialog)
 
 | Página | Descripción |
 |:-------|:------------|
 | 📊 **Dashboard** | Resumen con cards por entidad |
-| 📢 **Campañas** | Listado, búsqueda, eliminación |
-| 📍 **Ubicaciones** | Listado con tipo de ubicación |
-| 🏷️ **Categorías** | Listado básico |
-| 📦 **Productos** | Listado con categoría |
-| 🤝 **Donantes** | Listado con tipo y contacto |
-| 🏷️ **Lotes** | Listado + QR modal + estados |
+| 📢 **Campañas** | CRUD + form dialog con estados y Badge |
+| 📍 **Ubicaciones** | CRUD + form dialog con tipo y campaña |
+| 🏷️ **Categorías** | CRUD + form dialog |
+| 📦 **Productos** | CRUD + form dialog con categoría y unidad |
+| 🤝 **Donantes** | CRUD + form dialog con tipo enum (persona/empresa/iglesia/anónimo) |
+| 🏷️ **Lotes** | CRUD + QR modal + form dialog con 4 FK selects |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
-| 🚚 **Viajes** | Listado con origen/destino |
-| 📋 **Recepciones** | Listado por viaje |
-| 📝 **Solicitudes** | Listado con prioridad color-coded |
+| 🚚 **Viajes** | CRUD + form dialog con detalle anidado (lotes + cantidades) |
+| 📋 **Recepciones** | CRUD + form dialog con detalle anidado + sección "Viajes en camino" con botón Receptionar |
+| 📝 **Solicitudes** | CRUD + form dialog con detalle anidado + versión simplificada para RECEPTOR |
 | 📎 **Archivos** | Listado con descarga directa |
 | ⚙️ **Configuración** | Listado clave-valor |
 
@@ -303,7 +305,9 @@ pnpm dev
 - [x] Login funcional con sidebar colapsable
 - [x] Dashboard con stats por entidad
 - [x] Páginas de listado para todos los módulos
-- [ ] Formularios de creación/edición
+- [x] Formularios de creación para todos los módulos
+- [x] "Viajes en camino" en Recepciones con botón Receptionar
+- [x] Formulario de Solicitud simplificado para rol RECEPTOR
 - [ ] Página pública de consulta
 
 ### Fase 4 — Reportes 📊
