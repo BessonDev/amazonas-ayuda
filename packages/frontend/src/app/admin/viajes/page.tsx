@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Edit, Trash2 } from 'lucide-react'
+import { Plus, Search, Edit, Trash2 } from 'lucide-react'
+import { ViajeForm } from './viaje-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +39,7 @@ const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
 
 export default function ViajesPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: viajes = [], isLoading } = useQuery({
@@ -66,7 +68,13 @@ export default function ViajesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Viajes</h1>
           <p className="text-muted-foreground">Gestión de viajes y transportes</p>
         </div>
+        <Button onClick={() => setFormOpen(true)}>
+          <Plus className="size-4 mr-2" />
+          Nuevo viaje
+        </Button>
       </div>
+
+      <ViajeForm open={formOpen} onOpenChange={setFormOpen} />
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
