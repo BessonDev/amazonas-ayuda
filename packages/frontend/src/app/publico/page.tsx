@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clock, ArrowRight, ExternalLink, Warehouse, Users, Route, BarChart3, CheckCircle2, HandHeart } from 'lucide-react'
-import Image from 'next/image'
+import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clock, ArrowRight, Users, Route, CheckCircle2, HandHeart } from 'lucide-react'
 import Link from 'next/link'
 import { useCountUp } from '@/lib/hooks'
 
