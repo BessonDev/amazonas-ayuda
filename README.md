@@ -255,13 +255,14 @@ pnpm dev
 | 🤝 **Donantes** | ✅ | Registro de personas, empresas, orgs |
 | 🏷️ **Lotes** | ✅ | Código único + QR generado |
 | 📊 **Mov. Inventario** | ✅ | Saldos automáticos por lote+ubicación |
-| 🚚 **Viajes** | ✅ | Viajes con detalle y estados |
-| 📋 **Recepciones** | ✅ | Crea inventario automáticamente |
+| 🚚 **Viajes** | ✅ | Viajes con detalle y estados + auto-movimiento ENVIO |
+| 📋 **Recepciones** | ✅ | Crea inventario automáticamente + actualiza lote |
 | 📝 **Solicitudes** | ✅ | Pedidos con prioridad y estados |
+| 🌐 **Público** | ✅ | Stats y rastreo de lotes sin autenticación |
 | 📎 **Archivos** | ✅ | Upload multipart con metadatos |
 | ⚙️ **Configuración** | ✅ | Pares clave-valor |
 
-### Frontend — Admin panel (14 páginas, todos con form dialog)
+### Frontend — Admin panel (15 páginas, todos con form dialog) + Portal público
 
 | Página | Descripción |
 |:-------|:------------|
@@ -270,14 +271,16 @@ pnpm dev
 | 📍 **Ubicaciones** | CRUD + form dialog con tipo y campaña |
 | 🏷️ **Categorías** | CRUD + form dialog |
 | 📦 **Productos** | CRUD + form dialog con categoría y unidad |
-| 🤝 **Donantes** | CRUD + form dialog con tipo enum (persona/empresa/iglesia/anónimo) |
+| 🤝 **Donantes** | CRUD + form dialog con tipo enum |
 | 🏷️ **Lotes** | CRUD + QR modal + form dialog con 4 FK selects |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
 | 🚚 **Viajes** | CRUD + form dialog con detalle anidado (lotes + cantidades) |
-| 📋 **Recepciones** | CRUD + form dialog con detalle anidado + sección "Viajes en camino" con botón Receptionar |
-| 📝 **Solicitudes** | CRUD + form dialog con detalle anidado + versión simplificada para RECEPTOR |
+| 📋 **Recepciones** | CRUD + form dialog con detalle anidado + "Viajes en camino" con Receptionar |
+| 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
+| 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
 | 📎 **Archivos** | Listado con descarga directa |
 | ⚙️ **Configuración** | Listado clave-valor |
+| 🌐 **Portal público** | Página visual con stats, rastreo de lotes y línea de tiempo |
 
 **Leyenda:** ✅ Completado · 🔧 En progreso · ⏳ Pendiente
 
@@ -308,7 +311,8 @@ pnpm dev
 - [x] Formularios de creación para todos los módulos
 - [x] "Viajes en camino" en Recepciones con botón Receptionar
 - [x] Formulario de Solicitud simplificado para rol RECEPTOR
-- [ ] Página pública de consulta
+- [x] Portal público con stats y rastreo de lotes por código
+- [x] CRUD de usuarios del sistema
 
 ### Fase 4 — Reportes 📊
 - [ ] Exportación PDF (pdfkit instalado)
