@@ -11,8 +11,8 @@
     "db:studio": "pnpm --filter @donaciones/backend exec prisma studio"
   },
   "devDependencies": {
-    "turbo": "^2.5.0",
-    "prettier": "^3.5.0"
+    "prettier": "^3.5.0",
+    "turbo": "^2.5.0"
   },
   "engines": {
     "node": ">=20",
@@ -29,5 +29,8 @@
       "@scarf/scarf",
       "esbuild"
     ]
+  },
+  "dependencies": {
+    "concurrently": "^10.0.3"
   }
 }
