@@ -1,18 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement auth
+    setError("");
+    setCargando(true);
+
+    try {
+      await login({ email, password });
+      router.push("/admin/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -45,8 +61,13 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Ingresar
+
+            {error && (
+              <p className="text-sm text-red-600 font-medium">{error}</p>
+            )}
+
+            <Button type="submit" className="w-full" disabled={cargando}>
+              {cargando ? "Ingresando..." : "Ingresar"}
             </Button>
           </form>
         </CardContent>

@@ -1,70 +1,52 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
 
-interface RequestOptions extends RequestInit {
-  params?: Record<string, string | number | boolean | undefined>;
+interface RespuestaApi<T> {
+  exito: boolean
+  datos?: T
+  error?: string
 }
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const url = `${API_BASE}${endpoint}`
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { params, ...fetchOptions } = options;
-
-  let url = `${API_BASE}${endpoint}`;
-
-  if (params) {
-    const searchParams = new URLSearchParams();
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined) {
-        searchParams.set(key, String(value));
-      }
-    }
-    const qs = searchParams.toString();
-    if (qs) url += `?${qs}`;
-  }
-
-  const response = await fetch(url, {
-    ...fetchOptions,
-    credentials: "include",
+  const res = await fetch(url, {
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
-      ...fetchOptions.headers,
+      'Content-Type': 'application/json',
+      ...options.headers,
     },
-  });
+    ...options,
+  })
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ mensaje: "Error del servidor" }));
-    throw new ApiError(response.status, error.mensaje || error.error || "Error del servidor");
+  const data = await res.json()
+
+  if (!res.ok) {
+    const errorMsg =
+      data.message || data.error || `Error ${res.status}: ${res.statusText}`
+    throw new Error(errorMsg)
   }
 
-  return response.json();
+  return data
 }
 
 export const api = {
-  get: <T>(endpoint: string, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: "GET" }),
+  get: <T>(endpoint: string) => request<T>(endpoint),
 
-  post: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
+  post: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      ...options,
-      method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
     }),
 
-  put: <T>(endpoint: string, data?: unknown, options?: RequestOptions) =>
+  patch: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
-      ...options,
-      method: "PUT",
-      body: data ? JSON.stringify(data) : undefined,
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
     }),
 
-  delete: <T>(endpoint: string, options?: RequestOptions) =>
-    request<T>(endpoint, { ...options, method: "DELETE" }),
-};
+  delete: <T>(endpoint: string) =>
+    request<T>(endpoint, { method: 'DELETE' }),
+}
