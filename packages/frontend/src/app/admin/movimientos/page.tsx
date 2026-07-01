@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2 } from 'lucide-react'
+import { MovimientoForm } from './movimiento-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,7 @@ const tipoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'ou
 
 export default function MovimientosPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: movimientos = [], isLoading } = useQuery({
@@ -61,7 +63,13 @@ export default function MovimientosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
           <p className="text-muted-foreground">Gestión de movimientos de inventario</p>
         </div>
+        <Button onClick={() => setFormOpen(true)}>
+          <Plus className="size-4 mr-2" />
+          Nuevo movimiento
+        </Button>
       </div>
+
+      <MovimientoForm open={formOpen} onOpenChange={setFormOpen} />
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">

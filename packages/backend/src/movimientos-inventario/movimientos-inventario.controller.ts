@@ -6,7 +6,7 @@ import { UpdateMovimientoDto } from './dto/update-movimiento.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 
 @ApiTags('Movimientos de Inventario')
-@Controller('movimientos-inventario')
+@Controller('movimientos')
 export class MovimientosInventarioController {
   constructor(private readonly movimientosService: MovimientosInventarioService) {}
 
