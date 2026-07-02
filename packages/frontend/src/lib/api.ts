@@ -9,13 +9,18 @@ interface RespuestaApi<T> {
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
+  isFormData = false,
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`
+
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : { 'Content-Type': 'application/json' }
 
   const res = await fetch(url, {
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...defaultHeaders,
       ...options.headers,
     },
     ...options,
@@ -51,8 +56,8 @@ export const api = {
     request<T>(endpoint, {
       method: 'POST',
       body,
-      headers: {}, // Let browser set Content-Type with boundary
-    }),
+      headers: {},
+    }, true),
 
   patch: <T>(endpoint: string, body?: unknown) =>
     request<T>(endpoint, {
