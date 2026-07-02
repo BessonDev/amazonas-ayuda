@@ -70,16 +70,24 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 
 | 🚚 | **Logística & Transporte** |
 |:--:|:---------------------------|
-| | Planificación de viajes con rutas y responsables |
-| | Recepción y verificación en destino |
-| | Estados trazables: Registrado → En Tránsito → Entregado → Verificado |
-| | Inventario automático: movimientos ENTRADA/ENVIO/RECEPCION al crear lote, despachar viaje y recepcionar |
+| | Planificación de viajes con rutas, responsables y lotes consolidados por producto |
+| | Recepción y verificación en destino con foto |
+| | Transiciones de estado automáticas: Planificado → Preparando Carga → En Tránsito → Llegó → Completado |
+| | Manejo de faltantes y dañados en recepción parcial (lotes split) |
+| | Inventario automático: movimientos ENTRADA/ENVIO/RECEPCION/AJUSTE al crear lote, despachar viaje y recepcionar |
 
 | 📍 | **Inventario & Ubicaciones** |
 |:--:|:------------------------------|
 | | Múltiples tipos de ubicación: centros de acopio, hospitales, refugios, iglesias |
 | | Control de inventario basado en movimientos |
 | | Alertas de stock bajo |
+
+| 🖼️ | **Archivos & Fotos** |
+|:--:|:---------------------------|
+| | Upload de archivos multipart con metadatos por entidad |
+| | Componente FileUpload reutilizable con drag & drop y preview |
+| | Subida de fotos desde formularios de recepción y viaje |
+| | Carrusel de fotos en portal público |
 
 | 📊 | **Reportes & Exportación** |
 |:--:|:---------------------------|
@@ -260,11 +268,11 @@ pnpm dev
 | 🤝 **Donantes** | ✅ | Registro de personas, empresas, orgs |
 | 🏷️ **Lotes** | ✅ | Código único + QR generado |
 | 📊 **Mov. Inventario** | ✅ | Saldos automáticos por lote+ubicación |
-| 🚚 **Viajes** | ✅ | Viajes con detalle y estados + auto-movimiento ENVIO |
-| 📋 **Recepciones** | ✅ | Crea inventario automáticamente + actualiza lote |
+| 🚚 **Viajes** | ✅ | Viajes con detalle, consolidación FIFO de lotes, estados con transiciones automáticas + auto-movimiento ENVIO/AJUSTE |
+| 📋 **Recepciones** | ✅ | Crea inventario automáticamente + actualiza lote + subida de foto con FileUpload |
 | 📝 **Solicitudes** | ✅ | Pedidos con prioridad y estados |
 | 🌐 **Público** | ✅ | Stats, solicitudes con progreso (recibido/meta), viajes activos y rastreo de lotes |
-| 📎 **Archivos** | ✅ | Upload multipart con metadatos |
+| 📎 **Archivos** | ✅ | Upload multipart con metadatos + vista previa y descarga |
 | ⚙️ **Configuración** | ✅ | Pares clave-valor |
 | 📊 **Reportes** | ✅ | PDF (pdfkit) y Excel (exceljs): inventario, donaciones, viajes |
 | 📋 **Auditoría** | ✅ | Auto-logging de acciones + consulta con filtros |
@@ -291,11 +299,11 @@ pnpm --filter @donaciones/backend test:coverage
 | 🤝 **Donantes** | CRUD + form dialog con tipo enum |
 | 🏷️ **Lotes** | CRUD + QR modal + form dialog con 4 FK selects |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
-| 🚚 **Viajes** | CRUD + form dialog con detalle anidado (lotes + cantidades) |
-| 📋 **Recepciones** | CRUD + form dialog con detalle anidado + "Viajes en camino" con Receptionar |
+| 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas |
+| 📋 **Recepciones** | CRUD + form con detalle anidado + subida de foto con preview + "Viajes en camino" con Receptionar |
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
-| 📎 **Archivos** | Listado con descarga directa |
+| 📎 **Archivos** | Listado con upload dialog + FileUpload drag & drop + preview + descarga directa corregida |
 | 📊 **Reportes** | Generación PDF/Excel (inventario, donaciones, viajes) |
 | 📋 **Auditoría** | Registro de acciones con filtros |
 | ⚙️ **Configuración** | Listado clave-valor |
