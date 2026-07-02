@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Edit, Trash2, User, Tags, FileText, Mail, Phone, Settings2 } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, User, Tags, Phone, Settings2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,8 +15,6 @@ interface Donante {
   id: number
   nombre: string | null
   tipo: string | null
-  documento: string | null
-  email: string | null
   telefono: string | null
 }
 
@@ -41,7 +39,7 @@ export default function DonantesPage() {
 
   const filtered = donantes.filter((d) =>
     (d.nombre ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (d.documento ?? '').toLowerCase().includes(search.toLowerCase())
+    (d.tipo ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
   const openCreate = () => {
@@ -93,8 +91,6 @@ export default function DonantesPage() {
               <TableRow>
                 <TableHead><User className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Nombre</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Tipo</TableHead>
-                <TableHead><FileText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Documento</TableHead>
-                <TableHead><Mail className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Email</TableHead>
                 <TableHead><Phone className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Teléfono</TableHead>
                 <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
@@ -102,13 +98,13 @@ export default function DonantesPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     Cargando...
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                     No hay donantes registrados
                   </TableCell>
                 </TableRow>
@@ -117,10 +113,6 @@ export default function DonantesPage() {
                   <TableRow key={donante.id}>
                     <TableCell className="font-medium">{donante.nombre ?? '-'}</TableCell>
                     <TableCell>{donante.tipo ?? '-'}</TableCell>
-                    <TableCell>{donante.documento ?? '-'}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {donante.email ?? '-'}
-                    </TableCell>
                     <TableCell>{donante.telefono ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

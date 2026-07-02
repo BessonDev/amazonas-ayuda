@@ -35,8 +35,6 @@ interface Donante {
   id: number
   tipo: string | null
   nombre: string | null
-  documento: string | null
-  email: string | null
   telefono: string | null
 }
 
@@ -51,17 +49,14 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
   const queryClient = useQueryClient()
   const [tipo, setTipo] = useState('ANONIMO')
   const [nombre, setNombre] = useState('')
-  const [documento, setDocumento] = useState('')
-  const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
   const [error, setError] = useState('')
+  const esAnonimo = tipo === 'ANONIMO'
 
   useEffect(() => {
     if (open) {
       setTipo(donante?.tipo ?? 'ANONIMO')
       setNombre(donante?.nombre ?? '')
-      setDocumento(donante?.documento ?? '')
-      setEmail(donante?.email ?? '')
       setTelefono(donante?.telefono ?? '')
       setError('')
     }
@@ -83,11 +78,13 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!esAnonimo && !nombre.trim()) {
+      setError('El nombre es obligatorio para este tipo de donante')
+      return
+    }
     mutation.mutate({
       tipo,
-      nombre: nombre.trim() || undefined,
-      documento: documento.trim() || undefined,
-      email: email.trim() || undefined,
+      nombre: esAnonimo ? undefined : nombre.trim() || undefined,
       telefono: telefono.trim() || undefined,
     })
   }
@@ -125,17 +122,28 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nombre">Nombre / Razón Social</Label>
+            <Label htmlFor="nombre">
+              Nombre / Razón Social
+              {!esAnonimo && <span className="text-destructive ml-1">*</span>}
+            </Label>
             <Input
               id="nombre"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Nombre del donante"
+              placeholder={esAnonimo ? 'Opcional para donantes anónimos' : 'Nombre del donante'}
               autoFocus
             />
           </div>
 
-
+          <div className="space-y-2">
+            <Label htmlFor="telefono">Teléfono</Label>
+            <Input
+              id="telefono"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              placeholder="Número de contacto (opcional)"
+            />
+          </div>
 
           {error && (
             <p className="text-sm text-red-600 font-medium">{error}</p>
