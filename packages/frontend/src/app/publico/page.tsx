@@ -317,6 +317,12 @@ export default function PublicoPage() {
                           {mov.observaciones && (
                             <p className="text-sm text-[#5c4f3d]">{mov.observaciones}</p>
                           )}
+                          {mov.ubicacion && (
+                            <p className="text-xs text-[#5c4f3d] flex items-center gap-1 mt-1">
+                              <MapPin className="size-3" />
+                              {mov.ubicacion.nombre}
+                            </p>
+                          )}
                         </div>
                       </div>
                     )

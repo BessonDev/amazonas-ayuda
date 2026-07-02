@@ -97,13 +97,8 @@ export class PublicoService {
         campania: { select: { nombre: true } },
         movimientos: {
           orderBy: { createdAt: 'asc' },
-          select: {
-            id: true,
-            tipo: true,
-            cantidad: true,
-            createdAt: true,
-            ubicacionId: true,
-            observaciones: true,
+          include: {
+            ubicacion: { select: { nombre: true } },
           },
         },
       },

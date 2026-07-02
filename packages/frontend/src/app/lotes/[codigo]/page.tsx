@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Package, Search, ArrowLeft, Route } from 'lucide-react'
+import { Package, Search, ArrowLeft, Route, MapPin } from 'lucide-react'
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
 
@@ -121,6 +121,7 @@ export default function LoteTrackingPage() {
               { label: 'Cantidad', value: `${lote.cantidad} ${lote.producto?.unidad?.toLowerCase() ?? 'u'}` },
               { label: 'Donante', value: lote.donante?.nombre ?? 'Anónimo' },
               { label: 'Campaña', value: lote.campania?.nombre ?? '-' },
+              { label: 'Ubicación registro', value: lote.ubicacion?.nombre ?? '-' },
             ].map((f) => (
               <div key={f.label}>
                 <p className="text-[#a09585] text-xs mb-1">{f.label}</p>
@@ -162,6 +163,12 @@ export default function LoteTrackingPage() {
                           })}
                         </span>
                       </div>
+                      {mov.ubicacion && (
+                        <p className="text-xs text-[#5c4f3d] flex items-center gap-1">
+                          <MapPin className="size-3" />
+                          {mov.ubicacion.nombre}
+                        </p>
+                      )}
                       {mov.observaciones && (
                         <p className="text-sm text-[#5c4f3d]">{mov.observaciones}</p>
                       )}
