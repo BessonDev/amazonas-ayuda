@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Param, Delete, Query, Body, UseInterceptors, UploadedFile, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Param, Delete, Query, Body, UseInterceptors, UploadedFile, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger'
 import { ArchivosService } from './archivos.service'
 import { Roles } from '../common/decorators/roles.decorator'
+import { RolesGuard } from '../common/guards/roles.guard'
 
 @ApiTags('Archivos')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('archivos')
 export class ArchivosController {
   constructor(private readonly archivosService: ArchivosService) {}

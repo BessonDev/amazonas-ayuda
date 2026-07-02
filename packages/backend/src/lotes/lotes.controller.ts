@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common'
-import { ApiTags, ApiOperation } from '@nestjs/swagger'
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { LotesService } from './lotes.service'
 import { CreateLoteDto } from './dto/create-lote.dto'
 import { UpdateLoteDto } from './dto/update-lote.dto'
 import { TransferirLotesDto } from './dto/transferir-lotes.dto'
 import { Roles } from '../common/decorators/roles.decorator'
+import { RolesGuard } from '../common/guards/roles.guard'
 
 @ApiTags('Lotes')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('lotes')
 export class LotesController {
   constructor(private readonly lotesService: LotesService) {}

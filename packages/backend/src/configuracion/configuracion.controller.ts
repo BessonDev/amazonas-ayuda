@@ -1,11 +1,15 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common'
-import { ApiTags, ApiOperation } from '@nestjs/swagger'
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { ConfiguracionService } from './configuracion.service'
 import { CreateConfiguracionDto } from './dto/create-configuracion.dto'
 import { UpdateConfiguracionDto } from './dto/update-configuracion.dto'
 import { Roles } from '../common/decorators/roles.decorator'
+import { RolesGuard } from '../common/guards/roles.guard'
 
 @ApiTags('Configuración')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('configuracion')
 export class ConfiguracionController {
   constructor(private readonly configuracionService: ConfiguracionService) {}

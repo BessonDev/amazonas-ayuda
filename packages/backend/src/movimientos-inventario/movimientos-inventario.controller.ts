@@ -1,11 +1,15 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common'
-import { ApiTags, ApiOperation } from '@nestjs/swagger'
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { MovimientosInventarioService } from './movimientos-inventario.service'
 import { CreateMovimientoDto } from './dto/create-movimiento.dto'
 import { UpdateMovimientoDto } from './dto/update-movimiento.dto'
 import { Roles } from '../common/decorators/roles.decorator'
+import { RolesGuard } from '../common/guards/roles.guard'
 
 @ApiTags('Movimientos de Inventario')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('movimientos')
 export class MovimientosInventarioController {
   constructor(private readonly movimientosService: MovimientosInventarioService) {}
