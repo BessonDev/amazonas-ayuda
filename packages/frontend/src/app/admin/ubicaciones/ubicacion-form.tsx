@@ -55,6 +55,8 @@ interface Props {
   ubicacion?: Ubicacion | null
 }
 
+const TIPOS_VALIDOS = ['CENTRO_ACOPIO', 'HOSPITAL', 'REFUGIO', 'IGLESIA', 'COMUNIDAD', 'OTRO']
+
 export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
   const editando = !!ubicacion
   const queryClient = useQueryClient()
@@ -235,7 +237,7 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {tipos.map((t) => (
+                  {tipos.filter((t) => TIPOS_VALIDOS.includes(t.nombre)).map((t) => (
                     <SelectItem key={t.id} value={t.id.toString()}>
                       {formatTipoUbicacion(t.nombre)}
                     </SelectItem>

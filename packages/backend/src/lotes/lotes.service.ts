@@ -87,24 +87,33 @@ export class LotesService {
   ) {
     const solicitudes = await tx.solicitud.findMany({
       where: {
-        ubicacionId: dto.ubicacionId,
         estado: { in: ['ABIERTA', 'EN_PROCESO'] },
+        detalles: { some: { productoId: dto.productoId } },
       },
       include: {
         detalles: {
           where: { productoId: dto.productoId },
         },
       },
+      orderBy: { createdAt: 'asc' },
     })
 
+    let restante = dto.cantidad
+
     for (const solicitud of solicitudes) {
+      if (restante <= 0) break
+
       for (const detalle of solicitud.detalles) {
-        const nuevoRecibido = Math.min(detalle.recibido + dto.cantidad, detalle.meta)
-        if (nuevoRecibido === detalle.recibido) continue
+        if (restante <= 0) break
+        const pendiente = detalle.meta - detalle.recibido
+        if (pendiente <= 0) continue
+
+        const aAsignar = Math.min(pendiente, restante)
+        restante -= aAsignar
 
         await tx.detalleSolicitud.update({
           where: { id: detalle.id },
-          data: { recibido: nuevoRecibido },
+          data: { recibido: detalle.recibido + aAsignar },
         })
       }
 

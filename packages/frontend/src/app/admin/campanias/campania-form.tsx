@@ -25,7 +25,6 @@ import {
 import { toast } from 'sonner'
 
 const ESTADOS = [
-  { value: 'PLANIFICADA', label: 'Planificada' },
   { value: 'ACTIVA', label: 'Activa' },
   { value: 'PAUSADA', label: 'Pausada' },
   { value: 'FINALIZADA', label: 'Finalizada' },
@@ -57,7 +56,7 @@ export function CampaniaForm({ open, onOpenChange, campania }: Props) {
   const queryClient = useQueryClient()
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [estado, setEstado] = useState('PLANIFICADA')
+  const [estado, setEstado] = useState('ACTIVA')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin, setFechaFin] = useState('')
   const [objetivo, setObjetivo] = useState('')
@@ -67,7 +66,7 @@ export function CampaniaForm({ open, onOpenChange, campania }: Props) {
     if (open) {
       setNombre(campania?.nombre ?? '')
       setDescripcion(campania?.descripcion ?? '')
-      setEstado(campania?.estado ?? 'PLANIFICADA')
+      setEstado(campania?.estado ?? 'ACTIVA')
       setFechaInicio(toDateInput(campania?.fechaInicio))
       setFechaFin(toDateInput(campania?.fechaFin))
       setObjetivo(campania?.objetivo ?? '')
@@ -142,7 +141,7 @@ export function CampaniaForm({ open, onOpenChange, campania }: Props) {
 
           <div className="space-y-2">
             <Label htmlFor="estado">Estado</Label>
-            <Select value={estado} onValueChange={(v) => setEstado(v ?? 'PLANIFICADA')}>
+            <Select value={estado} onValueChange={(v) => setEstado(v ?? 'ACTIVA')}>
               <SelectTrigger className="w-full">
                 <SelectValue>
                   {(value: string | null) => {

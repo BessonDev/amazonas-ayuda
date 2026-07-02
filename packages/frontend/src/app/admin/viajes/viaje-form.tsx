@@ -134,6 +134,10 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
     u => u.tipo?.nombre === 'CENTRO_ACOPIO',
   )
 
+  const ubicacionesDestino = ubicaciones.filter(
+    u => u.id.toString() !== origenId,
+  )
+
   const { data: campanias = [] } = useQuery<Campania[]>({
     queryKey: ['campanias'],
     queryFn: () => api.get('/campanias'),
@@ -383,7 +387,7 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {ubicacionesOrigen.length === 0 ? (
-                    <SelectItem value="_none" disabled>
+                    <SelectItem key="_none" value="_none" disabled>
                       No hay centros de acopio disponibles
                     </SelectItem>
                   ) : (
@@ -407,13 +411,13 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
                   <SelectValue>
                     {(value: string | null) => {
                       if (!value) return 'Seleccionar...'
-                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      const u = ubicacionesDestino.find(u => u.id.toString() === value)
                       return u?.nombre ?? value
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {ubicaciones.map((u) => (
+                  {ubicacionesDestino.map((u) => (
                     <SelectItem key={u.id} value={u.id.toString()}>
                       {u.nombre}
                     </SelectItem>
