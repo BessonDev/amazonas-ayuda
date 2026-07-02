@@ -2,13 +2,24 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Download, Trash2 } from 'lucide-react'
+import { Search, Download, Trash2, Upload, Image } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { FileUpload } from '@/components/ui/file-upload'
 
 interface Archivo {
   id: number
@@ -39,6 +50,9 @@ function getMimeBadge(mime: string): string {
 
 export default function ArchivosPage() {
   const [search, setSearch] = useState('')
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadError, setUploadError] = useState('')
   const queryClient = useQueryClient()
 
   const { data: archivos = [], isLoading } = useQuery({
@@ -53,11 +67,36 @@ export default function ArchivosPage() {
     },
   })
 
+  const uploadMutation = useMutation({
+    mutationFn: (formData: FormData) => api.postForm('/archivos/upload', formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['archivos'] })
+      setUploadOpen(false)
+      setUploadFile(null)
+      setUploadError('')
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message)
+    },
+  })
+
+  const handleUpload = () => {
+    if (!uploadFile) { setUploadError('Selecciona un archivo'); return }
+    const formData = new FormData()
+    formData.append('archivo', uploadFile)
+    formData.append('nombre', uploadFile.name)
+    formData.append('entidadTipo', 'General')
+    formData.append('entidadId', '0')
+    uploadMutation.mutate(formData)
+  }
+
   const filtered = archivos.filter((a) =>
     a.nombre.toLowerCase().includes(search.toLowerCase()) ||
     a.entidadTipo.toLowerCase().includes(search.toLowerCase()) ||
     a.mimeType.toLowerCase().includes(search.toLowerCase())
   )
+
+  const downloadUrl = (archivo: Archivo) => `/api/archivos/${archivo.id}/descargar`
 
   return (
     <div className="space-y-6">
@@ -66,7 +105,44 @@ export default function ArchivosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Archivos</h1>
           <p className="text-muted-foreground">Archivos adjuntos del sistema</p>
         </div>
+        <Button onClick={() => setUploadOpen(true)}>
+          <Upload className="size-4 mr-2" />
+          Subir archivo
+        </Button>
       </div>
+
+      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Subir archivo</DialogTitle>
+            <DialogDescription>
+              Selecciona un archivo para subir al sistema
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <FileUpload
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv"
+              maxSize={10}
+              value={uploadFile}
+              onChange={(f) => { setUploadFile(f); setUploadError('') }}
+            />
+
+            {uploadError && (
+              <p className="text-sm text-destructive font-medium">{uploadError}</p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>
+              Cancelar
+            </DialogClose>
+            <Button onClick={handleUpload} disabled={!uploadFile || uploadMutation.isPending}>
+              {uploadMutation.isPending ? 'Subiendo...' : 'Subir'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
@@ -129,7 +205,7 @@ export default function ArchivosPage() {
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <a
-                          href={archivo.url}
+                          href={downloadUrl(archivo)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center size-7 rounded-md hover:bg-muted"

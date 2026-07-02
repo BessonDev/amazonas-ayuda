@@ -5,6 +5,7 @@ import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FileUpload } from '@/components/ui/file-upload'
 import {
   Select,
   SelectContent,
@@ -135,7 +136,7 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
         observaciones: d.observaciones.trim() || undefined,
       }))
 
-    if (detallesData.length === 0) { setError('Agrega al menos un lote para recepcionar'); return }
+    if (detallesData.length === 0) { setError('Agrega al menos un lote para marcar como recibido'); return }
 
     mutation.mutate({
       viajeId: Number(viajeId),
@@ -285,17 +286,12 @@ export function RecepcionForm({ open, onOpenChange, defaultViajeId }: Props) {
               <Image className="size-4.5 text-[#1B4332]" />
               Foto de la recepción (opcional)
             </Label>
-            <input
-              type="file"
+            <FileUpload
               accept="image/*"
-              className="text-sm w-full"
-              onChange={(e) => setFotoFile(e.target.files?.[0] ?? null)}
+              maxSize={10}
+              value={fotoFile}
+              onChange={setFotoFile}
             />
-            {fotoFile && (
-              <p className="text-xs text-green-600 flex items-center gap-1">
-                <Image className="size-3.5" /> {fotoFile.name}
-              </p>
-            )}
           </div>
 
           {error && (

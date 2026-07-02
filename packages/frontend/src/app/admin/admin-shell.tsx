@@ -39,6 +39,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { formatRol } from '@/lib/enums'
 
 const menuItems = [
   {
@@ -186,7 +187,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-6" />
           <span className="text-sm text-muted-foreground">
-            {usuario.rol}
+            {formatRol(usuario.rol)}
           </span>
         </header>
         <main className="flex-1 p-6">{children}</main>

@@ -111,7 +111,7 @@ export default function RecepcionesPage() {
                       setFormOpen(true)
                     }}
                   >
-                    Receptionar
+                    Marcar recibido
                   </Button>
                 </CardContent>
               </Card>

@@ -2,14 +2,18 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Edit, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Plus, Search, Trash2, Send, ArrowRight } from 'lucide-react'
 import { ViajeForm } from './viaje-form'
+import { CambiarEstadoDialog } from './cambiar-estado-dialog'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAuth } from '@/contexts/auth-context'
+import { formatEstadoViaje } from '@/lib/enums'
 
 interface Viaje {
   id: number
@@ -40,7 +44,12 @@ const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
 export default function ViajesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [estadoDialogViaje, setEstadstateDialogViaje] = useState<Viaje | null>(null)
   const queryClient = useQueryClient()
+  const { usuario } = useAuth()
+  const router = useRouter()
+
+  const puedeCambiarEstado = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'COORDINADOR_LOGISTICO'
 
   const { data: viajes = [], isLoading } = useQuery({
     queryKey: ['viajes'],
@@ -76,6 +85,11 @@ export default function ViajesPage() {
 
       <ViajeForm open={formOpen} onOpenChange={setFormOpen} />
 
+      <CambiarEstadoDialog
+        viaje={estadoDialogViaje}
+        onOpenChange={(open) => { if (!open) setEstadstateDialogViaje(null) }}
+      />
+
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -102,8 +116,7 @@ export default function ViajesPage() {
                 <TableHead>Responsable</TableHead>
                 <TableHead>Vehículo</TableHead>
                 <TableHead>Conductor</TableHead>
-                <TableHead>Origen</TableHead>
-                <TableHead>Destino</TableHead>
+                <TableHead>Origen → Destino</TableHead>
                 <TableHead>Campaña</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
@@ -124,24 +137,38 @@ export default function ViajesPage() {
                 </TableRow>
               ) : (
                 filtered.map((viaje) => (
-                  <TableRow key={viaje.id}>
+                  <TableRow
+                    key={viaje.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/admin/viajes/${viaje.id}`)}
+                  >
                     <TableCell className="font-mono text-xs">{viaje.codigo}</TableCell>
                     <TableCell>{viaje.nombreResponsable ?? '-'}</TableCell>
                     <TableCell>{viaje.vehiculo ?? '-'}</TableCell>
                     <TableCell>{viaje.conductor ?? '-'}</TableCell>
-                    <TableCell>{viaje.origen?.nombre ?? '-'}</TableCell>
-                    <TableCell>{viaje.destino?.nombre ?? '-'}</TableCell>
+                    <TableCell>
+                      <span className="text-xs">{viaje.origen?.nombre ?? '?'}</span>
+                      <ArrowRight className="inline size-3 mx-1 text-muted-foreground" />
+                      <span className="text-xs">{viaje.destino?.nombre ?? '?'}</span>
+                    </TableCell>
                     <TableCell>{viaje.campania?.nombre ?? '-'}</TableCell>
                     <TableCell>
                       <Badge variant={estadoVariants[viaje.estado] ?? 'outline'}>
-                        {viaje.estado}
+                        {formatEstadoViaje(viaje.estado)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm">
-                          <Edit className="size-4" />
-                        </Button>
+                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        {puedeCambiarEstado && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setEstadstateDialogViaje(viaje)}
+                            title="Cambiar estado"
+                          >
+                            <Send className="size-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon-sm"

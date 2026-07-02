@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Package, Image } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { FileUpload } from '@/components/ui/file-upload'
 import {
   Select,
   SelectContent,
@@ -23,11 +25,23 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { Separator } from '@/components/ui/separator'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatEstadoLote } from '@/lib/enums'
 
-interface Lote {
+interface LoteItem {
   id: number
   codigo: string
-  producto?: { nombre: string }
+  cantidad: number
+  estado: string
+  donante: string | null
+  fecha: string
+}
+
+interface GrupoProducto {
+  producto: { id: number; nombre: string; categoria?: { nombre: string } }
+  total: number
+  lotes: LoteItem[]
 }
 
 interface Ubicacion {
@@ -44,6 +58,8 @@ interface DetalleRow {
   key: string
   loteId: string
   cantidad: string
+  loteCodigo: string
+  productoNombre: string
 }
 
 interface Props {
@@ -51,8 +67,14 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
-function createRow(): DetalleRow {
-  return { key: crypto.randomUUID(), loteId: '', cantidad: '1' }
+function createRow(lote?: { id: number; codigo: string; productoNombre: string }): DetalleRow {
+  return {
+    key: crypto.randomUUID(),
+    loteId: lote ? lote.id.toString() : '',
+    cantidad: '',
+    loteCodigo: lote?.codigo ?? '',
+    productoNombre: lote?.productoNombre ?? '',
+  }
 }
 
 export function ViajeForm({ open, onOpenChange }: Props) {
@@ -66,13 +88,10 @@ export function ViajeForm({ open, onOpenChange }: Props) {
   const [campaniaId, setCampaniaId] = useState('')
   const [origenId, setOrigenId] = useState('')
   const [destinoId, setDestinoId] = useState('')
-  const [detalles, setDetalles] = useState<DetalleRow[]>([createRow()])
+  const [detalles, setDetalles] = useState<DetalleRow[]>([])
   const [error, setError] = useState('')
-
-  const { data: lotes = [] } = useQuery<Lote[]>({
-    queryKey: ['lotes'],
-    queryFn: () => api.get('/lotes'),
-  })
+  const [fotoFile, setFotoFile] = useState<File | null>(null)
+  const [cantidadPorLote, setCantidadPorLote] = useState<Record<number, string>>({})
 
   const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({
     queryKey: ['ubicaciones'],
@@ -82,6 +101,12 @@ export function ViajeForm({ open, onOpenChange }: Props) {
   const { data: campanias = [] } = useQuery<Campania[]>({
     queryKey: ['campanias'],
     queryFn: () => api.get('/campanias'),
+  })
+
+  const { data: grupos = [] } = useQuery<GrupoProducto[]>({
+    queryKey: ['lotes-disponibles', origenId],
+    queryFn: () => api.get(`/viajes/lotes-disponibles?origenId=${origenId}`),
+    enabled: !!origenId,
   })
 
   useEffect(() => {
@@ -95,16 +120,38 @@ export function ViajeForm({ open, onOpenChange }: Props) {
       setCampaniaId('')
       setOrigenId('')
       setDestinoId('')
-      setDetalles([createRow()])
+      setDetalles([])
+      setCantidadPorLote({})
       setError('')
+      setFotoFile(null)
     }
   }, [open])
 
-  const mutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      api.post('/viajes', data),
-    onSuccess: () => {
+  const uploadFoto = async (viajeId: number) => {
+    if (!fotoFile) return
+    const formData = new FormData()
+    formData.append('archivo', fotoFile)
+    formData.append('nombre', fotoFile.name)
+    formData.append('entidadTipo', 'Viaje')
+    formData.append('entidadId', String(viajeId))
+    formData.append('viajeId', String(viajeId))
+    await api.postForm('/archivos/upload', formData)
+  }
+
+  interface ViajeResponse {
+    id: number
+    [key: string]: unknown
+  }
+
+  const mutation = useMutation<ViajeResponse, Error, Record<string, unknown>>({
+    mutationFn: (data) =>
+      api.post<ViajeResponse>('/viajes', data),
+    onSuccess: async (viaje: ViajeResponse) => {
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
+      queryClient.invalidateQueries({ queryKey: ['lotes-disponibles'] })
+      if (fotoFile) {
+        await uploadFoto(viaje.id)
+      }
       onOpenChange(false)
     },
     onError: (err: Error) => {
@@ -112,14 +159,35 @@ export function ViajeForm({ open, onOpenChange }: Props) {
     },
   })
 
-  const updateDetalle = (key: string, field: keyof DetalleRow, value: string) => {
-    setDetalles((prev) =>
-      prev.map((d) => (d.key === key ? { ...d, [field]: value } : d))
-    )
+  const agregarLote = (lote: LoteItem) => {
+    const cantidad = parseInt(cantidadPorLote[lote.id] ?? '1', 10) || 1
+    if (isNaN(cantidad) || cantidad <= 0) return
+    if (cantidad > lote.cantidad) {
+      setError(`La cantidad máxima para ${lote.codigo} es ${lote.cantidad}`)
+      return
+    }
+
+    const producto = grupos.flatMap(g => g.lotes).find(l => l.id === lote.id)
+    const productoNombre = grupos.find(g => g.lotes.some(l => l.id === lote.id))?.producto.nombre ?? ''
+    setDetalles(prev => [...prev, createRow({ id: lote.id, codigo: lote.codigo, productoNombre })])
+    setDetalles(prev => {
+      const existing = prev.find(d => d.loteId === lote.id.toString())
+      if (existing) {
+        const newCant = (parseInt(existing.cantidad, 10) || 0) + cantidad
+        return prev.map(d => d.key === existing.key ? { ...d, cantidad: newCant.toString() } : d)
+      }
+      const newRow = createRow({ id: lote.id, codigo: lote.codigo, productoNombre })
+      return [...prev, { ...newRow, cantidad: cantidad.toString() }]
+    })
+    setCantidadPorLote(prev => ({ ...prev, [lote.id]: '' }))
   }
 
   const removeDetalle = (key: string) => {
-    setDetalles((prev) => prev.filter((d) => d.key !== key))
+    setDetalles(prev => prev.filter(d => d.key !== key))
+  }
+
+  const updateDetalleCantidad = (key: string, cantidad: string) => {
+    setDetalles(prev => prev.map(d => d.key === key ? { ...d, cantidad } : d))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -153,7 +221,7 @@ export function ViajeForm({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nuevo Viaje</DialogTitle>
           <DialogDescription>
@@ -237,7 +305,7 @@ export function ViajeForm({ open, onOpenChange }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="origen">Origen</Label>
-              <Select value={origenId} onValueChange={(v) => setOrigenId(v ?? '')}>
+              <Select value={origenId} onValueChange={(v) => { setOrigenId(v ?? ''); setDetalles([]) }}>
                 <SelectTrigger className="w-full">
                   <SelectValue>
                     {(value: string | null) => {
@@ -278,78 +346,136 @@ export function ViajeForm({ open, onOpenChange }: Props) {
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2 col-span-3">
-              <Label htmlFor="observaciones">Observaciones</Label>
-              <Input
-                id="observaciones"
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-                placeholder="Notas opcionales"
-              />
-            </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-medium">Lotes a transportar</Label>
-              <Button type="button" variant="outline" size="sm" onClick={() => setDetalles((p) => [...p, createRow()])}>
-                <Plus className="size-4 mr-1" />
-                Agregar lote
-              </Button>
+          <Separator />
+
+          {/* Lotes disponibles consolidados por producto */}
+          {origenId && (
+            <div className="space-y-3">
+              <Label className="text-base font-medium">Lotes disponibles en origen</Label>
+
+              {grupos.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay lotes disponibles en esta ubicación</p>
+              ) : (
+                <div className="space-y-4">
+                  {grupos.map((grupo) => (
+                    <div key={grupo.producto.id} className="border rounded-lg overflow-hidden">
+                      <div className="bg-muted/50 px-4 py-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Package className="size-4 text-muted-foreground" />
+                          <span className="font-semibold text-sm">{grupo.producto.nombre}</span>
+                          {grupo.producto.categoria && (
+                            <Badge variant="outline" className="text-xs">{grupo.producto.categoria.nombre}</Badge>
+                          )}
+                        </div>
+                        <span className="text-sm font-medium">{grupo.total} und disponibles</span>
+                      </div>
+
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs">Lote</TableHead>
+                            <TableHead className="text-xs">Cant.</TableHead>
+                            <TableHead className="text-xs">Donante</TableHead>
+                            <TableHead className="text-xs">Estado</TableHead>
+                            <TableHead className="text-xs w-28">Enviar</TableHead>
+                            <TableHead className="w-20"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {grupo.lotes.map((lote) => (
+                            <TableRow key={lote.id}>
+                              <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
+                              <TableCell className="text-xs">{lote.cantidad}</TableCell>
+                              <TableCell className="text-xs">{lote.donante ?? '—'}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">
+                                  {formatEstadoLote(lote.estado)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  max={lote.cantidad}
+                                  placeholder="Cant."
+                                  className="h-8 text-xs"
+                                  value={cantidadPorLote[lote.id] ?? ''}
+                                  onChange={(e) => setCantidadPorLote(prev => ({ ...prev, [lote.id]: e.target.value }))}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 text-xs"
+                                  disabled={!cantidadPorLote[lote.id] || parseInt(cantidadPorLote[lote.id] ?? '0', 10) <= 0}
+                                  onClick={() => agregarLote(lote)}
+                                >
+                                  <Plus className="size-3 mr-1" />
+                                  Agregar
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
 
-            {detalles.map((d) => (
-              <div key={d.key} className="flex gap-3 items-start p-3 border rounded-lg">
-                <div className="flex-[2] space-y-2">
-                  <Label className="text-xs">Lote</Label>
-                  <Select
-                    value={d.loteId}
-                    onValueChange={(v) => updateDetalle(d.key, 'loteId', v ?? '')}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {(value: string | null) => {
-                          if (!value) return 'Seleccionar...'
-                          const l = lotes.find(l => l.id.toString() === value)
-                          if (!l) return value
-                          return `${l.codigo}${l.producto ? ` (${l.producto.nombre})` : ''}`
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {lotes.map((l) => (
-                        <SelectItem key={l.id} value={l.id.toString()}>
-                          {l.codigo} {l.producto ? `(${l.producto.nombre})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="w-24 space-y-2">
-                  <Label className="text-xs">Cantidad</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={d.cantidad}
-                    onChange={(e) => updateDetalle(d.key, 'cantidad', e.target.value)}
-                  />
-                </div>
-
-                {detalles.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    className="mt-6 shrink-0"
-                    onClick={() => removeDetalle(d.key)}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                )}
+          {/* Lotes seleccionados */}
+          {detalles.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-base font-medium">Lotes seleccionados ({detalles.length})</Label>
+              <div className="space-y-2">
+                {detalles.map((d) => (
+                  <div key={d.key} className="flex items-center gap-3 p-2.5 border rounded-lg">
+                    <Package className="size-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-sm font-medium truncate">{d.loteCodigo}</p>
+                      <p className="text-xs text-muted-foreground truncate">{d.productoNombre}</p>
+                    </div>
+                    <div className="w-20">
+                      <Input
+                        type="number"
+                        min="1"
+                        value={d.cantidad}
+                        className="h-8 text-xs text-center"
+                        onChange={(e) => updateDetalleCantidad(d.key, e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="shrink-0"
+                      onClick={() => removeDetalle(d.key)}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          <div className="space-y-2 border-t pt-4">
+            <Label className="flex items-center gap-2 text-base font-medium">
+              <Image className="size-4.5 text-[#1B4332]" />
+              Foto del viaje (opcional)
+            </Label>
+            <FileUpload
+              accept="image/*"
+              maxSize={10}
+              value={fotoFile}
+              onChange={setFotoFile}
+            />
           </div>
 
           {error && (
