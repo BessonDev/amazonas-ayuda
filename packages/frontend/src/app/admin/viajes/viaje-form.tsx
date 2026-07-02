@@ -60,6 +60,7 @@ interface ViajeDetalle {
 interface Ubicacion {
   id: number
   nombre: string
+  tipo?: { nombre: string }
 }
 
 interface Campania {
@@ -129,12 +130,16 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
     queryFn: () => api.get('/ubicaciones'),
   })
 
+  const ubicacionesOrigen = ubicaciones.filter(
+    u => u.tipo?.nombre === 'CENTRO_ACOPIO',
+  )
+
   const { data: campanias = [] } = useQuery<Campania[]>({
     queryKey: ['campanias'],
     queryFn: () => api.get('/campanias'),
   })
 
-  const { data: grupos = [] } = useQuery<GrupoProducto[]>({
+  const { data: grupos = [], isError: gruposError, error: gruposQueryError } = useQuery<GrupoProducto[]>({
     queryKey: ['lotes-disponibles', origenId],
     queryFn: () => api.get(`/viajes/lotes-disponibles?origenId=${origenId}`),
     enabled: !!origenId,
@@ -370,20 +375,27 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
                 <SelectTrigger className="w-full">
                   <SelectValue>
                     {(value: string | null) => {
-                      if (!value) return 'Seleccionar...'
-                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      if (!value) return 'Seleccionar centro de acopio...'
+                      const u = ubicacionesOrigen.find(u => u.id.toString() === value)
                       return u?.nombre ?? value
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {ubicaciones.map((u) => (
-                    <SelectItem key={u.id} value={u.id.toString()}>
-                      {u.nombre}
-                    </SelectItem>
-                  ))}
+                  {ubicacionesOrigen.length === 0 ? (
+                    <p className="p-2 text-sm text-muted-foreground">No hay centros de acopio disponibles</p>
+                  ) : (
+                    ubicacionesOrigen.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.nombre}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Solo se muestran Centros de Acopio como origen del viaje
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -416,8 +428,10 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
             <div className="space-y-3">
               <Label className="text-base font-medium">Lotes disponibles en origen</Label>
 
-              {grupos.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No hay lotes disponibles en esta ubicación</p>
+              {gruposError ? (
+                <p className="text-sm text-red-600">{gruposQueryError?.message ?? 'Error al consultar lotes disponibles'}</p>
+              ) : grupos.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay lotes disponibles en esta ubicación. Crea lotes con estado DISPONIBLE en este origen para poder cargarlos al viaje</p>
               ) : (
                 <div className="space-y-4">
                   {grupos.map((grupo) => (

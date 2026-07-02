@@ -14,12 +14,10 @@ export const ESTADO_LOTE_LABELS: Record<string, string> = {
 
 export const TIPO_UBICACION_LABELS: Record<string, string> = {
   CENTRO_ACOPIO: 'Centro de Acopio',
-  BODEGA: 'Bodega',
-  IGLESIA: 'Iglesia',
   HOSPITAL: 'Hospital',
   REFUGIO: 'Refugio',
-  VEHICULO: 'Vehículo',
-  PUNTO_ENTREGA: 'Punto de Entrega',
+  IGLESIA: 'Iglesia',
+  COMUNIDAD: 'Comunidad',
   OTRO: 'Otro',
 }
 

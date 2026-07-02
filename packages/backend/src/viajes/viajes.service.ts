@@ -27,7 +27,7 @@ export class ViajesService {
     recepciones: true,
   }
 
-  private readonly TIPOS_ORIGEN_PERMITIDOS = ['CENTRO_ACOPIO', 'BODEGA']
+  private readonly TIPOS_ORIGEN_PERMITIDOS = ['CENTRO_ACOPIO']
 
   private generarCodigo(): string {
     const now = new Date()
@@ -42,7 +42,7 @@ export class ViajesService {
       include: { tipo: true },
     })
     if (!origen || !this.TIPOS_ORIGEN_PERMITIDOS.includes(origen.tipo.nombre)) {
-      throw new BadRequestException('El origen del viaje debe ser un Centro de Acopio o Bodega')
+      throw new BadRequestException('El origen del viaje debe ser un Centro de Acopio')
     }
     return origen
   }

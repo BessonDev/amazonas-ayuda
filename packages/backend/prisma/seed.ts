@@ -88,12 +88,10 @@ async function main() {
   // Tipos de ubicación
   const tiposUbicacion = [
     { nombre: 'CENTRO_ACOPIO', descripcion: 'Centro de acopio principal' },
-    { nombre: 'BODEGA', descripcion: 'Bodega de almacenamiento' },
-    { nombre: 'IGLESIA', descripcion: 'Iglesia' },
     { nombre: 'HOSPITAL', descripcion: 'Hospital o centro de salud' },
     { nombre: 'REFUGIO', descripcion: 'Refugio temporal' },
-    { nombre: 'VEHICULO', descripcion: 'Vehículo (almacén temporal)' },
-    { nombre: 'PUNTO_ENTREGA', descripcion: 'Punto de entrega final' },
+    { nombre: 'IGLESIA', descripcion: 'Iglesia' },
+    { nombre: 'COMUNIDAD', descripcion: 'Comunidad o punto de entrega final' },
     { nombre: 'OTRO', descripcion: 'Otro tipo de ubicación' },
   ]
 
