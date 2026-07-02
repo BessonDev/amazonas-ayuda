@@ -17,6 +17,7 @@ import {
   LogOut,
   ChevronLeft,
   Warehouse,
+  FileText,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import {
@@ -91,6 +92,7 @@ const menuItems: MenuGroup[] = [
     items: [
       { label: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['ADMINISTRADOR'] },
       { label: 'Imágenes', href: '/admin/archivos', icon: ImageIcon, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
+      { label: 'Reportes', href: '/admin/reportes', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
     ],
   },
 ]

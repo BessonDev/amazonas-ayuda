@@ -137,7 +137,7 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | Usuarios | CRUD completo | ✅ | ❌ | ❌ | ❌ |
 | Imágenes | Upload/descarga | ✅ | ✅ | ❌ | ❌ |
 | Configuración | CRUD completo | ✅ | ❌ | ❌ | ❌ |
-| Reportes | Generación PDF/Excel | ✅ | ❌ | ❌ | ❌ |
+| Reportes | Generación + descarga PDF/Excel | ✅ | ✅ | ❌ | ❌ |
 | Auditoría | Consulta con filtros | ✅ | ❌ | ❌ | ❌ |
 
 ---
@@ -351,7 +351,7 @@ pnpm --filter @donaciones/backend test:coverage
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
 | 📎 **Imágenes** | Listado con upload dialog + FileUpload drag & drop + preview + descarga directa + campo "Referencia a entrega" para galería pública |
-| 📊 **Reportes** | Generación PDF/Excel (inventario, donaciones, viajes) |
+| 📊 **Reportes** | Página dedicada con 3 cards (Inventario, Donaciones, Viajes) + descarga PDF/Excel con loading state y toast |
 | 📋 **Auditoría** | Registro de acciones con filtros |
 | ⚙️ **Configuración** | Listado clave-valor |
 | 🌐 **Portal público** | Página visual con stats, solicitudes con barras de progreso (GoFundMe-style), viajes activos, rastreo de lotes y timeline |

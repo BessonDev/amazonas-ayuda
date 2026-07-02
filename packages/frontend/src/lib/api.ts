@@ -62,4 +62,11 @@ export const api = {
 
   delete: <T>(endpoint: string) =>
     request<T>(endpoint, { method: 'DELETE' }),
+
+  downloadBlob: async (endpoint: string) => {
+    const url = `${API_BASE}${endpoint}`
+    const res = await fetch(url, { credentials: 'include' })
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`)
+    return res.blob()
+  },
 }
