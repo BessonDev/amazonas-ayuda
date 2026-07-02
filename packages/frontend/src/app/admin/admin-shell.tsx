@@ -14,7 +14,6 @@ import {
   Truck,
   ClipboardList,
   FileText,
-  Settings,
   LogOut,
   ChevronLeft,
   Warehouse,
@@ -84,7 +83,6 @@ const menuItems: MenuGroup[] = [
     label: 'Operaciones',
     items: [
       { label: 'Viajes', href: '/admin/viajes', icon: Truck, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
-      { label: 'Recepciones', href: '/admin/recepciones', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
       { label: 'Solicitudes', href: '/admin/solicitudes', icon: ClipboardList, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
     ],
   },
@@ -93,7 +91,6 @@ const menuItems: MenuGroup[] = [
     items: [
       { label: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['ADMINISTRADOR'] },
       { label: 'Archivos', href: '/admin/archivos', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
-      { label: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
     ],
   },
 ]
