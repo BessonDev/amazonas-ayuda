@@ -182,7 +182,12 @@ export class ViajesService {
 
     return Object.values(agrupados).map((g) => ({
       productoId: g.producto.id,
-      producto: g.producto.nombre,
+      producto: {
+        id: g.producto.id,
+        nombre: g.producto.nombre,
+        categoria: g.producto.categoria ?? null,
+        unidad: g.producto.unidad,
+      },
       categoria: g.producto.categoria?.nombre ?? null,
       unidad: g.producto.unidad,
       totalDisponible: g.total,
