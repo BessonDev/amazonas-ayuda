@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateSolicitudDto } from './dto/create-solicitud.dto'
 import { UpdateSolicitudDto } from './dto/update-solicitud.dto'
+import { UpdateDetalleSolicitudDto } from './dto/update-detalle-solicitud.dto'
 
 @Injectable()
 export class SolicitudesService {
@@ -75,5 +76,39 @@ export class SolicitudesService {
   async eliminar(id: number) {
     await this.obtener(id)
     await this.prisma.solicitud.delete({ where: { id } })
+  }
+
+  async actualizarRecibidoDetalle(
+    solicitudId: number,
+    detalleId: number,
+    dto: UpdateDetalleSolicitudDto,
+  ) {
+    const solicitud = await this.obtener(solicitudId)
+    const detalle = solicitud.detalles.find((d) => d.id === detalleId)
+    if (!detalle) throw new NotFoundException('Detalle no encontrado en esta solicitud')
+
+    if (dto.recibido > detalle.meta) {
+      throw new BadRequestException(
+        `El recibido (${dto.recibido}) no puede superar la meta (${detalle.meta})`,
+      )
+    }
+
+    await this.prisma.detalleSolicitud.update({
+      where: { id: detalleId },
+      data: { recibido: dto.recibido },
+    })
+
+    const detalles = await this.prisma.detalleSolicitud.findMany({
+      where: { solicitudId },
+    })
+
+    if (detalles.every((d) => d.recibido >= d.meta)) {
+      await this.prisma.solicitud.update({
+        where: { id: solicitudId },
+        data: { estado: 'COMPLETADA' },
+      })
+    }
+
+    return this.obtener(solicitudId)
   }
 }

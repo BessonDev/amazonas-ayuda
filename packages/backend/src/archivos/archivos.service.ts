@@ -1,19 +1,14 @@
 import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common'
-import { createReadStream, existsSync, mkdirSync } from 'fs'
-import { writeFile, unlink } from 'fs/promises'
-import { join, extname } from 'path'
+import { extname } from 'path'
 import { PrismaService } from '../prisma/prisma.service'
+import { MinioService } from '../common/minio/minio.service'
 
 @Injectable()
 export class ArchivosService {
-  private readonly uploadDir: string
-
-  constructor(private prisma: PrismaService) {
-    this.uploadDir = join(__dirname, '..', '..', '..', 'uploads')
-    if (!existsSync(this.uploadDir)) {
-      mkdirSync(this.uploadDir, { recursive: true })
-    }
-  }
+  constructor(
+    private prisma: PrismaService,
+    private minio: MinioService,
+  ) {}
 
   private readonly include = {
     campania: true,
@@ -38,9 +33,8 @@ export class ArchivosService {
 
   async crear(file: Express.Multer.File, dto: { nombre: string; entidadTipo: string; entidadId: number; campaniaId?: number; viajeId?: number }) {
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}${extname(file.originalname)}`
-    const filepath = join(this.uploadDir, filename)
 
-    await writeFile(filepath, file.buffer)
+    await this.minio.upload(filename, file.buffer, file.mimetype)
 
     return this.prisma.archivo.create({
       data: {
@@ -59,19 +53,20 @@ export class ArchivosService {
 
   async descargar(id: number) {
     const archivo = await this.obtener(id)
-    const filepath = join(this.uploadDir, archivo.url)
-    if (!existsSync(filepath)) throw new NotFoundException('Archivo físico no encontrado')
-    const stream = createReadStream(filepath)
-    return new StreamableFile(stream, {
-      disposition: `attachment; filename="${archivo.nombre}"`,
-      type: archivo.mimeType,
-    })
+    try {
+      const stream = await this.minio.getStream(archivo.url)
+      return new StreamableFile(stream, {
+        disposition: `attachment; filename="${archivo.nombre}"`,
+        type: archivo.mimeType,
+      })
+    } catch {
+      throw new NotFoundException('Archivo físico no encontrado en el almacenamiento')
+    }
   }
 
   async eliminar(id: number) {
     const archivo = await this.obtener(id)
-    const filepath = join(this.uploadDir, archivo.url)
-    try { await unlink(filepath) } catch {}
+    await this.minio.remove(archivo.url)
     await this.prisma.archivo.delete({ where: { id } })
   }
 }

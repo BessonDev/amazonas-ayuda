@@ -143,7 +143,7 @@ export default function LotesPage() {
                     <TableCell>{lote.campania?.nombre ?? '-'}</TableCell>
                     <TableCell className="text-right font-medium">{lote.cantidad}</TableCell>
                     <TableCell>
-                      <Badge variant={lote.estado === 'REGISTRADO' ? 'default' : 'secondary'}>
+                      <Badge variant="secondary">
                         {lote.estado}
                       </Badge>
                     </TableCell>

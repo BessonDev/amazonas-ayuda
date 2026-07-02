@@ -180,7 +180,7 @@ async function main() {
       conductor: 'José Martínez',
       fechaSalida: new Date('2026-07-05'),
       fechaEstimada: new Date('2026-07-07'),
-      estado: EstadoViaje.PREPARANDO_CARGA,
+      estado: EstadoViaje.EN_TRANSITO,
       campaniaId: campania.id,
       origenId: ubicaciones['Centro de Acopio Puerto Ayacucho'].id,
       destinoId: ubicaciones['Refugio Comunitario La Esmeralda'].id,

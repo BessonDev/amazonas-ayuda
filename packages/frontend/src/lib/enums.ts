@@ -1,21 +1,15 @@
 export const ESTADO_VIAJE_LABELS: Record<string, string> = {
   PLANIFICADO: 'Planificado',
-  PREPARANDO_CARGA: 'Preparando Carga',
   EN_TRANSITO: 'En Tránsito',
-  LLEGO: 'Llegó',
   RECEPCION_PARCIAL: 'Recepción Parcial',
   COMPLETADO: 'Completado',
   CANCELADO: 'Cancelado',
 }
 
 export const ESTADO_LOTE_LABELS: Record<string, string> = {
-  REGISTRADO: 'Registrado',
   DISPONIBLE: 'Disponible',
-  RESERVADO: 'Reservado',
   EN_TRANSITO: 'En Tránsito',
   ENTREGADO: 'Entregado',
-  VERIFICADO: 'Verificado',
-  DISTRIBUIDO: 'Distribuido',
 }
 
 export const TIPO_UBICACION_LABELS: Record<string, string> = {

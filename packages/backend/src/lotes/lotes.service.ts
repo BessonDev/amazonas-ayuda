@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateLoteDto } from './dto/create-lote.dto'
 import { UpdateLoteDto } from './dto/update-lote.dto'
+import { TransferirLotesDto } from './dto/transferir-lotes.dto'
 import * as QRCode from 'qrcode'
 
 @Injectable()
@@ -72,8 +73,55 @@ export class LotesService {
         },
       })
 
+      await this.actualizarSolicitudConLote(tx, dto, codigo)
+
       return lote
     })
+  }
+
+  private async actualizarSolicitudConLote(
+    tx: any,
+    dto: CreateLoteDto,
+    codigo: string,
+  ) {
+    const solicitudes = await tx.solicitud.findMany({
+      where: {
+        ubicacionId: dto.ubicacionId,
+        estado: { in: ['ABIERTA', 'EN_PROCESO'] },
+      },
+      include: {
+        detalles: {
+          where: { productoId: dto.productoId },
+        },
+      },
+    })
+
+    for (const solicitud of solicitudes) {
+      for (const detalle of solicitud.detalles) {
+        const nuevoRecibido = Math.min(detalle.recibido + dto.cantidad, detalle.meta)
+        if (nuevoRecibido === detalle.recibido) continue
+
+        await tx.detalleSolicitud.update({
+          where: { id: detalle.id },
+          data: { recibido: nuevoRecibido },
+        })
+      }
+
+      const detallesActualizados = await tx.detalleSolicitud.findMany({
+        where: { solicitudId: solicitud.id },
+      })
+
+      const todosCompletos = detallesActualizados.every(
+        (d: { recibido: number; meta: number }) => d.recibido >= d.meta,
+      )
+
+      if (todosCompletos) {
+        await tx.solicitud.update({
+          where: { id: solicitud.id },
+          data: { estado: 'COMPLETADA' },
+        })
+      }
+    }
   }
 
   async actualizar(id: number, dto: UpdateLoteDto) {
@@ -82,6 +130,75 @@ export class LotesService {
       where: { id },
       data: dto,
       include: this.include,
+    })
+  }
+
+  async transferir(dto: TransferirLotesDto) {
+    const lotes = await this.prisma.lote.findMany({
+      where: { id: { in: dto.loteIds } },
+    })
+
+    if (lotes.length !== dto.loteIds.length) {
+      throw new NotFoundException('Uno o más lotes no existen')
+    }
+
+    const noDisponibles = lotes.filter(l => l.estado !== 'DISPONIBLE')
+    if (noDisponibles.length > 0) {
+      throw new BadRequestException(
+        `Solo se pueden transferir lotes DISPONIBLES. No disponibles: ${noDisponibles.map(l => l.codigo).join(', ')}`
+      )
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const lote of lotes) {
+        const ultimo = await tx.movimientoInventario.findFirst({
+          where: { loteId: lote.id, ubicacionId: lote.ubicacionId },
+          orderBy: { createdAt: 'desc' },
+        })
+        const saldoAnterior = ultimo?.saldoNuevo ?? 0
+
+        await tx.movimientoInventario.create({
+          data: {
+            tipo: 'TRANSFERENCIA',
+            cantidad: lote.cantidad,
+            saldoAnterior,
+            saldoNuevo: 0,
+            observaciones: `Transferencia de ubicación #${lote.ubicacionId} → #${dto.ubicacionDestinoId}${dto.observaciones ? ': ' + dto.observaciones : ''}`,
+            loteId: lote.id,
+            ubicacionId: lote.ubicacionId,
+            campaniaId: lote.campaniaId,
+          },
+        })
+
+        await tx.lote.update({
+          where: { id: lote.id },
+          data: { ubicacionId: dto.ubicacionDestinoId },
+        })
+
+        const ultimoDestino = await tx.movimientoInventario.findFirst({
+          where: { loteId: lote.id, ubicacionId: dto.ubicacionDestinoId },
+          orderBy: { createdAt: 'desc' },
+        })
+        const saldoDestino = ultimoDestino?.saldoNuevo ?? 0
+
+        await tx.movimientoInventario.create({
+          data: {
+            tipo: 'ENTRADA',
+            cantidad: lote.cantidad,
+            saldoAnterior: saldoDestino,
+            saldoNuevo: saldoDestino + lote.cantidad,
+            observaciones: `Recepción por transferencia desde ubicación #${lote.ubicacionId}${dto.observaciones ? ': ' + dto.observaciones : ''}`,
+            loteId: lote.id,
+            ubicacionId: dto.ubicacionDestinoId,
+            campaniaId: lote.campaniaId,
+          },
+        })
+      }
+
+      return tx.lote.findMany({
+        where: { id: { in: dto.loteIds } },
+        include: this.include,
+      })
     })
   }
 

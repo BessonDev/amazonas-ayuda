@@ -41,7 +41,7 @@ export class ReportesService {
 
   async generarDonaciones(formato: 'pdf' | 'excel', res: Response) {
     const data = await this.prisma.lote.findMany({
-      where: { estado: { not: 'REGISTRADO' as any } },
+      where: { estado: { in: ['DISPONIBLE', 'EN_TRANSITO', 'ENTREGADO'] } },
       include: {
         producto: { include: { categoria: true } },
         donante: true,

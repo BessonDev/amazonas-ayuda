@@ -44,9 +44,7 @@ interface ViajeDetalle {
 
 const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PLANIFICADO: 'secondary',
-  PREPARANDO_CARGA: 'outline',
   EN_TRANSITO: 'default',
-  LLEGO: 'default',
   RECEPCION_PARCIAL: 'outline',
   COMPLETADO: 'default',
   CANCELADO: 'destructive',
@@ -236,13 +234,12 @@ export default function ViajeDetailPage() {
           )}
         </CardContent>
       </Card>
-      </div>
 
       <ViajeForm
         open={editFormOpen}
         onOpenChange={setEditFormOpen}
         viaje={viaje}
       />
-    </div>
+      </div>
   )
 }

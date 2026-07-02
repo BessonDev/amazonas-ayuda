@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UbicacionForm } from './ubicacion-form'
+import { formatTipoUbicacion } from '@/lib/enums'
 
 interface Ubicacion {
   id: number
@@ -117,7 +118,7 @@ export default function UbicacionesPage() {
                     <TableCell className="max-w-[250px] truncate">
                       {ubicacion.direccion ?? '-'}
                     </TableCell>
-                    <TableCell>{ubicacion.tipo?.nombre ?? '-'}</TableCell>
+                    <TableCell>{formatTipoUbicacion(ubicacion.tipo?.nombre ?? '')}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon-sm" onClick={() => openEdit(ubicacion)}>

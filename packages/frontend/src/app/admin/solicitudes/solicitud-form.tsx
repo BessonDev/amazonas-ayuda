@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/dialog'
 
 const PRIORIDADES = [
-  { value: 'BAJA', label: 'Baja' },
   { value: 'MEDIA', label: 'Media' },
   { value: 'ALTA', label: 'Alta' },
   { value: 'URGENTE', label: 'Urgente' },

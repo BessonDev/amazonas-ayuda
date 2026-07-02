@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { LotesService } from './lotes.service'
 import { CreateLoteDto } from './dto/create-lote.dto'
 import { UpdateLoteDto } from './dto/update-lote.dto'
+import { TransferirLotesDto } from './dto/transferir-lotes.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 
 @ApiTags('Lotes')
@@ -15,6 +16,13 @@ export class LotesController {
   @ApiOperation({ summary: 'Crear lote (genera código y QR automáticamente)' })
   crear(@Body() dto: CreateLoteDto) {
     return this.lotesService.crear(dto)
+  }
+
+  @Post('transferir')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @ApiOperation({ summary: 'Transferir múltiples lotes entre ubicaciones' })
+  transferir(@Body() dto: TransferirLotesDto) {
+    return this.lotesService.transferir(dto)
   }
 
   @Get()

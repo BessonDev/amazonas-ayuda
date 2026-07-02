@@ -25,13 +25,10 @@ interface Movimiento {
 
 const tipoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ENTRADA: 'default',
-  RESERVA: 'secondary',
   TRANSFERENCIA: 'outline',
   ENVIO: 'destructive',
   RECEPCION: 'default',
   AJUSTE: 'secondary',
-  DISTRIBUCION: 'destructive',
-  CONSUMO: 'destructive',
 }
 
 export default function MovimientosPage() {

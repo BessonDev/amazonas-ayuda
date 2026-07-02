@@ -49,9 +49,13 @@ export class ViajesController {
 
   @Patch(':id/estado')
   @Roles('COORDINADOR_LOGISTICO')
-  @ApiOperation({ summary: 'Cambiar estado de viaje con transiciones automáticas (solo COORDINADOR/LOGISTICA)' })
+  @ApiOperation({ summary: 'Cambiar estado de viaje con transiciones automáticas' })
   cambiarEstado(@Param('id', ParseIntPipe) id: number, @Body() dto: CambiarEstadoViajeDto) {
-    return this.viajesService.cambiarEstado(id, dto.estado, dto.observaciones)
+    return this.viajesService.cambiarEstado(id, dto.estado, {
+      observaciones: dto.observaciones,
+      responsableId: dto.responsableId,
+      detallesRecepcion: dto.detallesRecepcion,
+    })
   }
 
   @Delete(':id')

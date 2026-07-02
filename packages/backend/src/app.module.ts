@@ -12,13 +12,14 @@ import { DonantesModule } from './donantes/donantes.module'
 import { LotesModule } from './lotes/lotes.module'
 import { MovimientosInventarioModule } from './movimientos-inventario/movimientos-inventario.module'
 import { ViajesModule } from './viajes/viajes.module'
-import { RecepcionesModule } from './recepciones/recepciones.module'
+
 import { SolicitudesModule } from './solicitudes/solicitudes.module'
 import { ArchivosModule } from './archivos/archivos.module'
 import { ConfiguracionModule } from './configuracion/configuracion.module'
 import { PublicoModule } from './publico/publico.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
+import { MinioModule } from './common/minio/minio.module';
 
 @Module({
   imports: [
@@ -37,8 +38,8 @@ import { AuditoriaModule } from './auditoria/auditoria.module';
     LotesModule,
     MovimientosInventarioModule,
     ViajesModule,
-    RecepcionesModule,
     SolicitudesModule,
+    MinioModule,
     ArchivosModule,
     ConfiguracionModule,
     PublicoModule,

@@ -48,8 +48,8 @@ export default function PublicoPage() {
 
   const tipoLabel: Record<string, string> = {
     ENTRADA: 'Registrado', ENVIO: 'Despachado', RECEPCION: 'Recibido',
-    RESERVA: 'Reservado', TRANSFERENCIA: 'Transferido',
-    AJUSTE: 'Ajustado', DISTRIBUCION: 'Distribuido', CONSUMO: 'Consumido',
+    TRANSFERENCIA: 'Transferido',
+    AJUSTE: 'Ajustado',
   }
 
   return (
@@ -683,9 +683,7 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
 
 const estadoViajeCfg: Record<string, { label: string; color: string; dot: string; cardBg: string; border: string }> = {
   PLANIFICADO: { label: 'Planificado', color: 'text-blue-600 bg-blue-50 border-blue-200', dot: 'bg-blue-500', cardBg: 'bg-blue-50/40', border: 'border-blue-200/50' },
-  PREPARANDO_CARGA: { label: 'Preparando carga', color: 'text-amber-600 bg-amber-50 border-amber-200', dot: 'bg-amber-500', cardBg: 'bg-amber-50/40', border: 'border-amber-200/50' },
   EN_TRANSITO: { label: 'En tránsito', color: 'text-emerald-600 bg-emerald-50 border-emerald-200', dot: 'bg-emerald-500', cardBg: 'bg-emerald-50/40', border: 'border-emerald-200/50' },
-  LLEGO: { label: 'Llegó a destino', color: 'text-[#D4A373] bg-[#D4A373]/10 border-[#D4A373]/20', dot: 'bg-[#D4A373]', cardBg: 'bg-[#D4A373]/5', border: 'border-[#D4A373]/15' },
   RECEPCION_PARCIAL: { label: 'Recepción parcial', color: 'text-purple-600 bg-purple-50 border-purple-200', dot: 'bg-purple-500', cardBg: 'bg-purple-50/40', border: 'border-purple-200/50' },
 }
 

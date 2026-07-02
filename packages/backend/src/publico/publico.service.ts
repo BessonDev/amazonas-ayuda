@@ -64,7 +64,7 @@ export class PublicoService {
 
   async viajes() {
     const items = await this.prisma.viaje.findMany({
-      where: { estado: { in: ['PLANIFICADO', 'PREPARANDO_CARGA', 'EN_TRANSITO', 'LLEGO', 'RECEPCION_PARCIAL'] } },
+      where: { estado: { in: ['PLANIFICADO', 'EN_TRANSITO', 'RECEPCION_PARCIAL'] } },
       include: {
         origen: { select: { nombre: true } },
         destino: { select: { nombre: true } },

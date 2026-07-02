@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe } from '@nestjs/common'
+import { UpdateDetalleSolicitudDto } from './dto/update-detalle-solicitud.dto'
 import { ApiTags, ApiOperation } from '@nestjs/swagger'
 import { SolicitudesService } from './solicitudes.service'
 import { CreateSolicitudDto } from './dto/create-solicitud.dto'
@@ -43,5 +44,16 @@ export class SolicitudesController {
   @ApiOperation({ summary: 'Eliminar solicitud' })
   eliminar(@Param('id', ParseIntPipe) id: number) {
     return this.solicitudesService.eliminar(id)
+  }
+
+  @Patch(':id/detalles/:detalleId')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
+  @ApiOperation({ summary: 'Actualizar recibido de un detalle de solicitud' })
+  actualizarRecibidoDetalle(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('detalleId', ParseIntPipe) detalleId: number,
+    @Body() dto: UpdateDetalleSolicitudDto,
+  ) {
+    return this.solicitudesService.actualizarRecibidoDetalle(id, detalleId, dto)
   }
 }

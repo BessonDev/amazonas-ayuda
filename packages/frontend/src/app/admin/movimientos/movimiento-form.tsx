@@ -25,13 +25,10 @@ import {
 
 const TIPOS_MOVIMIENTO = [
   { value: 'ENTRADA', label: 'Entrada' },
-  { value: 'RESERVA', label: 'Reserva' },
   { value: 'TRANSFERENCIA', label: 'Transferencia' },
   { value: 'ENVIO', label: 'Envío' },
   { value: 'RECEPCION', label: 'Recepción' },
   { value: 'AJUSTE', label: 'Ajuste' },
-  { value: 'DISTRIBUCION', label: 'Distribución' },
-  { value: 'CONSUMO', label: 'Consumo' },
 ]
 
 interface Lote {

@@ -31,32 +31,22 @@ enum TipoDonante {
 }
 
 enum EstadoLote {
-  REGISTRADO
   DISPONIBLE
-  RESERVADO
   EN_TRANSITO
   ENTREGADO
-  VERIFICADO
-  DISTRIBUIDO
-  AJUSTE
 }
 
 enum TipoMovimiento {
   ENTRADA
-  RESERVA
   TRANSFERENCIA
   ENVIO
   RECEPCION
   AJUSTE
-  DISTRIBUCION
-  CONSUMO
 }
 
 enum EstadoViaje {
   PLANIFICADO
-  PREPARANDO_CARGA
   EN_TRANSITO
-  LLEGO
   RECEPCION_PARCIAL
   COMPLETADO
   CANCELADO
@@ -264,7 +254,7 @@ model Lote {
   cantidad      Int
   fecha         DateTime @default(now())
   observaciones String?
-  estado        EstadoLote @default(REGISTRADO)
+  estado        EstadoLote @default(DISPONIBLE)
   qrUrl         String?
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
@@ -284,12 +274,6 @@ model Lote {
   responsableId Int?
   responsable   Usuario? @relation("ResponsableLote", fields: [responsableId], references: [id])
 
-  lotePadreId   Int?
-  lotePadre     Lote?    @relation("LoteSplit", fields: [lotePadreId], references: [id])
-  lotesHijos    Lote[]   @relation("LoteSplit")
-
-  esSplit       Boolean  @default(false)
-
   movimientos         MovimientoInventario[]
   detalleViajes       DetalleViaje[]
   detalleRecepciones  DetalleRecepcion[]
@@ -298,7 +282,6 @@ model Lote {
   @@index([ubicacionId])
   @@index([productoId])
   @@index([estado])
-  @@index([lotePadreId])
   @@map("lotes")
 }
 

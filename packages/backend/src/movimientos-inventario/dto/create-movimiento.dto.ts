@@ -3,9 +3,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { TipoMovimiento } from '@prisma/client'
 
 export class CreateMovimientoDto {
-  @ApiProperty({ enum: ['ENTRADA', 'RESERVA', 'TRANSFERENCIA', 'ENVIO', 'RECEPCION', 'AJUSTE', 'DISTRIBUCION', 'CONSUMO'] })
-  @IsEnum(['ENTRADA', 'RESERVA', 'TRANSFERENCIA', 'ENVIO', 'RECEPCION', 'AJUSTE', 'DISTRIBUCION', 'CONSUMO'])
-  tipo: string
+  @ApiProperty({ enum: TipoMovimiento })
+  @IsEnum(TipoMovimiento)
+  tipo: TipoMovimiento
 
   @ApiProperty()
   @IsInt()

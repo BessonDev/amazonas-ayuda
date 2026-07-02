@@ -527,8 +527,7 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
           )}
 
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              }>Cancelar</DialogClose>
+            <DialogClose render={<Button variant="outline" />} />
             <Button type="submit" disabled={mutation.isPending}>
               {mutation.isPending ? 'Guardando...' : (isEditing ? 'Actualizar viaje' : 'Crear viaje')}
             </Button>

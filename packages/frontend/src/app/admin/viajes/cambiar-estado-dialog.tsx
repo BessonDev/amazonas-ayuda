@@ -25,13 +25,13 @@ interface Viaje {
   estado: string
 }
 
+// Transiciones que no requieren detalles extra (detallesRecepcion).
+// COMPLETADO / RECEPCION_PARCIAL se manejan desde la página detalle con los datos de recepción.
 const TRANSICIONES: Record<string, string[]> = {
-  PLANIFICADO: ['PREPARANDO_CARGA', 'CANCELADO'],
-  PREPARANDO_CARGA: ['EN_TRANSITO', 'PLANIFICADO', 'CANCELADO'],
-  EN_TRANSITO: ['LLEGO', 'CANCELADO'],
-  LLEGO: ['COMPLETADO', 'RECEPCION_PARCIAL', 'EN_TRANSITO'],
+  PLANIFICADO: ['EN_TRANSITO', 'CANCELADO'],
+  EN_TRANSITO: ['CANCELADO'],
+  RECEPCION_PARCIAL: [],
   COMPLETADO: [],
-  RECEPCION_PARCIAL: ['COMPLETADO'],
   CANCELADO: [],
 }
 

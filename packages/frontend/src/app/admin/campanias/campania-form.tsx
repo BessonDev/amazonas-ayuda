@@ -24,11 +24,9 @@ import {
 } from '@/components/ui/dialog'
 
 const ESTADOS = [
-  { value: 'PLANIFICADA', label: 'Planificada' },
   { value: 'ACTIVA', label: 'Activa' },
   { value: 'PAUSADA', label: 'Pausada' },
   { value: 'FINALIZADA', label: 'Finalizada' },
-  { value: 'CANCELADA', label: 'Cancelada' },
 ]
 
 interface Campania {

@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import {
   LayoutDashboard,
   Package,
@@ -41,44 +42,58 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { formatRol } from '@/lib/enums'
 
-const menuItems = [
+type Rol = 'ADMINISTRADOR' | 'COORDINADOR_LOGISTICO' | 'OPERADOR_INVENTARIO' | 'RESPONSABLE_DESTINO'
+
+interface MenuItem {
+  label: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  roles: Rol[]
+}
+
+interface MenuGroup {
+  label: string
+  items: MenuItem[]
+}
+
+const menuItems: MenuGroup[] = [
   {
     label: 'General',
     items: [
-      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
     ],
   },
   {
     label: 'Catálogo',
     items: [
-      { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList },
-      { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin },
-      { label: 'Categorías', href: '/admin/categorias', icon: Tags },
-      { label: 'Productos', href: '/admin/productos', icon: Package },
-      { label: 'Donantes', href: '/admin/donantes', icon: Users },
+      { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Categorías', href: '/admin/categorias', icon: Tags, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Productos', href: '/admin/productos', icon: Package, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Donantes', href: '/admin/donantes', icon: Users, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },
   {
     label: 'Inventario',
     items: [
-      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse },
-      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart },
+      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
     ],
   },
   {
     label: 'Operaciones',
     items: [
-      { label: 'Viajes', href: '/admin/viajes', icon: Truck },
-      { label: 'Recepciones', href: '/admin/recepciones', icon: FileText },
-      { label: 'Solicitudes', href: '/admin/solicitudes', icon: ClipboardList },
+      { label: 'Viajes', href: '/admin/viajes', icon: Truck, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Recepciones', href: '/admin/recepciones', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Solicitudes', href: '/admin/solicitudes', icon: ClipboardList, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
     ],
   },
   {
     label: 'Sistema',
     items: [
-      { label: 'Usuarios', href: '/admin/usuarios', icon: Users },
-      { label: 'Archivos', href: '/admin/archivos', icon: FileText },
-      { label: 'Configuración', href: '/admin/configuracion', icon: Settings },
+      { label: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['ADMINISTRADOR'] },
+      { label: 'Archivos', href: '/admin/archivos', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Configuración', href: '/admin/configuracion', icon: Settings, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
     ],
   },
 ]
@@ -88,6 +103,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const { usuario, logout, cargando } = useAuth()
   const router = useRouter()
   const isLoginPage = pathname === '/admin/login'
+
+  const needsRedirect = (() => {
+    if (!usuario || isLoginPage) return false
+    const role = usuario.rol as Rol
+    return !menuItems.some((g) =>
+      g.items.some(
+        (i) =>
+          i.roles.includes(role) &&
+          (pathname === i.href || pathname.startsWith(i.href + '/')),
+      ),
+    )
+  })()
+
+  useEffect(() => {
+    if (needsRedirect) {
+      router.push('/admin/dashboard')
+    }
+  }, [needsRedirect, router])
 
   if (cargando) {
     return (
@@ -105,6 +138,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   if (!usuario) {
     return null
   }
+
+  const userRole = usuario.rol as Rol
+
+  const allowedItems = menuItems
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => item.roles.includes(userRole)),
+    }))
+    .filter((group) => group.items.length > 0)
 
   const handleLogout = async () => {
     await logout()
@@ -134,7 +176,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </SidebarHeader>
 
         <SidebarContent>
-          {menuItems.map((group) => (
+          {allowedItems.map((group) => (
             <SidebarGroup key={group.label}>
               <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
                 {group.label}

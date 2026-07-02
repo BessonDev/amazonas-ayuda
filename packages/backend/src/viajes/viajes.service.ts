@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateViajeDto } from './dto/create-viaje.dto'
 import { UpdateViajeDto } from './dto/update-viaje.dto'
-import { EstadoViaje, EstadoLote, TipoMovimiento, Prisma } from '@prisma/client'
+import { EstadoViaje } from '@prisma/client'
 
 @Injectable()
 export class ViajesService {
@@ -77,7 +77,7 @@ export class ViajesService {
         fechaEstimada: dto.fechaEstimada ? new Date(dto.fechaEstimada) : undefined,
         fechaLlegada: dto.fechaLlegada ? new Date(dto.fechaLlegada) : undefined,
         observaciones: dto.observaciones,
-        estado: dto.estado,
+        estado: 'PLANIFICADO',
         campaniaId: dto.campaniaId,
         origenId: dto.origenId,
         destinoId: dto.destinoId,
@@ -98,6 +98,10 @@ export class ViajesService {
   async actualizar(id: number, dto: UpdateViajeDto) {
     const viaje = await this.obtener(id)
 
+    if (viaje.estado !== 'PLANIFICADO') {
+      throw new BadRequestException('Solo se puede editar un viaje en estado PLANIFICADO')
+    }
+
     const { detalles, ...rest } = dto
 
     const data: any = {}
@@ -110,82 +114,27 @@ export class ViajesService {
       }
     }
 
-    // Validar origen si se está cambiando
     if (dto.origenId && dto.origenId !== viaje.origenId) {
       await this.validarOrigen(dto.origenId)
     }
 
-    const transito = rest.estado === 'EN_TRANSITO' && viaje.estado !== 'EN_TRANSITO'
-
-    if (transito) {
-      return this.prisma.$transaction(async (tx) => {
-        if (detalles !== undefined) {
-          await tx.detalleViaje.deleteMany({ where: { viajeId: id } })
-          await tx.detalleViaje.createMany({
-            data: detalles.map((d) => ({
-              viajeId: id,
-              cantidad: d.cantidad,
-              loteId: d.loteId,
-            })),
-          })
-        }
-
-        const updated = await tx.viaje.update({
-          where: { id },
-          data,
-          include: this.include,
+    return this.prisma.$transaction(async (tx) => {
+      if (detalles !== undefined) {
+        await tx.detalleViaje.deleteMany({ where: { viajeId: id } })
+        await tx.detalleViaje.createMany({
+          data: detalles.map((d) => ({
+            viajeId: id,
+            cantidad: d.cantidad,
+            loteId: d.loteId,
+          })),
         })
+      }
 
-        const detallesList = detalles ?? viaje.detalles
-
-        for (const det of detallesList) {
-          const ultimo = await tx.movimientoInventario.findFirst({
-            where: { loteId: det.loteId, ubicacionId: viaje.origenId },
-            orderBy: { createdAt: 'desc' },
-          })
-
-          const saldoAnterior = ultimo?.saldoNuevo ?? 0
-          const saldoNuevo = Math.max(0, saldoAnterior - det.cantidad)
-
-          await tx.movimientoInventario.create({
-            data: {
-              tipo: 'ENVIO',
-              cantidad: det.cantidad,
-              saldoAnterior,
-              saldoNuevo,
-              observaciones: `Envío en viaje ${viaje.codigo}`,
-              loteId: det.loteId,
-              ubicacionId: viaje.origenId,
-              campaniaId: viaje.campaniaId,
-              viajeId: id,
-            },
-          })
-
-          await tx.lote.update({
-            where: { id: det.loteId },
-            data: { estado: 'EN_TRANSITO' },
-          })
-        }
-
-        return updated
+      return tx.viaje.update({
+        where: { id },
+        data,
+        include: this.include,
       })
-    }
-
-    if (detalles !== undefined) {
-      await this.prisma.detalleViaje.deleteMany({ where: { viajeId: id } })
-      await this.prisma.detalleViaje.createMany({
-        data: detalles.map((d) => ({
-          viajeId: id,
-          cantidad: d.cantidad,
-          loteId: d.loteId,
-        })),
-      })
-    }
-
-    return this.prisma.viaje.update({
-      where: { id },
-      data,
-      include: this.include,
     })
   }
 
@@ -200,9 +149,8 @@ export class ViajesService {
     const lotes = await this.prisma.lote.findMany({
       where: {
         ubicacionId: origenId,
-        estado: { in: ['DISPONIBLE', 'RESERVADO'] },
+        estado: 'DISPONIBLE',
         cantidad: { gt: 0 },
-        esSplit: false,
       },
       include: {
         producto: { include: { categoria: true } },
@@ -212,7 +160,6 @@ export class ViajesService {
       orderBy: { createdAt: 'asc' },
     })
 
-    // Agrupar por productoId - consolidación FIFO
     const agrupados = lotes.reduce((acc, lote) => {
       const key = lote.productoId
       if (!acc[key]) {
@@ -227,7 +174,6 @@ export class ViajesService {
         id: lote.id,
         codigo: lote.codigo,
         cantidad: lote.cantidad,
-        estado: lote.estado,
         donante: lote.donante?.nombre ?? null,
         fecha: lote.fecha,
       })
@@ -240,17 +186,15 @@ export class ViajesService {
       categoria: g.producto.categoria?.nombre ?? null,
       unidad: g.producto.unidad,
       totalDisponible: g.total,
-      lotes: g.lotes, // ya ordenados FIFO por createdAt
+      lotes: g.lotes,
     }))
   }
 
   private readonly TRANSICIONES_VALIDAS: Record<EstadoViaje, EstadoViaje[]> = {
-    PLANIFICADO: ['PREPARANDO_CARGA', 'CANCELADO'],
-    PREPARANDO_CARGA: ['EN_TRANSITO', 'PLANIFICADO', 'CANCELADO'],
-    EN_TRANSITO: ['LLEGO', 'CANCELADO'],
-    LLEGO: ['COMPLETADO', 'RECEPCION_PARCIAL', 'EN_TRANSITO'],
-    COMPLETADO: [],
+    PLANIFICADO: ['EN_TRANSITO', 'CANCELADO'],
+    EN_TRANSITO: ['COMPLETADO', 'RECEPCION_PARCIAL', 'CANCELADO'],
     RECEPCION_PARCIAL: ['COMPLETADO'],
+    COMPLETADO: [],
     CANCELADO: [],
   }
 
@@ -263,9 +207,15 @@ export class ViajesService {
     }
   }
 
-  async cambiarEstado(id: number, nuevoEstado: EstadoViaje, observaciones?: string) {
+  async cambiarEstado(
+    id: number,
+    nuevoEstado: EstadoViaje,
+    options?: { observaciones?: string; responsableId?: number; detallesRecepcion?: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[] }
+  ) {
     const viaje = await this.obtener(id)
     this.validarTransicion(viaje.estado, nuevoEstado)
+
+    const { observaciones, responsableId, detallesRecepcion } = options ?? {}
 
     return this.prisma.$transaction(async (tx) => {
       const detalles = await tx.detalleViaje.findMany({
@@ -273,88 +223,51 @@ export class ViajesService {
         include: { lote: true },
       })
 
-      // 1. PLANIFICADO → PREPARANDO_CARGA: Reservar stock
-      if (viaje.estado === 'PLANIFICADO' && nuevoEstado === 'PREPARANDO_CARGA') {
+      // PLANIFICADO → EN_TRANSITO: enviar lotes
+      if (viaje.estado === 'PLANIFICADO' && nuevoEstado === 'EN_TRANSITO') {
         for (const det of detalles) {
           const lote = det.lote
           if (det.cantidad > lote.cantidad) {
             throw new BadRequestException(
-              `Lote ${lote.codigo} tiene ${lote.cantidad} und, se intentan reservar ${det.cantidad}`
+              `Lote ${lote.codigo} tiene ${lote.cantidad} und, se intentan enviar ${det.cantidad}`
             )
           }
 
-          // Si es envío parcial, crear lote hijo (split)
-          let loteIdParaReserva = lote.id
-          let cantidadReserva = det.cantidad
+          let loteEnviadoId = lote.id
 
           if (det.cantidad < lote.cantidad) {
-            // Crear lote hijo para la parte que viaja
-            const loteHijo = await tx.lote.create({
+            await tx.lote.update({
+              where: { id: lote.id },
+              data: { cantidad: lote.cantidad - det.cantidad },
+            })
+
+            const nuevoLote = await tx.lote.create({
               data: {
-                codigo: `${lote.codigo}-SPLIT-${Date.now().toString(36).toUpperCase()}`,
+                codigo: `${lote.codigo}-ENV-${Date.now().toString(36).toUpperCase()}`,
                 cantidad: det.cantidad,
-                estado: 'RESERVADO',
+                estado: 'EN_TRANSITO',
                 campaniaId: lote.campaniaId,
                 ubicacionId: lote.ubicacionId,
                 productoId: lote.productoId,
                 donanteId: lote.donanteId,
                 responsableId: lote.responsableId,
-                lotePadreId: lote.id,
-                esSplit: true,
-                observaciones: `Split para viaje ${viaje.codigo} (${det.cantidad} de ${lote.cantidad})`,
+                observaciones: `Envío parcial desde lote ${lote.codigo} para viaje ${viaje.codigo}`,
               },
             })
-            // Reducir lote padre
-            await tx.lote.update({
-              where: { id: lote.id },
-              data: { cantidad: lote.cantidad - det.cantidad },
-            })
-            loteIdParaReserva = loteHijo.id
-            cantidadReserva = det.cantidad
+            loteEnviadoId = nuevoLote.id
           } else {
-            // Reserva completa del lote
             await tx.lote.update({
               where: { id: lote.id },
-              data: { estado: 'RESERVADO' },
+              data: { estado: 'EN_TRANSITO' },
             })
           }
 
-          // Movimiento RESERVA
           const ultimo = await tx.movimientoInventario.findFirst({
-            where: { loteId: loteIdParaReserva, ubicacionId: viaje.origenId },
+            where: { loteId: loteEnviadoId, ubicacionId: viaje.origenId },
             orderBy: { createdAt: 'desc' },
           })
           const saldoAnterior = ultimo?.saldoNuevo ?? 0
-          await tx.movimientoInventario.create({
-            data: {
-              tipo: 'RESERVA',
-              cantidad: cantidadReserva,
-              saldoAnterior,
-              saldoNuevo: saldoAnterior - cantidadReserva,
-              observaciones: `Reserva para viaje ${viaje.codigo}${observaciones ? ': ' + observaciones : ''}`,
-              loteId: loteIdParaReserva,
-              ubicacionId: viaje.origenId,
-              campaniaId: viaje.campaniaId,
-              viajeId: id,
-            },
-          })
-        }
-      }
 
-      // 2. PREPARANDO_CARGA → EN_TRANSITO: Convertir reserva en envío
-      if (viaje.estado === 'PREPARANDO_CARGA' && nuevoEstado === 'EN_TRANSITO') {
-        for (const det of detalles) {
-          const lote = det.lote
-          await tx.lote.update({
-            where: { id: lote.id },
-            data: { estado: 'EN_TRANSITO' },
-          })
-
-          const ultimo = await tx.movimientoInventario.findFirst({
-            where: { loteId: lote.id, ubicacionId: viaje.origenId },
-            orderBy: { createdAt: 'desc' },
-          })
-          const saldoAnterior = ultimo?.saldoNuevo ?? 0
           await tx.movimientoInventario.create({
             data: {
               tipo: 'ENVIO',
@@ -362,159 +275,132 @@ export class ViajesService {
               saldoAnterior,
               saldoNuevo: Math.max(0, saldoAnterior - det.cantidad),
               observaciones: `Envío en viaje ${viaje.codigo}${observaciones ? ': ' + observaciones : ''}`,
-              loteId: lote.id,
+              loteId: loteEnviadoId,
               ubicacionId: viaje.origenId,
               campaniaId: viaje.campaniaId,
               viajeId: id,
             },
           })
+
+          if (det.cantidad < lote.cantidad) {
+            const ultimoOriginal = await tx.movimientoInventario.findFirst({
+              where: { loteId: lote.id, ubicacionId: viaje.origenId },
+              orderBy: { createdAt: 'desc' },
+            })
+            const saldoOriginal = ultimoOriginal?.saldoNuevo ?? 0
+            await tx.movimientoInventario.create({
+              data: {
+                tipo: 'AJUSTE',
+                cantidad: det.cantidad,
+                saldoAnterior: saldoOriginal,
+                saldoNuevo: saldoOriginal - det.cantidad,
+                observaciones: `Ajuste por envío parcial del lote ${lote.codigo}`,
+                loteId: lote.id,
+                ubicacionId: viaje.origenId,
+                campaniaId: viaje.campaniaId,
+                viajeId: id,
+              },
+            })
+          }
         }
       }
 
-      // 3. EN_TRANSITO → LLEGO: Solo cambio de estado (esperando recepción)
-      // 4. LLEGO → COMPLETADO / RECEPCION_PARCIAL: Procesar recepción
-      if (viaje.estado === 'LLEGO' && (nuevoEstado === 'COMPLETADO' || nuevoEstado === 'RECEPCION_PARCIAL')) {
-        const recepcion = await tx.recepcion.findFirst({
-          where: { viajeId: id },
-          include: {
+      // EN_TRANSITO → COMPLETADO / RECEPCION_PARCIAL: procesar recepción
+      if (viaje.estado === 'EN_TRANSITO' && (nuevoEstado === 'COMPLETADO' || nuevoEstado === 'RECEPCION_PARCIAL')) {
+        if (!detallesRecepcion?.length) {
+          throw new BadRequestException('Debe proporcionar detalles de recepción (detallesRecepcion)')
+        }
+
+        const detalleViajeMap = new Map(detalles.map(d => [d.loteId, d]))
+
+        // Crear registro de Recepcion
+        await tx.recepcion.create({
+          data: {
+            fecha: new Date(),
+            viajeId: id,
+            responsableId,
             detalles: {
-              include: { lote: true },
+              createMany: {
+                data: detallesRecepcion.map(d => ({
+                  cantidadRecibida: d.cantidadRecibida,
+                  cantidadDanada: d.cantidadDanada ?? 0,
+                  cantidadFaltante: Math.max(0, (detalleViajeMap.get(d.loteId)?.cantidad ?? 0) - d.cantidadRecibida - (d.cantidadDanada ?? 0)),
+                  observaciones: d.observaciones,
+                  loteId: d.loteId,
+                })),
+              },
             },
           },
         })
-        if (!recepcion) {
-          throw new BadRequestException('No existe recepción para este viaje. Cree la recepción primero.')
-        }
 
-        // Mapa de loteId -> detalleViaje para obtener cantidadEnviada
-        const detalleViajeMap = new Map(detalles.map(d => [d.loteId, d]))
+        for (const detRec of detallesRecepcion) {
+          const lote = await tx.lote.findUnique({ where: { id: detRec.loteId } })
+          if (!lote) continue
 
-        for (const detRec of recepcion.detalles) {
-          const lote = detRec.lote
-          const detViaje = detalleViajeMap.get(lote.id)
+          const detViaje = detalleViajeMap.get(detRec.loteId)
           const cantidadEnviada = detViaje?.cantidad ?? 0
+          const faltante = cantidadEnviada - detRec.cantidadRecibida
 
-          if (nuevoEstado === 'COMPLETADO') {
-            // Recepción completa
+          if (detRec.cantidadRecibida > 0) {
             await tx.lote.update({
-              where: { id: lote.id },
+              where: { id: detRec.loteId },
               data: {
                 ubicacionId: viaje.destinoId,
                 cantidad: detRec.cantidadRecibida,
-                estado: 'VERIFICADO',
+                estado: 'ENTREGADO',
               },
             })
 
-            // Movimiento RECEPCION en destino
             const ultimoDestino = await tx.movimientoInventario.findFirst({
-              where: { loteId: lote.id, ubicacionId: viaje.destinoId },
+              where: { loteId: detRec.loteId, ubicacionId: viaje.destinoId },
               orderBy: { createdAt: 'desc' },
             })
             const saldoAnteriorDestino = ultimoDestino?.saldoNuevo ?? 0
+
             await tx.movimientoInventario.create({
               data: {
                 tipo: 'RECEPCION',
                 cantidad: detRec.cantidadRecibida,
                 saldoAnterior: saldoAnteriorDestino,
                 saldoNuevo: saldoAnteriorDestino + detRec.cantidadRecibida,
-                observaciones: `Recepción completa viaje ${viaje.codigo}${observaciones ? ': ' + observaciones : ''}`,
-                loteId: lote.id,
+                observaciones: nuevoEstado === 'COMPLETADO'
+                  ? `Recepción completa viaje ${viaje.codigo}${observaciones ? ': ' + observaciones : ''}`
+                  : `Recepción parcial viaje ${viaje.codigo} (${detRec.cantidadRecibida}/${cantidadEnviada})${observaciones ? ': ' + observaciones : ''}`,
+                loteId: detRec.loteId,
                 ubicacionId: viaje.destinoId,
                 campaniaId: viaje.campaniaId,
                 viajeId: id,
               },
             })
-          } else {
-            // RECEPCION_PARCIAL: recibido < enviado
-            const cantidadRecibida = detRec.cantidadRecibida
-            const cantidadEnviada = detViaje?.cantidad ?? 0
-            const faltante = cantidadEnviada - cantidadRecibida
-
-            if (cantidadRecibida > 0) {
-              // Lote recibido → VERIFICADO en destino
-              await tx.lote.update({
-                where: { id: lote.id },
-                data: {
-                  ubicacionId: viaje.destinoId,
-                  cantidad: cantidadRecibida,
-                  estado: 'VERIFICADO',
-                },
-              })
-
-              const ultimoDestino = await tx.movimientoInventario.findFirst({
-                where: { loteId: lote.id, ubicacionId: viaje.destinoId },
-                orderBy: { createdAt: 'desc' },
-              })
-              const saldoAnteriorDestino = ultimoDestino?.saldoNuevo ?? 0
-              await tx.movimientoInventario.create({
-                data: {
-                  tipo: 'RECEPCION',
-                  cantidad: cantidadRecibida,
-                  saldoAnterior: saldoAnteriorDestino,
-                  saldoNuevo: saldoAnteriorDestino + cantidadRecibida,
-                  observaciones: `Recepción parcial viaje ${viaje.codigo} (${cantidadRecibida}/${cantidadEnviada})${observaciones ? ': ' + observaciones : ''}`,
-                  loteId: lote.id,
-                  ubicacionId: viaje.destinoId,
-                  campaniaId: viaje.campaniaId,
-                  viajeId: id,
-                },
-              })
-            }
-
-            // Faltante → crear lote hijo con estado AJUSTE en origen (o mantener en tránsito si se espera)
-            if (faltante > 0) {
-              await tx.lote.create({
-                data: {
-                  codigo: `${lote.codigo}-FALTANTE-${Date.now().toString(36).toUpperCase()}`,
-                  cantidad: faltante,
-                  estado: 'AJUSTE',
-                  campaniaId: lote.campaniaId,
-                  ubicacionId: viaje.origenId, // queda en origen conceptualmente
-                  productoId: lote.productoId,
-                  donanteId: lote.donanteId,
-                  responsableId: lote.responsableId,
-                  lotePadreId: lote.id,
-                  esSplit: true,
-                  observaciones: `Faltante recepción viaje ${viaje.codigo} (${faltante} und no llegaron)`,
-                },
-              })
-
-              // Movimiento AJUSTE en origen por faltante
-              const ultimoOrigen = await tx.movimientoInventario.findFirst({
-                where: { loteId: lote.id, ubicacionId: viaje.origenId },
-                orderBy: { createdAt: 'desc' },
-              })
-              const saldoAnteriorOrigen = ultimoOrigen?.saldoNuevo ?? 0
-              await tx.movimientoInventario.create({
-                data: {
-                  tipo: 'AJUSTE',
-                  cantidad: faltante,
-                  saldoAnterior: saldoAnteriorOrigen,
-                  saldoNuevo: saldoAnteriorOrigen - faltante,
-                  observaciones: `Ajuste faltante recepción viaje ${viaje.codigo}`,
-                  loteId: lote.id,
-                  ubicacionId: viaje.origenId,
-                  campaniaId: viaje.campaniaId,
-                  viajeId: id,
-                },
-              })
-            }
           }
 
-          // Dañado → lote hijo separado
+          if (faltante > 0 && nuevoEstado === 'RECEPCION_PARCIAL') {
+            await tx.lote.create({
+              data: {
+                codigo: `${lote.codigo}-FALTANTE-${Date.now().toString(36).toUpperCase()}`,
+                cantidad: faltante,
+                estado: 'ENTREGADO',
+                campaniaId: lote.campaniaId,
+                ubicacionId: viaje.origenId,
+                productoId: lote.productoId,
+                donanteId: lote.donanteId,
+                responsableId: lote.responsableId,
+                observaciones: `Faltante recepción viaje ${viaje.codigo} (${faltante} und no llegaron)`,
+              },
+            })
+          }
+
           if (detRec.cantidadDanada && detRec.cantidadDanada > 0) {
             await tx.lote.create({
               data: {
                 codigo: `${lote.codigo}-DANIADO-${Date.now().toString(36).toUpperCase()}`,
                 cantidad: detRec.cantidadDanada,
-                estado: 'AJUSTE',
+                estado: 'ENTREGADO',
                 campaniaId: lote.campaniaId,
                 ubicacionId: viaje.destinoId,
                 productoId: lote.productoId,
                 donanteId: lote.donanteId,
                 responsableId: lote.responsableId,
-                lotePadreId: lote.id,
-                esSplit: true,
                 observaciones: `Dañado en recepción viaje ${viaje.codigo} (${detRec.cantidadDanada} und)`,
               },
             })
@@ -522,17 +408,15 @@ export class ViajesService {
         }
       }
 
-      // 5. CANCELADO desde cualquier estado: revertir
+      // CANCELADO: revertir
       if (nuevoEstado === 'CANCELADO') {
-        // Revertir movimientos según estado actual
         const movimientos = await tx.movimientoInventario.findMany({
           where: { viajeId: id },
           orderBy: { createdAt: 'desc' },
         })
 
         for (const mov of movimientos) {
-          if (mov.tipo === 'RESERVA' || mov.tipo === 'ENVIO') {
-            // Reponer en origen
+          if (mov.tipo === 'ENVIO') {
             const ultimo = await tx.movimientoInventario.findFirst({
               where: { loteId: mov.loteId, ubicacionId: viaje.origenId },
               orderBy: { createdAt: 'desc' },
@@ -552,35 +436,24 @@ export class ViajesService {
               },
             })
 
-            // Si es lote split (esSplit), fusionar de vuelta al padre
-            const lote = await tx.lote.findUnique({ where: { id: mov.loteId } })
-            if (lote?.esSplit && lote.lotePadreId) {
-              await tx.lote.update({
-                where: { id: lote.lotePadreId },
-                data: { cantidad: { increment: lote.cantidad } },
-              })
-              await tx.lote.delete({ where: { id: lote.id } })
-            } else {
-              await tx.lote.update({
-                where: { id: mov.loteId },
-                data: { estado: 'DISPONIBLE' },
-              })
-            }
+            await tx.lote.update({
+              where: { id: mov.loteId },
+              data: { estado: 'DISPONIBLE' },
+            })
           }
         }
       }
 
-      // Actualizar estado del viaje
-      const updated = await tx.viaje.update({
+      return tx.viaje.update({
         where: { id },
         data: {
           estado: nuevoEstado,
-          observaciones: observaciones ? `${viaje.observaciones ?? ''}\n[${new Date().toISOString()}] ${nuevoEstado}: ${observaciones}`.trim() : viaje.observaciones,
+          observaciones: observaciones
+            ? `${viaje.observaciones ?? ''}\n[${new Date().toISOString()}] ${nuevoEstado}: ${observaciones}`.trim()
+            : viaje.observaciones,
         },
         include: this.include,
       })
-
-      return updated
     })
   }
 }

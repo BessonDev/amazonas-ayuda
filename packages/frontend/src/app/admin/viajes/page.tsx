@@ -33,9 +33,7 @@ interface Viaje {
 
 const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PLANIFICADO: 'secondary',
-  PREPARANDO_CARGA: 'outline',
   EN_TRANSITO: 'default',
-  LLEGO: 'default',
   RECEPCION_PARCIAL: 'outline',
   COMPLETADO: 'default',
   CANCELADO: 'destructive',

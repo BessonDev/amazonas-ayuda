@@ -38,11 +38,8 @@ export default function LoteTrackingPage() {
     ENTRADA: 'Registrado',
     ENVIO: 'Despachado',
     RECEPCION: 'Recibido',
-    RESERVA: 'Reservado',
     TRANSFERENCIA: 'Transferido',
     AJUSTE: 'Ajustado',
-    DISTRIBUCION: 'Distribuido',
-    CONSUMO: 'Consumido',
   }
 
   if (loading) {

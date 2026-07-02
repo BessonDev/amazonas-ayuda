@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { SolicitudForm } from './solicitud-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -37,6 +38,7 @@ const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
 }
 
 export default function SolicitudesPage() {
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const queryClient = useQueryClient()
@@ -137,17 +139,26 @@ export default function SolicitudesPage() {
                       {new Date(sol.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => {
-                          if (confirm('¿Eliminar esta solicitud?')) {
-                            deleteMutation.mutate(sol.id)
-                          }
-                        }}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => router.push(`/admin/solicitudes/${sol.id}`)}
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => {
+                            if (confirm('¿Eliminar esta solicitud?')) {
+                              deleteMutation.mutate(sol.id)
+                            }
+                          }}
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

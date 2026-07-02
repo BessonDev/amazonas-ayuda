@@ -8,6 +8,7 @@ import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { formatRol } from '@/lib/enums'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -112,7 +113,7 @@ export default function UsuariosPage() {
                     <TableCell className="text-xs">{u.email}</TableCell>
                     <TableCell className="text-xs">{u.telefono ?? '-'}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{u.rol.nombre}</Badge>
+                      <Badge variant="outline">{formatRol(u.rol.nombre)}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={u.activo ? 'default' : 'secondary'}>
