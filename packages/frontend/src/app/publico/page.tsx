@@ -107,6 +107,7 @@ export default function PublicoPage() {
             </p>
 
             <div className="flex flex-wrap gap-4">
+              {/* disabled: se activará cuando el tracking público esté listo
               <a
                 href="#track"
                 className="group inline-flex items-center gap-2.5 bg-[#D4A373] text-[#1B4332] font-semibold px-8 py-4 rounded-2xl hover:bg-[#c4955f] transition-all hover:shadow-xl hover:shadow-[#D4A373]/25 active:scale-[0.98]"
@@ -115,6 +116,7 @@ export default function PublicoPage() {
                 Rastrear donación
                 <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
               </a>
+              */}
               <a
                 href="#solicitudes"
                 className="inline-flex items-center gap-2.5 bg-white/8 backdrop-blur-sm text-white font-medium px-8 py-4 rounded-2xl hover:bg-white/15 transition-all border border-white/10 active:scale-[0.98]"
@@ -196,7 +198,9 @@ export default function PublicoPage() {
       {/* ══════════ VIAJES ══════════ */}
       <ViajesActivos API_BASE={API_BASE} />
 
-      {/* ══════════ TRACKING ══════════ */}
+      {/* ══════════ TRACKING (oculto) ══════════ */}
+      {
+      /* disabled: se activará cuando el tracking público esté listo
       <section id="track" className="relative py-24 sm:py-32 px-6 bg-white">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A373]/20 to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(45,106,79,0.03)_0%,transparent_60%)]" />
@@ -211,128 +215,10 @@ export default function PublicoPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="relative max-w-xl mx-auto mb-16">
-          <div className="relative flex items-center gap-2 bg-[#FEFCF3] rounded-2xl border-2 border-[#e8e0d0] has-[input:focus]:border-[#D4A373] transition-all duration-300 p-1.5 shadow-sm has-[input:focus]:shadow-md has-[input:focus]:shadow-[#D4A373]/10">
-            <Search className="size-5 text-[#D4A373] ml-4 shrink-0" />
-            <input
-              type="text"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value.toUpperCase())}
-              placeholder="Ej: LOTE-250701-A3B2"
-              className="flex-1 bg-transparent border-0 outline-none text-sm py-3 text-[#1B4332] placeholder:text-[#a09585]"
-            />
-            <button
-              type="submit"
-              disabled={busy}
-              className="bg-[#1B4332] text-white px-7 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2D6A4F] transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0 active:scale-[0.97]"
-            >
-              {busy ? 'Buscando...' : 'Buscar'}
-            </button>
-          </div>
-        </form>
-
-        {notFound && (
-          <div className="max-w-lg mx-auto text-center bg-white rounded-2xl p-12 border border-[#e8e0d0] shadow-sm">
-            <div className="size-16 rounded-2xl bg-[#D4A373]/10 flex items-center justify-center mx-auto mb-5">
-              <Search className="size-7 text-[#D4A373]" />
-            </div>
-            <h3 className="heading text-2xl text-[#1B4332] mb-2">Lote no encontrado</h3>
-            <p className="text-sm text-[#5c4f3d] max-w-xs mx-auto">
-              Verifica el código. Si donaste recientemente, el lote puede estar todavía en proceso de registro.
-            </p>
-          </div>
-        )}
-
-        {lote && (
-          <div className="max-w-3xl mx-auto space-y-6">
-            <div className="bg-[#FEFCF3] rounded-2xl p-8 border border-[#e8e0d0] shadow-sm">
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-7">
-                <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-xl bg-[#1B4332] flex items-center justify-center">
-                    <Package className="size-6 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-[#a09585] uppercase tracking-wider mb-1">Código de lote</p>
-                    <h3 className="heading text-2xl text-[#1B4332] font-mono tracking-wider">{lote.codigo}</h3>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#2D6A4F]/10 text-[#2D6A4F] text-xs font-semibold">
-                  <span className="size-1.5 rounded-full bg-[#2D6A4F]" />
-                  {lote.estado}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-[#e8e0d0]">
-                {[
-                  { label: 'Producto', value: lote.producto?.nombre ?? '-' },
-                  { label: 'Cantidad', value: `${lote.cantidad} ${lote.producto?.unidad?.toLowerCase() ?? 'u'}` },
-                  { label: 'Donante', value: lote.donante?.nombre ?? 'Anónimo' },
-                  { label: 'Campaña', value: lote.campania?.nombre ?? '-' },
-                ].map((f) => (
-                  <div key={f.label}>
-                    <p className="text-[#a09585] text-xs mb-1">{f.label}</p>
-                    <p className="font-semibold text-[#1B4332] text-sm">{f.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Timeline */}
-            {lote.movimientos?.length > 0 && (
-              <div className="bg-white rounded-2xl p-8 border border-[#e8e0d0] shadow-sm">
-                <h4 className="heading text-lg text-[#1B4332] mb-8 flex items-center gap-2">
-                  <Route className="size-5 text-[#D4A373]" />
-                  Recorrido del lote
-                </h4>
-                <div className="space-y-0">
-                  {lote.movimientos.map((mov: any, i: number) => {
-                    const isLast = i === lote.movimientos.length - 1
-                    return (
-                      <div key={mov.id} className="relative flex gap-6 pb-10 last:pb-0">
-                        {!isLast && (
-                          <div className="absolute left-[15px] top-8 bottom-0 w-[2px] bg-gradient-to-b from-[#D4A373]/30 to-[#D4A373]/5" />
-                        )}
-                        <div className={cn(
-                          'relative shrink-0 size-8 rounded-full border-[3px] flex items-center justify-center',
-                          isLast
-                            ? 'border-[#2D6A4F] bg-[#2D6A4F] text-white'
-                            : 'border-[#D4A373] bg-white',
-                        )}>
-                          {isLast ? '✓' : i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0 pt-0.5">
-                          <div className="flex flex-wrap items-center gap-3 mb-1">
-                            <span className={cn(
-                              'text-sm font-bold',
-                              isLast ? 'text-[#2D6A4F]' : 'text-[#1B4332]',
-                            )}>
-                              {tipoLabel[mov.tipo] ?? mov.tipo}
-                            </span>
-                            <span className="text-xs text-[#a09585]">
-                              {new Date(mov.createdAt).toLocaleDateString('es-ES', {
-                                day: 'numeric', month: 'long', year: 'numeric',
-                              })}
-                            </span>
-                          </div>
-                          {mov.observaciones && (
-                            <p className="text-sm text-[#5c4f3d]">{mov.observaciones}</p>
-                          )}
-                          {mov.ubicacion && (
-                            <p className="text-xs text-[#5c4f3d] flex items-center gap-1 mt-1">
-                              <MapPin className="size-3" />
-                              {mov.ubicacion.nombre}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <BuscarLote API_BASE={API_BASE} />
       </section>
+      */
+      }
 
       {/* ══════════ IMPACTO - GALERÍA DE ENTREGAS ══════════ */}
       <section id="impact" className="relative py-24 sm:py-32 px-6 overflow-hidden">

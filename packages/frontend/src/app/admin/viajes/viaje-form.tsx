@@ -74,6 +74,20 @@ interface DetalleRow {
   productoNombre: string
 }
 
+interface LoteItem {
+  id: number
+  codigo: string
+  cantidad: number
+  donante: string | null
+  estado: string
+}
+
+interface GrupoProducto {
+  producto: { id: number; nombre: string; categoria?: { nombre: string } }
+  total: number
+  lotes: LoteItem[]
+}
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void

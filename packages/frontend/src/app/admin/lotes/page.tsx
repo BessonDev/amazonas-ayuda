@@ -52,7 +52,7 @@ export default function LotesPage() {
   const [search, setSearch] = useState('')
   const [qrLote, setQrLote] = useState<Lote | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [editLote, setEditLote] = useState<Lote | null>(null)
+  const [editLote, setEditLote] = useState<Lote | undefined>(undefined)
   const queryClient = useQueryClient()
 
   const { data: lotes = [], isLoading } = useQuery({
@@ -191,7 +191,7 @@ export default function LotesPage() {
 
       <LoteForm
         open={formOpen}
-        onOpenChange={(open) => { setFormOpen(open); if (!open) setEditLote(null) }}
+        onOpenChange={(open) => { setFormOpen(open); if (!open) setEditLote(undefined) }}
         lote={editLote}
       />
 

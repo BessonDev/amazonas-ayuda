@@ -26,17 +26,18 @@ interface ViajeDetalle {
   fechaLlegada: string | null
   observaciones: string | null
   estado: string
-  campania?: { nombre: string }
-  origen?: { nombre: string }
-  destino?: { nombre: string }
+  campania?: { id: number; nombre: string }
+  origen?: { id: number; nombre: string }
+  destino?: { id: number; nombre: string }
   detalles?: Array<{
     id: number
     cantidad: number
     lote: {
+      id: number
       codigo: string
       cantidad: number
       estado: string
-      producto?: { nombre: string }
+      producto?: { id: number; nombre: string }
       donante?: { nombre: string }
     }
   }>
@@ -116,9 +117,8 @@ export default function ViajeDetailPage() {
       </div>
 
       <CambiarEstadoDialog
-        viaje={{ id: viaje.id, codigo: viaje.codigo, estado: viaje.estado }}
-        open={estadoDialogOpen}
-        onOpenChange={(open) => { if (!open) setEstadstateDialogOpen(false) }}
+        viaje={estadoDialogOpen ? { id: viaje.id, codigo: viaje.codigo, estado: viaje.estado } : null}
+        onOpenChange={setEstadstateDialogOpen}
       />
 
       <div className="grid gap-6 md:grid-cols-3">
