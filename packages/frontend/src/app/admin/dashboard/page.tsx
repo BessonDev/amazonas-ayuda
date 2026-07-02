@@ -140,7 +140,7 @@ export default function DashboardPage() {
             return (
               <a key={item.label} href={item.href} className="block group">
                 <Card className="relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} via-transparent to-transparent opacity-60`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} via-transparent to-transparent opacity-80`} />
                   <Icon className="absolute -bottom-2 -right-2 size-20 text-foreground/10 dark:text-foreground/15 transition-transform group-hover:scale-110 group-hover:rotate-3" />
                   <CardHeader className="py-3 relative">
                     <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
