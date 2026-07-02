@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Download, Trash2, Upload, Image } from 'lucide-react'
+import { Search, Download, Trash2, Upload, Image, FileText, HardDrive, Building2, Calendar, Settings2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -166,12 +166,12 @@ export default function ArchivosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead className="text-right">Tamaño</TableHead>
-                <TableHead>Entidad</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead><FileText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Nombre</TableHead>
+                <TableHead><FileText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Tipo</TableHead>
+                <TableHead className="text-right"><HardDrive className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Tamaño</TableHead>
+                <TableHead><Building2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Entidad</TableHead>
+                <TableHead><Calendar className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Fecha</TableHead>
+                <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

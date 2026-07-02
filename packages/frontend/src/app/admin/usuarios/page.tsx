@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Edit, UserX, UserCheck } from 'lucide-react'
+import { Plus, Search, Edit, UserX, UserCheck, User, Mail, Phone, Shield, Activity, Calendar, Settings2 } from 'lucide-react'
 import { UsuarioForm } from './usuario-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -84,13 +84,13 @@ export default function UsuariosPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Último acceso</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead><User className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Nombre</TableHead>
+                <TableHead><Mail className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Email</TableHead>
+                <TableHead><Phone className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Teléfono</TableHead>
+                <TableHead><Shield className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Rol</TableHead>
+                <TableHead><Activity className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Estado</TableHead>
+                <TableHead><Calendar className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Último acceso</TableHead>
+                <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
