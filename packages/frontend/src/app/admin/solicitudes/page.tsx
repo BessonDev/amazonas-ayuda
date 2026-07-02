@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Eye } from 'lucide-react'
+import { Plus, Search, Trash2, Eye, Tag, User, MapPin, Calendar, Activity, AlertTriangle, ClipboardList, Settings2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { SolicitudForm } from './solicitud-form'
 import { api } from '@/lib/api'
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 interface Solicitud {
   id: number
@@ -21,6 +22,7 @@ interface Solicitud {
   createdAt: string
   campania?: { nombre: string }
   ubicacion?: { nombre: string }
+  detalles?: Array<{ cantidadSolicitada: number; cantidadRecibida: number }>
 }
 
 const prioridadVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -30,17 +32,13 @@ const prioridadVariants: Record<string, 'default' | 'secondary' | 'destructive' 
   URGENTE: 'destructive',
 }
 
-const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  ABIERTA: 'default',
-  EN_PROCESO: 'outline',
-  COMPLETADA: 'secondary',
-  CANCELADA: 'destructive',
-}
+const PRIORIDADES = ['BAJA', 'MEDIA', 'ALTA', 'URGENTE'] as const
 
 export default function SolicitudesPage() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
+  const [filtroPrioridad, setFiltroPrioridad] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const { data: solicitudes = [], isLoading } = useQuery({
@@ -55,10 +53,21 @@ export default function SolicitudesPage() {
     },
   })
 
-  const filtered = solicitudes.filter((s) =>
-    s.titulo.toLowerCase().includes(search.toLowerCase()) ||
-    (s.descripcion ?? '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = solicitudes.filter((s) => {
+    if (filtroPrioridad && s.prioridad !== filtroPrioridad) return false
+    return (
+      s.titulo.toLowerCase().includes(search.toLowerCase()) ||
+      (s.descripcion ?? '').toLowerCase().includes(search.toLowerCase())
+    )
+  })
+
+  const calcProgreso = (s: Solicitud) => {
+    if (!s.detalles || s.detalles.length === 0) return 0
+    const totalSoli = s.detalles.reduce((a, d) => a + d.cantidadSolicitada, 0)
+    const totalRecib = s.detalles.reduce((a, d) => a + d.cantidadRecibida, 0)
+    if (totalSoli === 0) return 0
+    return Math.min(Math.round((totalRecib / totalSoli) * 100), 100)
+  }
 
   return (
     <div className="space-y-6">
@@ -87,6 +96,25 @@ export default function SolicitudesPage() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap">
+        {PRIORIDADES.map((pri) => (
+          <Button
+            key={pri}
+            variant={filtroPrioridad === pri ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFiltroPrioridad(filtroPrioridad === pri ? null : pri)}
+          >
+            <AlertTriangle className="size-3.5 mr-1.5" />
+            {pri}
+          </Button>
+        ))}
+        {filtroPrioridad && (
+          <Button variant="ghost" size="sm" onClick={() => setFiltroPrioridad(null)}>
+            Limpiar filtro
+          </Button>
+        )}
+      </div>
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium">
@@ -97,13 +125,13 @@ export default function SolicitudesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Prioridad</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Campaña</TableHead>
-                <TableHead>Ubicación</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead><ClipboardList className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Título</TableHead>
+                <TableHead><AlertTriangle className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Prioridad</TableHead>
+                <TableHead><Activity className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Estado</TableHead>
+                <TableHead><ClipboardList className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Campaña</TableHead>
+                <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
+                <TableHead><Calendar className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Fecha</TableHead>
+                <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -120,48 +148,57 @@ export default function SolicitudesPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((sol) => (
-                  <TableRow key={sol.id}>
-                    <TableCell className="font-medium max-w-[250px] truncate">{sol.titulo}</TableCell>
-                    <TableCell>
-                      <Badge variant={prioridadVariants[sol.prioridad] ?? 'outline'}>
-                        {sol.prioridad}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={estadoVariants[sol.estado] ?? 'outline'}>
-                        {sol.estado}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{sol.campania?.nombre ?? '-'}</TableCell>
-                    <TableCell>{sol.ubicacion?.nombre ?? '-'}</TableCell>
-                    <TableCell className="text-xs">
-                      {new Date(sol.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => router.push(`/admin/solicitudes/${sol.id}`)}
-                        >
-                          <Eye className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar esta solicitud?')) {
-                              deleteMutation.mutate(sol.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filtered.map((sol) => {
+                  const prog = calcProgreso(sol)
+                  return (
+                    <TableRow key={sol.id}>
+                      <TableCell className="font-medium max-w-[220px]">
+                        <div className="truncate">{sol.titulo}</div>
+                        {sol.detalles && sol.detalles.length > 0 && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <Progress value={prog} className="h-1.5 w-20" />
+                            <span className="text-xs text-muted-foreground tabular-nums">{prog}%</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={prioridadVariants[sol.prioridad] ?? 'outline'}>
+                          {sol.prioridad}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{sol.estado}</Badge>
+                      </TableCell>
+                      <TableCell>{sol.campania?.nombre ?? '-'}</TableCell>
+                      <TableCell>{sol.ubicacion?.nombre ?? '-'}</TableCell>
+                      <TableCell className="text-xs">
+                        {new Date(sol.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => router.push(`/admin/solicitudes/${sol.id}`)}
+                          >
+                            <Eye className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar esta solicitud?')) {
+                                deleteMutation.mutate(sol.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               )}
             </TableBody>
           </Table>
