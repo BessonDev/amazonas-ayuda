@@ -3,7 +3,7 @@ import { Type } from 'class-transformer'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { EstadoViaje } from '@prisma/client'
 
-class DetalleRecepcionDto {
+export class DetalleRecepcionDto {
   @ApiProperty()
   @IsInt()
   loteId: number

@@ -5,6 +5,7 @@ import { ViajesService } from './viajes.service'
 import { CreateViajeDto } from './dto/create-viaje.dto'
 import { UpdateViajeDto } from './dto/update-viaje.dto'
 import { CambiarEstadoViajeDto } from './dto/cambiar-estado-viaje.dto'
+import { RecibirViajeDto } from './dto/recibir-viaje.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
 
@@ -49,6 +50,15 @@ export class ViajesController {
   @ApiOperation({ summary: 'Actualizar viaje' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateViajeDto) {
     return this.viajesService.actualizar(id, dto)
+  }
+
+  @Post(':id/recibir')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO')
+  @ApiOperation({ summary: 'Recibir viaje (determina automáticamente COMPLETADO o RECEPCION_PARCIAL)' })
+  recibir(@Param('id', ParseIntPipe) id: number, @Body() dto: RecibirViajeDto) {
+    return this.viajesService.recibir(id, dto.detallesRecepcion, {
+      observaciones: dto.observaciones,
+    })
   }
 
   @Patch(':id/estado')

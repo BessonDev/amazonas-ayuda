@@ -65,18 +65,18 @@ const menuItems: MenuGroup[] = [
   {
     label: 'Catálogo',
     items: [
-      { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
       { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
       { label: 'Categorías', href: '/admin/categorias', icon: Tags, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
-      { label: 'Productos', href: '/admin/productos', icon: Package, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Productos', href: '/admin/productos', icon: Package, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
       { label: 'Donantes', href: '/admin/donantes', icon: Users, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },
   {
     label: 'Inventario',
     items: [
-      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
-      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },
   {
@@ -90,7 +90,7 @@ const menuItems: MenuGroup[] = [
     label: 'Sistema',
     items: [
       { label: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['ADMINISTRADOR'] },
-      { label: 'Archivos', href: '/admin/archivos', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Archivos', href: '/admin/archivos', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
     ],
   },
 ]

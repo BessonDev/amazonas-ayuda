@@ -87,16 +87,22 @@ export default function DashboardPage() {
     },
   ]
 
-  const { isAdmin } = useRole()
+  const { isAdmin, hasRole } = useRole()
 
   const quickAccess = [
-    { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, color: 'from-blue-500/10' },
-    { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin, color: 'from-violet-500/10' },
-    { label: 'Categorías', href: '/admin/categorias', icon: Tags, color: 'from-pink-500/10' },
-    { label: 'Productos', href: '/admin/productos', icon: Package, color: 'from-emerald-500/10' },
-    { label: 'Donantes', href: '/admin/donantes', icon: Users, color: 'from-amber-500/10' },
-    { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, color: 'from-cyan-500/10' },
-    { label: 'Archivos', href: '/admin/archivos', icon: FileText, color: 'from-orange-500/10' },
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO') ? [{ label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, color: 'from-blue-500/10' }] : []),
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO') ? [
+      { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin, color: 'from-violet-500/10' },
+      { label: 'Categorías', href: '/admin/categorias', icon: Tags, color: 'from-pink-500/10' },
+      { label: 'Donantes', href: '/admin/donantes', icon: Users, color: 'from-amber-500/10' },
+    ] : []),
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO') ? [
+      { label: 'Productos', href: '/admin/productos', icon: Package, color: 'from-emerald-500/10' },
+    ] : []),
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO') ? [
+      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, color: 'from-cyan-500/10' },
+    ] : []),
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO') ? [{ label: 'Archivos', href: '/admin/archivos', icon: FileText, color: 'from-orange-500/10' }] : []),
     ...(isAdmin ? [{ label: 'Usuarios', href: '/admin/usuarios', icon: Settings, color: 'from-rose-500/10' }] : []),
   ]
 

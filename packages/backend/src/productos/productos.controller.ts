@@ -18,14 +18,14 @@ export class ProductosController {
   constructor(private productosService: ProductosService) {}
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar productos' })
   listar() {
     return this.productosService.listar()
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener producto por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.productosService.obtener(id)

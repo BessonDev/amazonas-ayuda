@@ -60,7 +60,7 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 |:--:|:---------------------------|
 | | Login seguro con JWT + Refresh Tokens en cookies HttpOnly |
 | | 4 roles con permisos granular: Administrador, Coordinador Logístico, Operador de Inventario, Responsable de Destino |
-| | Formularios adaptados por rol (RECEPTOR ve versión simplificada) |
+| | Formularios adaptados por rol (RESPONSABLE_DESTINO ve versión simplificada) |
 
 | 📦 | **Gestión de Donaciones** |
 |:--:|:---------------------------|
@@ -93,6 +93,46 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 |:--:|:---------------------------|
 | | Generación de reportes en PDF y Excel |
 | | Panel administrativo con métricas en tiempo real |
+
+---
+
+## 👥 Matriz de Roles
+
+### Sidebar — Recursos visibles por rol
+
+| Recurso | `ADMINISTRADOR` | `COORDINADOR_LOGISTICO` | `OPERADOR_INVENTARIO` | `RESPONSABLE_DESTINO` |
+|:--------|:---------------:|:------------------------:|:---------------------:|:---------------------:|
+| Dashboard | ✅ | ✅ | ✅ | ✅ |
+| Campañas | ✅ | ✅ | ❌ | ❌ |
+| Ubicaciones | ✅ | ✅ | ✅ | ❌ |
+| Categorías | ✅ | ✅ | ✅ | ❌ |
+| Productos | ✅ | ✅ | ✅ | ✅ |
+| Donantes | ✅ | ✅ | ✅ | ❌ |
+| Lotes | ✅ | ✅ | ✅ | ❌ |
+| Movimientos | ✅ | ✅ | ✅ | ❌ |
+| Viajes | ✅ | ✅ | ✅ | ✅ |
+| Solicitudes | ✅ | ✅ | ✅ | ✅ |
+| Usuarios | ✅ | ❌ | ❌ | ❌ |
+| Archivos | ✅ | ✅ | ❌ | ❌ |
+
+### Permisos CRUD por recurso
+
+| Recurso | Acción | `ADMIN` | `COORD_LOG` | `OP_INV` | `RESP_DESTINO` |
+|:--------|--------|:-------:|:-----------:|:--------:|:--------------:|
+| Campañas | CRUD completo | ✅ | ✅ | ❌ | ❌ |
+| Ubicaciones | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
+| Categorías | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
+| Productos | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ✅ (solo listar) |
+| Donantes | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
+| Lotes | CRUD completo | ✅ | ✅ | ✅ | ❌ |
+| Movimientos | CRUD completo | ✅ | ✅ | ✅ | ❌ |
+| Viajes | CRUD + cambio estado | ✅ | ✅ | ✅ | ✅ (solo recibir) |
+| Solicitudes | CRUD + cambio estado | ✅ | ✅ | ✅ | ✅ + crear con form simplificado |
+| Usuarios | CRUD completo | ✅ | ❌ | ❌ | ❌ |
+| Archivos | Upload/descarga | ✅ | ✅ | ❌ | ❌ |
+| Configuración | CRUD completo | ✅ | ❌ | ❌ | ❌ |
+| Reportes | Generación PDF/Excel | ✅ | ❌ | ❌ | ❌ |
+| Auditoría | Consulta con filtros | ✅ | ❌ | ❌ | ❌ |
 
 ---
 
@@ -268,7 +308,7 @@ pnpm dev
 | 🤝 **Donantes** | ✅ | Registro de personas, empresas, orgs |
 | 🏷️ **Lotes** | ✅ | Código único + QR generado |
 | 📊 **Mov. Inventario** | ✅ | Saldos automáticos por lote+ubicación |
-| 🚚 **Viajes** | ✅ | Viajes con detalle, consolidación FIFO de lotes, estados con transiciones automáticas + auto-movimiento ENVIO/AJUSTE |
+| 🚚 **Viajes** | ✅ | Viajes con detalle, consolidación FIFO de lotes, estados con transiciones automáticas + auto-movimiento ENVIO/AJUSTE + `POST /:id/recibir` para recepción en destino |
 | 📋 **Recepciones** | ✅ | Crea inventario automáticamente + actualiza lote + subida de foto con FileUpload |
 | 📝 **Solicitudes** | ✅ | Pedidos con prioridad y estados |
 | 🌐 **Público** | ✅ | Stats, solicitudes con progreso (recibido/meta), viajes activos y rastreo de lotes |
@@ -299,7 +339,7 @@ pnpm --filter @donaciones/backend test:coverage
 | 🤝 **Donantes** | CRUD + form dialog con tipo enum |
 | 🏷️ **Lotes** | CRUD + QR modal + form dialog con 4 FK selects |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
-| 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas |
+| 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas, botón Recibir + `RecibirDialog` para ADMIN/COORD_LOG/RESP |
 | 📋 **Recepciones** | CRUD + form con detalle anidado + subida de foto con preview + "Viajes en camino" con Receptionar |
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |

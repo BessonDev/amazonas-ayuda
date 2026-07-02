@@ -207,6 +207,38 @@ export class ViajesService {
     }
   }
 
+  async recibir(
+    id: number,
+    detalles: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[],
+    options?: { observaciones?: string; responsableId?: number }
+  ) {
+    const viaje = await this.obtener(id)
+
+    if (viaje.estado !== 'EN_TRANSITO') {
+      throw new BadRequestException('Solo se puede recibir un viaje en estado EN_TRANSITO')
+    }
+
+    const envios = await this.prisma.detalleViaje.findMany({ where: { viajeId: id } })
+
+    let completo = true
+    for (const det of detalles) {
+      const envio = envios.find(d => d.loteId === det.loteId)
+      const recibido = det.cantidadRecibida + (det.cantidadDanada ?? 0)
+      if (!envio || recibido !== envio.cantidad) {
+        completo = false
+        break
+      }
+    }
+
+    const nuevoEstado = completo ? 'COMPLETADO' : 'RECEPCION_PARCIAL'
+
+    return this.cambiarEstado(id, nuevoEstado, {
+      detallesRecepcion: detalles,
+      observaciones: options?.observaciones,
+      responsableId: options?.responsableId,
+    })
+  }
+
   async cambiarEstado(
     id: number,
     nuevoEstado: EstadoViaje,

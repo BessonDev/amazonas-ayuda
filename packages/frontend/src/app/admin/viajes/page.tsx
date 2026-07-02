@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Trash2, Send, ArrowRight, Tag, User, Truck, MapPin, ClipboardList, Activity, Settings2 } from 'lucide-react'
+import { Plus, Search, Trash2, Send, CheckCircle2, ArrowRight, Tag, User, Truck, MapPin, ClipboardList, Activity, Settings2 } from 'lucide-react'
 import { ViajeForm } from './viaje-form'
 import { CambiarEstadoDialog } from './cambiar-estado-dialog'
+import { RecibirDialog } from './recibir-dialog'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,9 +46,10 @@ export default function ViajesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [estadoDialogViaje, setEstadstateDialogViaje] = useState<Viaje | null>(null)
+  const [recibirDialogViaje, setRecibirDialogViaje] = useState<Viaje | null>(null)
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
   const queryClient = useQueryClient()
-  const { canChangeStatus, canManage, canDelete } = useRole()
+  const { canChangeStatus, canManage, canDelete, hasRole } = useRole()
   const router = useRouter()
 
   const { data: viajes = [], isLoading } = useQuery({
@@ -92,6 +94,10 @@ export default function ViajesPage() {
       <CambiarEstadoDialog
         viaje={estadoDialogViaje}
         onOpenChange={(open) => { if (!open) setEstadstateDialogViaje(null) }}
+      />
+      <RecibirDialog
+        viaje={recibirDialogViaje}
+        onOpenChange={(open) => { if (!open) setRecibirDialogViaje(null) }}
       />
 
       <div className="flex items-center gap-2">
@@ -182,6 +188,16 @@ export default function ViajesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        {(viaje.estado === 'EN_TRANSITO') && hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO') && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setRecibirDialogViaje(viaje)}
+                            title="Recibir viaje"
+                          >
+                            <CheckCircle2 className="size-4 text-emerald-500" />
+                          </Button>
+                        )}
                         {canChangeStatus && (
                           <Button
                             variant="ghost"
