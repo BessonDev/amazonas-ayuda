@@ -40,7 +40,8 @@ export class LotesService {
 
   async crear(dto: CreateLoteDto) {
     const codigo = this.generarCodigo()
-    const qrData = `http://localhost:3000/lotes/${codigo}`
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+    const qrData = `${baseUrl}/lotes/${codigo}`
     const qrUrl = await QRCode.toDataURL(qrData)
 
     return this.prisma.$transaction(async (tx) => {
