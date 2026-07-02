@@ -22,6 +22,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 const UNIDADES = [
   { value: 'UNIDAD', label: 'Unidad' },
@@ -86,10 +87,12 @@ export function ProductoForm({ open, onOpenChange, producto }: Props) {
         : api.post('/productos', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productos'] })
+      toast.success(editando ? 'Producto actualizado' : 'Producto creado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Search, Edit, UserX, UserCheck, User, Mail, Phone, Shield, Activity, Calendar, Settings2 } from 'lucide-react'
 import { UsuarioForm } from './usuario-form'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRole } from '@/hooks/use-role'
@@ -37,10 +39,19 @@ export default function UsuariosPage() {
 
   const { isAdmin } = useRole()
 
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
+
   const desactivarMutation = useMutation({
     mutationFn: (id: number) => api.patch(`/usuarios/${id}/desactivar`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+      toast.success('Estado de usuario actualizado')
     },
   })
 
@@ -66,6 +77,18 @@ export default function UsuariosPage() {
       </div>
 
       <UsuarioForm open={formOpen} onOpenChange={setFormOpen} editUser={editUser} />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
+      />
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
@@ -143,12 +166,13 @@ export default function UsuariosPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              const accion = u.activo ? 'desactivar' : '¿Estás seguro?'
-                              if (confirm(`¿${u.activo ? 'Desactivar' : 'Activar'} usuario ${u.nombre}?`)) {
-                                desactivarMutation.mutate(u.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: u.activo ? 'Desactivar usuario' : 'Activar usuario',
+                              description: `¿Estás seguro de ${u.activo ? 'desactivar' : 'activar'} al usuario "${u.nombre}"?`,
+                              variant: 'default',
+                              onConfirm: () => desactivarMutation.mutate(u.id),
+                            })}
                           >
                             {u.activo
                               ? <UserX className="size-4 text-destructive" />

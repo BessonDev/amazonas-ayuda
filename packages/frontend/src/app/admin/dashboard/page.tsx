@@ -78,7 +78,7 @@ export default function DashboardPage() {
       variant: urgentes > 0 ? 'danger' : 'success',
     },
     {
-      label: 'Lotes disponibles', value: disponibles, icon: Package, href: '/admin/lotes',
+      label: 'Stock disponible', value: disponibles, icon: Package, href: '/admin/lotes',
       subtitle: 'Listos para asignar', variant: 'success',
     },
     {

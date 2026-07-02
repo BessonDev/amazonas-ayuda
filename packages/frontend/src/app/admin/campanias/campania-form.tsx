@@ -22,6 +22,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 const ESTADOS = [
   { value: 'ACTIVA', label: 'Activa' },
@@ -80,10 +81,12 @@ export function CampaniaForm({ open, onOpenChange, campania }: Props) {
         : api.post('/campanias', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campanias'] })
+      toast.success(editando ? 'Campaña actualizada' : 'Campaña creada')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

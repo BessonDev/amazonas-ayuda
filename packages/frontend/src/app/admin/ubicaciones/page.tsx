@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UbicacionForm } from './ubicacion-form'
 import { formatTipoUbicacion } from '@/lib/enums'
 import { useRole } from '@/hooks/use-role'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Ubicacion {
   id: number
@@ -30,6 +32,13 @@ export default function UbicacionesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Ubicacion | null>(null)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canManage, canDelete } = useRole()
 
@@ -42,6 +51,7 @@ export default function UbicacionesPage() {
     mutationFn: (id: number) => api.delete(`/ubicaciones/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ubicaciones'] })
+      toast.success('Ubicación eliminada')
     },
   })
 
@@ -134,11 +144,12 @@ export default function UbicacionesPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar esta ubicación?')) {
-                                deleteMutation.mutate(ubicacion.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar ubicación',
+                              description: `¿Estás seguro de eliminar la ubicación "${ubicacion.nombre}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(ubicacion.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -157,6 +168,18 @@ export default function UbicacionesPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         ubicacion={selected}
+      />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
     </div>
   )

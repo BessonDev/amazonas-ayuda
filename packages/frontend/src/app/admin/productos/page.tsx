@@ -10,6 +10,8 @@ import { useRole } from '@/hooks/use-role'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProductoForm } from './producto-form'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Producto {
   id: number
@@ -24,6 +26,13 @@ export default function ProductosPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Producto | null>(null)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canManage, canDelete } = useRole()
 
@@ -36,6 +45,7 @@ export default function ProductosPage() {
     mutationFn: (id: number) => api.delete(`/productos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productos'] })
+      toast.success('Producto eliminado')
     },
   })
 
@@ -128,11 +138,12 @@ export default function ProductosPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar este producto?')) {
-                                deleteMutation.mutate(producto.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar producto',
+                              description: `¿Estás seguro de eliminar el producto "${producto.nombre}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(producto.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -151,6 +162,18 @@ export default function ProductosPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         producto={selected}
+      />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
     </div>
   )

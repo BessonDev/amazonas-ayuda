@@ -40,6 +40,8 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useRole } from '@/hooks/use-role'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Lote {
   id: number
@@ -73,6 +75,13 @@ export default function LotesPage() {
   const [transferOpen, setTransferOpen] = useState(false)
   const [destinoId, setDestinoId] = useState('')
   const [observaciones, setObservaciones] = useState('')
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canManage, canDelete, canTransfer } = useRole()
 
@@ -90,6 +99,7 @@ export default function LotesPage() {
     mutationFn: (id: number) => api.delete(`/lotes/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      toast.success('Lote eliminado')
     },
   })
 
@@ -102,6 +112,7 @@ export default function LotesPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      toast.success('Lote(s) transferido(s) correctamente')
       setSelectedIds(new Set())
       setDestinoId('')
       setObservaciones('')
@@ -121,8 +132,8 @@ export default function LotesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Lotes</h1>
-          <p className="text-muted-foreground">Gestión de lotes de productos</p>
+          <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
+          <p className="text-muted-foreground">Gestión de inventario y lotes de productos</p>
         </div>
         <div className="flex items-center gap-2">
           {canTransfer && (
@@ -258,9 +269,12 @@ export default function LotesPage() {
                             </Button>
                           )}
                           {canDelete && (
-                            <Button variant="ghost" size="icon-sm" onClick={() => {
-                              if (confirm('¿Eliminar este lote?')) deleteMutation.mutate(lote.id)
-                            }}>
+                            <Button variant="ghost" size="icon-sm" onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar lote',
+                              description: `¿Estás seguro de eliminar el lote "${lote.codigo}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(lote.id),
+                            })}>
                               <Trash2 className="size-4 text-destructive" />
                             </Button>
                           )}
@@ -279,6 +293,18 @@ export default function LotesPage() {
         open={formOpen}
         onOpenChange={(open) => { setFormOpen(open); if (!open) setEditLote(undefined) }}
         lote={editLote}
+      />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
 
       <Dialog open={!!qrLote} onOpenChange={(open) => !open && setQrLote(null)}>

@@ -23,6 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 const TIPOS_MOVIMIENTO = [
   { value: 'AJUSTE', label: 'Ajuste' },
@@ -100,10 +101,12 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
       api.post('/movimientos', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movimientos'] })
+      toast.success('Movimiento registrado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

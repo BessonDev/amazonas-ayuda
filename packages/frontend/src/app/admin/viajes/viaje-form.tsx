@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, Package, Image } from 'lucide-react'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -208,10 +209,12 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
       if (fotoFile) {
         await uploadFoto(viaje.id)
       }
+      toast.success(isEditing ? 'Viaje actualizado' : 'Viaje creado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

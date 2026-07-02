@@ -23,6 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 interface Producto {
   id: number
@@ -122,10 +123,12 @@ export function LoteForm({ open, onOpenChange, lote }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      toast.success(isEditing ? 'Lote actualizado' : 'Lote creado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

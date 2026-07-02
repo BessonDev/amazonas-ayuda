@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRole } from '@/hooks/use-role'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Movimiento {
   id: number
@@ -37,6 +39,13 @@ export default function MovimientosPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [filtroTipo, setFiltroTipo] = useState<string | null>(null)
   const { hasRole } = useRole()
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
 
   const { data: movimientos = [], isLoading } = useQuery({
@@ -48,6 +57,7 @@ export default function MovimientosPage() {
     mutationFn: (id: number) => api.delete(`/movimientos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movimientos'] })
+      toast.success('Movimiento eliminado')
     },
   })
 
@@ -75,6 +85,18 @@ export default function MovimientosPage() {
       </div>
 
       <MovimientoForm open={formOpen} onOpenChange={setFormOpen} />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
+      />
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
@@ -168,11 +190,12 @@ export default function MovimientosPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar este movimiento?')) {
-                                deleteMutation.mutate(mov.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar movimiento',
+                              description: '¿Estás seguro de eliminar este movimiento? Esta acción no se puede deshacer.',
+                              onConfirm: () => deleteMutation.mutate(mov.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>

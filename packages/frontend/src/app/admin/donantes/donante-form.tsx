@@ -22,6 +22,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 const TIPOS_DONANTE = [
   { value: 'ANONIMO', label: 'Anónimo' },
@@ -69,10 +70,12 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
         : api.post('/donantes', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['donantes'] })
+      toast.success(editando ? 'Donante actualizado' : 'Donante creado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

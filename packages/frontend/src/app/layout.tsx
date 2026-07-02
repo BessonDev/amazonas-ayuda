@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/contexts/query-provider";
 import { AuthProvider } from "@/contexts/auth-context";
@@ -40,6 +41,7 @@ export default function RootLayout({
             <TooltipProvider>{children}</TooltipProvider>
           </AuthProvider>
         </QueryProvider>
+        <Toaster richColors closeButton position="bottom-right" />
       </body>
     </html>
   );

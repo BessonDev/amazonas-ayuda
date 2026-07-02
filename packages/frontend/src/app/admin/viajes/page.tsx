@@ -8,6 +8,8 @@ import { ViajeForm } from './viaje-form'
 import { CambiarEstadoDialog } from './cambiar-estado-dialog'
 import { RecibirDialog } from './recibir-dialog'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -48,6 +50,13 @@ export default function ViajesPage() {
   const [estadoDialogViaje, setEstadstateDialogViaje] = useState<Viaje | null>(null)
   const [recibirDialogViaje, setRecibirDialogViaje] = useState<Viaje | null>(null)
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canChangeStatus, canManage, canDelete, hasRole } = useRole()
   const router = useRouter()
@@ -61,6 +70,7 @@ export default function ViajesPage() {
     mutationFn: (id: number) => api.delete(`/viajes/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
+      toast.success('Viaje eliminado')
     },
   })
 
@@ -98,6 +108,17 @@ export default function ViajesPage() {
       <RecibirDialog
         viaje={recibirDialogViaje}
         onOpenChange={(open) => { if (!open) setRecibirDialogViaje(null) }}
+      />
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
 
       <div className="flex items-center gap-2">
@@ -212,11 +233,12 @@ export default function ViajesPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar este viaje?')) {
-                                deleteMutation.mutate(viaje.id)
-                              }
-                            }}
+                              onClick={() => setConfirmState({
+                                open: true,
+                                title: 'Eliminar viaje',
+                                description: `¿Estás seguro de eliminar el viaje "${viaje.codigo}"? Esta acción no se puede deshacer.`,
+                                onConfirm: () => deleteMutation.mutate(viaje.id),
+                              })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>

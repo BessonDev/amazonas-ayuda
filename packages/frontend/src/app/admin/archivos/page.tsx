@@ -7,6 +7,8 @@ import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useRole } from '@/hooks/use-role'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -73,6 +75,14 @@ export default function ArchivosPage() {
   const queryClient = useQueryClient()
   const { canManage, canDelete } = useRole()
 
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
+
   const { data: archivos = [], isLoading } = useQuery({
     queryKey: ['archivos'],
     queryFn: () => api.get<Archivo[]>('/archivos'),
@@ -87,6 +97,7 @@ export default function ArchivosPage() {
     mutationFn: (id: number) => api.delete(`/archivos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['archivos'] })
+      toast.success('Imagen eliminada')
     },
   })
 
@@ -94,6 +105,7 @@ export default function ArchivosPage() {
     mutationFn: (formData: FormData) => api.postForm('/archivos/upload', formData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['archivos'] })
+      toast.success('Imagen subida correctamente')
       setUploadOpen(false)
       setUploadFile(null)
       setUploadRecepcionId('')
@@ -101,6 +113,7 @@ export default function ArchivosPage() {
     },
     onError: (err: Error) => {
       setUploadError(err.message)
+      toast.error(err.message)
     },
   })
 
@@ -288,11 +301,12 @@ export default function ArchivosPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar esta imagen?')) {
-                                deleteMutation.mutate(archivo.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar imagen',
+                              description: `¿Estás seguro de eliminar la imagen "${archivo.nombre}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(archivo.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -306,6 +320,18 @@ export default function ArchivosPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
+      />
     </div>
   )
 }

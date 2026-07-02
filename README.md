@@ -89,6 +89,12 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | | Subida de fotos desde formularios de recepción y viaje |
 | | Carrusel de fotos en portal público |
 
+| 🔔 | **UX & Feedback** |
+|:--:|:-------------------|
+| | Toast notifications vía Sonner en cada operación CRUD (crear, editar, eliminar, transferir, recibir, cambiar estado) |
+| | ConfirmDialog estético (AlertDialog shadcn) reemplazando browser confirm() para acciones destructivas |
+| | Feedback visual inmediato con richColors y closeButton |
+
 | 📊 | **Reportes & Exportación** |
 |:--:|:---------------------------|
 | | Generación de reportes en PDF y Excel |
@@ -108,12 +114,12 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | Categorías | ✅ | ✅ | ✅ | ❌ |
 | Productos | ✅ | ✅ | ✅ | ✅ |
 | Donantes | ✅ | ✅ | ✅ | ❌ |
-| Lotes | ✅ | ✅ | ✅ | ❌ |
+| Inventario | ✅ | ✅ | ✅ | ❌ |
 | Movimientos | ✅ | ✅ | ✅ | ❌ |
 | Viajes | ✅ | ✅ | ✅ | ✅ |
 | Solicitudes | ✅ | ✅ | ✅ | ✅ |
 | Usuarios | ✅ | ❌ | ❌ | ❌ |
-| Archivos | ✅ | ✅ | ❌ | ❌ |
+| Imágenes | ✅ | ✅ | ❌ | ❌ |
 
 ### Permisos CRUD por recurso
 
@@ -124,12 +130,12 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | Categorías | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
 | Productos | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ✅ (solo listar) |
 | Donantes | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
-| Lotes | CRUD completo | ✅ | ✅ | ✅ | ❌ |
+| Inventario | CRUD completo | ✅ | ✅ | ✅ | ❌ |
 | Movimientos | CRUD completo | ✅ | ✅ | ✅ | ❌ |
 | Viajes | CRUD + cambio estado | ✅ | ✅ | ✅ | ✅ (solo recibir) |
 | Solicitudes | CRUD + cambio estado | ✅ | ✅ | ✅ | ✅ + crear con form simplificado |
 | Usuarios | CRUD completo | ✅ | ❌ | ❌ | ❌ |
-| Archivos | Upload/descarga | ✅ | ✅ | ❌ | ❌ |
+| Imágenes | Upload/descarga | ✅ | ✅ | ❌ | ❌ |
 | Configuración | CRUD completo | ✅ | ❌ | ❌ | ❌ |
 | Reportes | Generación PDF/Excel | ✅ | ❌ | ❌ | ❌ |
 | Auditoría | Consulta con filtros | ✅ | ❌ | ❌ | ❌ |
@@ -205,7 +211,8 @@ Donante ──> Lote (QR) ──> Centro de Acopio ──> Viaje ──> Destino
 |:-----------|:--------|:----------|
 | [Next.js](https://nextjs.org/) | 16 | Framework React App Router |
 | [Tailwind CSS](https://tailwindcss.com/) | 4 | Estilos utilitarios |
-| [shadcn/ui](https://ui.shadcn.com/) | — | Componentes base-nova |
+| [shadcn/ui](https://ui.shadcn.com/) | — | Componentes base-nova (incluye AlertDialog) |
+| [Sonner](https://sonner.emilkowal.ski/) | — | Toast notifications |
 | [TanStack Query](https://tanstack.com/query) | 5 | Manejo de estado asíncrono |
 | [React Hook Form](https://react-hook-form.com/) | 7 | Formularios performantes |
 | [Zod](https://zod.dev/) | 3 | Validación de esquemas |
@@ -337,13 +344,13 @@ pnpm --filter @donaciones/backend test:coverage
 | 🏷️ **Categorías** | CRUD + form dialog |
 | 📦 **Productos** | CRUD + form dialog con categoría y unidad |
 | 🤝 **Donantes** | CRUD + form dialog con tipo enum |
-| 🏷️ **Lotes** | CRUD + QR modal + form dialog con 4 FK selects |
+| 🏷️ **Inventario** | CRUD + QR modal + form dialog con Combobox de producto + transferencia múltiple entre ubicaciones |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
 | 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas, botón Recibir + `RecibirDialog` para ADMIN/COORD_LOG/RESP |
 | 📋 **Recepciones** | CRUD + form con detalle anidado + subida de foto con preview + "Viajes en camino" con Receptionar |
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
-| 📎 **Archivos** | Listado con upload dialog + FileUpload drag & drop + preview + descarga directa corregida |
+| 📎 **Imágenes** | Listado con upload dialog + FileUpload drag & drop + preview + descarga directa + campo "Referencia a entrega" para galería pública |
 | 📊 **Reportes** | Generación PDF/Excel (inventario, donaciones, viajes) |
 | 📋 **Auditoría** | Registro de acciones con filtros |
 | ⚙️ **Configuración** | Listado clave-valor |

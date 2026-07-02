@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { formatEstadoViaje } from '@/lib/enums'
 import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -53,9 +54,13 @@ export function CambiarEstadoDialog({ viaje, onOpenChange }: CambiarEstadoDialog
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
       queryClient.invalidateQueries({ queryKey: ['viaje'] })
+      toast.success(`Estado cambiado a ${formatEstadoViaje(selectedEstado ?? '')}`)
       setSelectedEstado(null)
       setObservaciones('')
       onOpenChange(false)
+    },
+    onError: () => {
+      toast.error('Error al cambiar estado del viaje')
     },
   })
 

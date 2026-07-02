@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CampaniaForm } from './campania-form'
 import { useRole } from '@/hooks/use-role'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Campania {
   id: number
@@ -42,6 +44,13 @@ export default function CampaniasPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Campania | null>(null)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canManage, canDelete } = useRole()
 
@@ -54,6 +63,7 @@ export default function CampaniasPage() {
     mutationFn: (id: number) => api.delete(`/campanias/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campanias'] })
+      toast.success('Campaña eliminada')
     },
   })
 
@@ -160,11 +170,12 @@ export default function CampaniasPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar esta campaña?')) {
-                                deleteMutation.mutate(campania.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar campaña',
+                              description: `¿Estás seguro de eliminar la campaña "${campania.nombre}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(campania.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -183,6 +194,18 @@ export default function CampaniasPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         campania={selected}
+      />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
     </div>
   )

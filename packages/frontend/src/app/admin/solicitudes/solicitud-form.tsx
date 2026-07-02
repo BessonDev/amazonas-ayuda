@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { useAuth } from '@/contexts/auth-context'
 import { Button } from '@/components/ui/button'
@@ -117,10 +118,12 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
       api.post('/solicitudes', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
+      toast.success('Solicitud creada')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Loader2, CheckCircle2, ArrowRight } from 'lucide-react'
 
 interface Viaje {
@@ -69,8 +70,12 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
       queryClient.invalidateQueries({ queryKey: ['viaje', viaje?.id] })
+      toast.success(`Viaje ${viaje!.codigo} recibido correctamente`)
       setObservaciones('')
       onOpenChange(false)
+    },
+    onError: () => {
+      toast.error('Error al recibir el viaje')
     },
   })
 

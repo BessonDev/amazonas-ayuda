@@ -10,6 +10,8 @@ import { useRole } from '@/hooks/use-role'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CategoriaForm } from './categoria-form'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Categoria {
   id: number
@@ -21,6 +23,13 @@ export default function CategoriasPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Categoria | null>(null)
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant?: 'destructive' | 'default'
+    onConfirm: () => void
+  } | null>(null)
   const queryClient = useQueryClient()
   const { canManage, canDelete } = useRole()
 
@@ -33,6 +42,7 @@ export default function CategoriasPage() {
     mutationFn: (id: number) => api.delete(`/categorias/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      toast.success('Categoría eliminada')
     },
   })
 
@@ -123,11 +133,12 @@ export default function CategoriasPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar esta categoría?')) {
-                                deleteMutation.mutate(categoria.id)
-                              }
-                            }}
+                            onClick={() => setConfirmState({
+                              open: true,
+                              title: 'Eliminar categoría',
+                              description: `¿Estás seguro de eliminar la categoría "${categoria.nombre}"? Esta acción no se puede deshacer.`,
+                              onConfirm: () => deleteMutation.mutate(categoria.id),
+                            })}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -146,6 +157,18 @@ export default function CategoriasPage() {
         open={formOpen}
         onOpenChange={setFormOpen}
         categoria={selected}
+      />
+
+      <ConfirmDialog
+        open={!!confirmState}
+        onOpenChange={(open) => !open && setConfirmState(null)}
+        title={confirmState?.title ?? ''}
+        description={confirmState?.description ?? ''}
+        variant={confirmState?.variant ?? 'destructive'}
+        onConfirm={() => {
+          confirmState?.onConfirm()
+          setConfirmState(null)
+        }}
       />
     </div>
   )

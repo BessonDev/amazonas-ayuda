@@ -23,6 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 interface TipoUbicacion {
   id: number
@@ -100,10 +101,12 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
         : api.post('/ubicaciones', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ubicaciones'] })
+      toast.success(editando ? 'Ubicación actualizada' : 'Ubicación creada')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

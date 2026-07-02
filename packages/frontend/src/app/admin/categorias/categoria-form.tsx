@@ -15,6 +15,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { toast } from 'sonner'
 
 interface Categoria {
   id: number
@@ -51,10 +52,12 @@ export function CategoriaForm({ open, onOpenChange, categoria }: Props) {
         : api.post('/categorias', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      toast.success(editando ? 'Categoría actualizada' : 'Categoría creada')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 

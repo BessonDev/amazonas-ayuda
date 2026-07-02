@@ -75,7 +75,7 @@ const menuItems: MenuGroup[] = [
   {
     label: 'Inventario',
     items: [
-      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Inventario', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
       { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },

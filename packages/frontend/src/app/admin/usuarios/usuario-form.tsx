@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -74,10 +75,12 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
       esEdicion ? api.patch(`/usuarios/${editUser!.id}`, data) : api.post('/usuarios', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios'] })
+      toast.success(esEdicion ? 'Usuario actualizado' : 'Usuario creado')
       onOpenChange(false)
     },
     onError: (err: Error) => {
       setError(err.message)
+      toast.error(err.message)
     },
   })
 
