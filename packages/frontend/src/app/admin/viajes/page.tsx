@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { Plus, Search, Trash2, Send, ArrowRight } from 'lucide-react'
+import { Plus, Search, Trash2, Send, ArrowRight, Tag, User, Truck, MapPin, ClipboardList, Activity, Settings2 } from 'lucide-react'
 import { ViajeForm } from './viaje-form'
 import { CambiarEstadoDialog } from './cambiar-estado-dialog'
 import { api } from '@/lib/api'
@@ -39,10 +39,13 @@ const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
   CANCELADO: 'destructive',
 }
 
+const ESTADOS = ['PLANIFICADO', 'EN_TRANSITO', 'RECEPCION_PARCIAL', 'COMPLETADO', 'CANCELADO'] as const
+
 export default function ViajesPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [estadoDialogViaje, setEstadstateDialogViaje] = useState<Viaje | null>(null)
+  const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
   const queryClient = useQueryClient()
   const { usuario } = useAuth()
   const router = useRouter()
@@ -61,12 +64,15 @@ export default function ViajesPage() {
     },
   })
 
-  const filtered = viajes.filter((v) =>
-    v.codigo.toLowerCase().includes(search.toLowerCase()) ||
-    (v.nombreResponsable ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (v.vehiculo ?? '').toLowerCase().includes(search.toLowerCase()) ||
-    (v.conductor ?? '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = viajes.filter((v) => {
+    if (filtroEstado && v.estado !== filtroEstado) return false
+    return (
+      v.codigo.toLowerCase().includes(search.toLowerCase()) ||
+      (v.nombreResponsable ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (v.vehiculo ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (v.conductor ?? '').toLowerCase().includes(search.toLowerCase())
+    )
+  })
 
   return (
     <div className="space-y-6">
@@ -100,6 +106,25 @@ export default function ViajesPage() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap">
+        {ESTADOS.map((estado) => (
+          <Button
+            key={estado}
+            variant={filtroEstado === estado ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFiltroEstado(filtroEstado === estado ? null : estado)}
+          >
+            <Activity className="size-3.5 mr-1.5" />
+            {formatEstadoViaje(estado)}
+          </Button>
+        ))}
+        {filtroEstado && (
+          <Button variant="ghost" size="sm" onClick={() => setFiltroEstado(null)}>
+            Limpiar filtro
+          </Button>
+        )}
+      </div>
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium">
@@ -110,26 +135,26 @@ export default function ViajesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Responsable</TableHead>
-                <TableHead>Vehículo</TableHead>
-                <TableHead>Conductor</TableHead>
-                <TableHead>Origen → Destino</TableHead>
-                <TableHead>Campaña</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead><Tag className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Código</TableHead>
+                <TableHead><User className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Responsable</TableHead>
+                <TableHead><Truck className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Vehículo</TableHead>
+                <TableHead><User className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Conductor</TableHead>
+                <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Origen → Destino</TableHead>
+                <TableHead><ClipboardList className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Campaña</TableHead>
+                <TableHead><Activity className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Estado</TableHead>
+                <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Cargando...
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     No hay viajes registrados
                   </TableCell>
                 </TableRow>
