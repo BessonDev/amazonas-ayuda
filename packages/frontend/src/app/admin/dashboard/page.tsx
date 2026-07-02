@@ -53,12 +53,15 @@ export default function DashboardPage() {
           const Icon = item.icon
           return (
             <a key={item.label} href={item.href} className="block">
-              <Card className="transition-colors hover:bg-muted/50 cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <Card className="relative overflow-hidden transition-colors hover:bg-muted/50 cursor-pointer">
+                <div className={`absolute -bottom-3 -right-3 opacity-[0.07] pointer-events-none ${item.color}`}>
+                  <Icon className="size-28" />
+                </div>
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
                   <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
                   <Icon className={`size-4 ${item.color}`} />
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
                   <div className="text-2xl font-bold">{item.count}</div>
                 </CardContent>
               </Card>
