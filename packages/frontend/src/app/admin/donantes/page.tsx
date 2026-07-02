@@ -6,6 +6,7 @@ import { Plus, Search, Edit, Trash2, User, Tags, FileText, Mail, Phone, Settings
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRole } from '@/hooks/use-role'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DonanteForm } from './donante-form'
@@ -24,6 +25,7 @@ export default function DonantesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Donante | null>(null)
   const queryClient = useQueryClient()
+  const { canManage, canDelete } = useRole()
 
   const { data: donantes = [], isLoading } = useQuery({
     queryKey: ['donantes'],
@@ -59,10 +61,12 @@ export default function DonantesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Donantes</h1>
           <p className="text-muted-foreground">Gestión de donantes</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Nuevo Donante
-        </Button>
+        {canManage && (
+          <Button onClick={openCreate}>
+            <Plus className="size-4" />
+            Nuevo Donante
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -120,20 +124,24 @@ export default function DonantesPage() {
                     <TableCell>{donante.telefono ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(donante)}>
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar este donante?')) {
-                              deleteMutation.mutate(donante.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {canManage && (
+                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(donante)}>
+                            <Edit className="size-4" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar este donante?')) {
+                                deleteMutation.mutate(donante.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UbicacionForm } from './ubicacion-form'
 import { formatTipoUbicacion } from '@/lib/enums'
+import { useRole } from '@/hooks/use-role'
 
 interface Ubicacion {
   id: number
@@ -30,6 +31,7 @@ export default function UbicacionesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Ubicacion | null>(null)
   const queryClient = useQueryClient()
+  const { canManage, canDelete } = useRole()
 
   const { data: ubicaciones = [], isLoading } = useQuery({
     queryKey: ['ubicaciones'],
@@ -64,10 +66,12 @@ export default function UbicacionesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Ubicaciones</h1>
           <p className="text-muted-foreground">Gestión de ubicaciones de almacenamiento</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Nueva Ubicación
-        </Button>
+        {canManage && (
+          <Button onClick={openCreate}>
+            <Plus className="size-4" />
+            Nueva Ubicación
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -121,20 +125,24 @@ export default function UbicacionesPage() {
                     <TableCell>{formatTipoUbicacion(ubicacion.tipo?.nombre ?? '')}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(ubicacion)}>
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar esta ubicación?')) {
-                              deleteMutation.mutate(ubicacion.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {canManage && (
+                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(ubicacion)}>
+                            <Edit className="size-4" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar esta ubicación?')) {
+                                deleteMutation.mutate(ubicacion.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

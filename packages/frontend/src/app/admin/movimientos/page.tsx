@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useRole } from '@/hooks/use-role'
 
 interface Movimiento {
   id: number
@@ -35,6 +36,7 @@ export default function MovimientosPage() {
   const [search, setSearch] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [filtroTipo, setFiltroTipo] = useState<string | null>(null)
+  const { hasRole } = useRole()
   const queryClient = useQueryClient()
 
   const { data: movimientos = [], isLoading } = useQuery({
@@ -57,10 +59,12 @@ export default function MovimientosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
           <p className="text-muted-foreground">Historial de movimientos de inventario</p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="size-4 mr-2" />
-          Nuevo movimiento
-        </Button>
+        {hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO') && (
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4 mr-2" />
+            Nuevo movimiento
+          </Button>
+        )}
       </div>
 
       <MovimientoForm open={formOpen} onOpenChange={setFormOpen} />

@@ -39,6 +39,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { useRole } from '@/hooks/use-role'
 
 interface Lote {
   id: number
@@ -73,6 +74,7 @@ export default function LotesPage() {
   const [destinoId, setDestinoId] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const queryClient = useQueryClient()
+  const { canManage, canDelete, canTransfer } = useRole()
 
   const { data: lotes = [], isLoading } = useQuery({
     queryKey: ['lotes'],
@@ -123,18 +125,22 @@ export default function LotesPage() {
           <p className="text-muted-foreground">Gestión de lotes de productos</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            disabled={selectedIds.size === 0}
-            onClick={() => { setDestinoId(''); setObservaciones(''); setTransferOpen(true) }}
-          >
-            <ArrowRight className="size-4" />
-            Transferir ({selectedIds.size})
-          </Button>
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="size-4" />
-            Nuevo Lote
-          </Button>
+          {canTransfer && (
+            <Button
+              variant="outline"
+              disabled={selectedIds.size === 0}
+              onClick={() => { setDestinoId(''); setObservaciones(''); setTransferOpen(true) }}
+            >
+              <ArrowRight className="size-4" />
+              Transferir ({selectedIds.size})
+            </Button>
+          )}
+          {canManage && (
+            <Button onClick={() => setFormOpen(true)}>
+              <Plus className="size-4" />
+              Nuevo Lote
+            </Button>
+          )}
         </div>
       </div>
 
@@ -166,19 +172,21 @@ export default function LotesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
-                  <Checkbox
-                    checked={allFilteredSelected}
-                    indeterminate={!allFilteredSelected && someFilteredSelected}
-                    onCheckedChange={() => {
-                      if (allFilteredSelected) {
-                        setSelectedIds(new Set())
-                      } else {
-                        setSelectedIds(new Set(filtered.map((l) => l.id)))
-                      }
-                    }}
-                  />
-                </TableHead>
+                {canTransfer && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allFilteredSelected}
+                      indeterminate={!allFilteredSelected && someFilteredSelected}
+                      onCheckedChange={() => {
+                        if (allFilteredSelected) {
+                          setSelectedIds(new Set())
+                        } else {
+                          setSelectedIds(new Set(filtered.map((l) => l.id)))
+                        }
+                      }}
+                    />
+                  </TableHead>
+                )}
                 <TableHead><Tag className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Código</TableHead>
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Producto</TableHead>
                 <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
@@ -206,18 +214,20 @@ export default function LotesPage() {
                   const stockDot = stockLevel === 'high' ? 'bg-emerald-500' : stockLevel === 'medium' ? 'bg-amber-500' : 'bg-red-500'
                   return (
                     <TableRow key={lote.id}>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedIds.has(lote.id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedIds((prev) => {
-                              const next = new Set(prev)
-                              if (checked) { next.add(lote.id) } else { next.delete(lote.id) }
-                              return next
-                            })
-                          }}
-                        />
-                      </TableCell>
+                      {canTransfer && (
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.has(lote.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedIds((prev) => {
+                                const next = new Set(prev)
+                                if (checked) { next.add(lote.id) } else { next.delete(lote.id) }
+                                return next
+                              })
+                            }}
+                          />
+                        </TableCell>
+                      )}
                       <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
                       <TableCell>
                         <div className="text-sm">{lote.producto?.nombre ?? '-'}</div>
@@ -242,14 +252,18 @@ export default function LotesPage() {
                               <QrCode className="size-4" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon-sm" onClick={() => { setEditLote(lote); setFormOpen(true) }}>
-                            <Edit className="size-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon-sm" onClick={() => {
-                            if (confirm('¿Eliminar este lote?')) deleteMutation.mutate(lote.id)
-                          }}>
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
+                          {canManage && (
+                            <Button variant="ghost" size="icon-sm" onClick={() => { setEditLote(lote); setFormOpen(true) }}>
+                              <Edit className="size-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button variant="ghost" size="icon-sm" onClick={() => {
+                              if (confirm('¿Eliminar este lote?')) deleteMutation.mutate(lote.id)
+                            }}>
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useRole } from '@/hooks/use-role'
 
 const kpiStyles = {
   warning: { border: 'border-amber-200 dark:border-amber-800', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: 'text-amber-600' },
@@ -62,6 +63,8 @@ export default function DashboardPage() {
     },
   ]
 
+  const { isAdmin, hasRole } = useRole()
+
   const quickAccess = [
     { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList },
     { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin },
@@ -70,7 +73,7 @@ export default function DashboardPage() {
     { label: 'Donantes', href: '/admin/donantes', icon: Users },
     { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart },
     { label: 'Archivos', href: '/admin/archivos', icon: FileText },
-    { label: 'Usuarios', href: '/admin/usuarios', icon: Settings },
+    ...(isAdmin ? [{ label: 'Usuarios', href: '/admin/usuarios', icon: Settings }] : []),
   ]
 
   return (

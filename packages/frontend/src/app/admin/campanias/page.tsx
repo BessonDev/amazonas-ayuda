@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CampaniaForm } from './campania-form'
+import { useRole } from '@/hooks/use-role'
 
 interface Campania {
   id: number
@@ -42,6 +43,7 @@ export default function CampaniasPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [selected, setSelected] = useState<Campania | null>(null)
   const queryClient = useQueryClient()
+  const { canManage, canDelete } = useRole()
 
   const { data: campanias = [], isLoading } = useQuery({
     queryKey: ['campanias'],
@@ -76,10 +78,12 @@ export default function CampaniasPage() {
           <h1 className="text-2xl font-bold tracking-tight">Campañas</h1>
           <p className="text-muted-foreground">Gestión de campañas de donación</p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="size-4" />
-          Nueva Campaña
-        </Button>
+        {canManage && (
+          <Button onClick={openCreate}>
+            <Plus className="size-4" />
+            Nueva Campaña
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -147,20 +151,24 @@ export default function CampaniasPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(campania)}>
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar esta campaña?')) {
-                              deleteMutation.mutate(campania.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {canManage && (
+                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(campania)}>
+                            <Edit className="size-4" />
+                          </Button>
+                        )}
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar esta campaña?')) {
+                                deleteMutation.mutate(campania.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

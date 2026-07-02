@@ -6,6 +6,7 @@ import { Search, Download, Trash2, Upload, Image, FileText, HardDrive, Building2
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRole } from '@/hooks/use-role'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -54,6 +55,7 @@ export default function ArchivosPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [uploadError, setUploadError] = useState('')
   const queryClient = useQueryClient()
+  const { canManage, canDelete } = useRole()
 
   const { data: archivos = [], isLoading } = useQuery({
     queryKey: ['archivos'],
@@ -105,10 +107,12 @@ export default function ArchivosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Archivos</h1>
           <p className="text-muted-foreground">Archivos adjuntos del sistema</p>
         </div>
-        <Button onClick={() => setUploadOpen(true)}>
-          <Upload className="size-4 mr-2" />
-          Subir archivo
-        </Button>
+        {canManage && (
+          <Button onClick={() => setUploadOpen(true)}>
+            <Upload className="size-4 mr-2" />
+            Subir archivo
+          </Button>
+        )}
       </div>
 
       <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
@@ -212,17 +216,19 @@ export default function ArchivosPage() {
                         >
                           <Download className="size-4" />
                         </a>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar este archivo?')) {
-                              deleteMutation.mutate(archivo.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar este archivo?')) {
+                                deleteMutation.mutate(archivo.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

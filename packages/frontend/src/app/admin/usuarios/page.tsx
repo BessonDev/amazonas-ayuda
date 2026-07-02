@@ -7,6 +7,7 @@ import { UsuarioForm } from './usuario-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useRole } from '@/hooks/use-role'
 import { Badge } from '@/components/ui/badge'
 import { formatRol } from '@/lib/enums'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -34,6 +35,8 @@ export default function UsuariosPage() {
     queryFn: () => api.get('/usuarios'),
   })
 
+  const { isAdmin } = useRole()
+
   const desactivarMutation = useMutation({
     mutationFn: (id: number) => api.patch(`/usuarios/${id}/desactivar`),
     onSuccess: () => {
@@ -54,10 +57,12 @@ export default function UsuariosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Usuarios</h1>
           <p className="text-muted-foreground">Gestión de usuarios del sistema</p>
         </div>
-        <Button onClick={() => { setEditUser(undefined); setFormOpen(true) }}>
-          <Plus className="size-4 mr-2" />
-          Nuevo usuario
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => { setEditUser(undefined); setFormOpen(true) }}>
+            <Plus className="size-4 mr-2" />
+            Nuevo usuario
+          </Button>
+        )}
       </div>
 
       <UsuarioForm open={formOpen} onOpenChange={setFormOpen} editUser={editUser} />
@@ -125,28 +130,32 @@ export default function UsuariosPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => { setEditUser(u); setFormOpen(true) }}
-                        >
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            const accion = u.activo ? 'desactivar' : '¿Estás seguro?'
-                            if (confirm(`¿${u.activo ? 'Desactivar' : 'Activar'} usuario ${u.nombre}?`)) {
-                              desactivarMutation.mutate(u.id)
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => { setEditUser(u); setFormOpen(true) }}
+                          >
+                            <Edit className="size-4" />
+                          </Button>
+                        )}
+                        {isAdmin && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              const accion = u.activo ? 'desactivar' : '¿Estás seguro?'
+                              if (confirm(`¿${u.activo ? 'Desactivar' : 'Activar'} usuario ${u.nombre}?`)) {
+                                desactivarMutation.mutate(u.id)
+                              }
+                            }}
+                          >
+                            {u.activo
+                              ? <UserX className="size-4 text-destructive" />
+                              : <UserCheck className="size-4 text-green-600" />
                             }
-                          }}
-                        >
-                          {u.activo
-                            ? <UserX className="size-4 text-destructive" />
-                            : <UserCheck className="size-4 text-green-600" />
-                          }
-                        </Button>
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

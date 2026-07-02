@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { useRole } from '@/hooks/use-role'
 
 interface Solicitud {
   id: number
@@ -40,6 +41,7 @@ export default function SolicitudesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [filtroPrioridad, setFiltroPrioridad] = useState<string | null>(null)
   const queryClient = useQueryClient()
+  const { canDelete } = useRole()
 
   const { data: solicitudes = [], isLoading } = useQuery({
     queryKey: ['solicitudes'],
@@ -183,17 +185,19 @@ export default function SolicitudesPage() {
                           >
                             <Eye className="size-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => {
-                              if (confirm('¿Eliminar esta solicitud?')) {
-                                deleteMutation.mutate(sol.id)
-                              }
-                            }}
-                          >
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
+                          {canDelete && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => {
+                                if (confirm('¿Eliminar esta solicitud?')) {
+                                  deleteMutation.mutate(sol.id)
+                                }
+                              }}
+                            >
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

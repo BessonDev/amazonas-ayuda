@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/contexts/auth-context'
 import { formatEstadoViaje } from '@/lib/enums'
+import { useRole } from '@/hooks/use-role'
 
 interface Viaje {
   id: number
@@ -47,10 +47,8 @@ export default function ViajesPage() {
   const [estadoDialogViaje, setEstadstateDialogViaje] = useState<Viaje | null>(null)
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null)
   const queryClient = useQueryClient()
-  const { usuario } = useAuth()
+  const { canChangeStatus, canManage, canDelete } = useRole()
   const router = useRouter()
-
-  const puedeCambiarEstado = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'COORDINADOR_LOGISTICO'
 
   const { data: viajes = [], isLoading } = useQuery({
     queryKey: ['viajes'],
@@ -81,10 +79,12 @@ export default function ViajesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Viajes</h1>
           <p className="text-muted-foreground">Gestión de viajes y transportes</p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="size-4 mr-2" />
-          Nuevo viaje
-        </Button>
+        {canManage && (
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4 mr-2" />
+            Nuevo viaje
+          </Button>
+        )}
       </div>
 
       <ViajeForm open={formOpen} onOpenChange={setFormOpen} />
@@ -182,7 +182,7 @@ export default function ViajesPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                        {puedeCambiarEstado && (
+                        {canChangeStatus && (
                           <Button
                             variant="ghost"
                             size="icon-sm"
@@ -192,17 +192,19 @@ export default function ViajesPage() {
                             <Send className="size-4" />
                           </Button>
                         )}
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar este viaje?')) {
-                              deleteMutation.mutate(viaje.id)
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar este viaje?')) {
+                                deleteMutation.mutate(viaje.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
