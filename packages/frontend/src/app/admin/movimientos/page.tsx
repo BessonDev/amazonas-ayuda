@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, ArrowDown, ArrowUp, ArrowLeftRight, RefreshCw, Package, Tag, MapPin, Hash, Calendar, MessageSquareText, Activity } from 'lucide-react'
+import { Plus, Search, ArrowDown, ArrowUp, ArrowLeftRight, RefreshCw, Package, Tag, MapPin, Hash, Calendar, MessageSquareText, Activity, Trash2, Settings2 } from 'lucide-react'
 import { MovimientoForm } from './movimiento-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -42,6 +42,13 @@ export default function MovimientosPage() {
   const { data: movimientos = [], isLoading } = useQuery({
     queryKey: ['movimientos'],
     queryFn: () => api.get<Movimiento[]>('/movimientos'),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.delete(`/movimientos/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movimientos'] })
+    },
   })
 
   const filtered = movimientos.filter((m) => {
@@ -118,23 +125,24 @@ export default function MovimientosPage() {
                 <TableHead><Tag className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Lote</TableHead>
                 <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
                 <TableHead><MessageSquareText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Observaciones</TableHead>
-                <TableHead><Calendar className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Fecha</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Cargando...
-                  </TableCell>
-                </TableRow>
-              ) : filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No hay movimientos registrados
-                  </TableCell>
-                </TableRow>
-              ) : (
+<TableHead><Calendar className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Fecha</TableHead>
+              <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+             <TableBody>
+               {isLoading ? (
+                 <TableRow>
+                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                     Cargando...
+                   </TableCell>
+                 </TableRow>
+               ) : filtered.length === 0 ? (
+                 <TableRow>
+                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                     No hay movimientos registrados
+                   </TableCell>
+                 </TableRow>
+               ) : (
                 filtered.map((mov) => {
                   const cfg = tipoConfig[mov.tipo]
                   const Icon = cfg?.icon ?? Package
@@ -154,6 +162,21 @@ export default function MovimientosPage() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {new Date(mov.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {hasRole('ADMINISTRADOR') && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              if (confirm('¿Eliminar este movimiento?')) {
+                                deleteMutation.mutate(mov.id)
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   )
