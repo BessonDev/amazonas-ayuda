@@ -14,6 +14,11 @@ import {
   User,
   MapPin,
   ClipboardList,
+  ArrowRight,
+  Hash,
+  Tag,
+  Activity,
+  Settings2,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { LoteForm } from './lote-form'
@@ -29,6 +34,11 @@ import { Badge } from '@/components/ui/badge'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 interface Lote {
   id: number
@@ -48,16 +58,30 @@ interface Lote {
   campania?: { nombre: string }
 }
 
+interface Ubicacion {
+  id: number
+  nombre: string
+}
+
 export default function LotesPage() {
   const [search, setSearch] = useState('')
   const [qrLote, setQrLote] = useState<Lote | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editLote, setEditLote] = useState<Lote | undefined>(undefined)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [transferOpen, setTransferOpen] = useState(false)
+  const [destinoId, setDestinoId] = useState('')
+  const [observaciones, setObservaciones] = useState('')
   const queryClient = useQueryClient()
 
   const { data: lotes = [], isLoading } = useQuery({
     queryKey: ['lotes'],
     queryFn: () => api.get<Lote[]>('/lotes'),
+  })
+
+  const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({
+    queryKey: ['ubicaciones'],
+    queryFn: () => api.get('/ubicaciones'),
   })
 
   const deleteMutation = useMutation({
@@ -67,10 +91,29 @@ export default function LotesPage() {
     },
   })
 
+  const transferMutation = useMutation({
+    mutationFn: () =>
+      api.post('/lotes/transferir', {
+        loteIds: Array.from(selectedIds),
+        ubicacionDestinoId: Number(destinoId),
+        observaciones: observaciones || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      setSelectedIds(new Set())
+      setDestinoId('')
+      setObservaciones('')
+      setTransferOpen(false)
+    },
+  })
+
   const filtered = lotes.filter((l) =>
     l.codigo.toLowerCase().includes(search.toLowerCase()) ||
     (l.observaciones ?? '').toLowerCase().includes(search.toLowerCase())
   )
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((l) => selectedIds.has(l.id))
+  const someFilteredSelected = filtered.some((l) => selectedIds.has(l.id))
 
   return (
     <div className="space-y-6">
@@ -79,10 +122,20 @@ export default function LotesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Lotes</h1>
           <p className="text-muted-foreground">Gestión de lotes de productos</p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="size-4" />
-          Nuevo Lote
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={selectedIds.size === 0}
+            onClick={() => { setDestinoId(''); setObservaciones(''); setTransferOpen(true) }}
+          >
+            <ArrowRight className="size-4" />
+            Transferir ({selectedIds.size})
+          </Button>
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4" />
+            Nuevo Lote
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
@@ -95,6 +148,12 @@ export default function LotesPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        {selectedIds.size > 0 && (
+          <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+            <X className="size-4" />
+            Limpiar selección
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -107,82 +166,95 @@ export default function LotesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Observaciones</TableHead>
-                <TableHead>Producto</TableHead>
-                <TableHead>Donante</TableHead>
-                <TableHead>Ubicación</TableHead>
-                <TableHead>Campaña</TableHead>
-                <TableHead className="text-right">Cantidad</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={allFilteredSelected}
+                    indeterminate={!allFilteredSelected && someFilteredSelected}
+                    onCheckedChange={() => {
+                      if (allFilteredSelected) {
+                        setSelectedIds(new Set())
+                      } else {
+                        setSelectedIds(new Set(filtered.map((l) => l.id)))
+                      }
+                    }}
+                  />
+                </TableHead>
+                <TableHead><Tag className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Código</TableHead>
+                <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Producto</TableHead>
+                <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
+                <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Cantidad</TableHead>
+                <TableHead><Activity className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Estado</TableHead>
+                <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Cargando...
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     No hay lotes registrados
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((lote) => (
-                  <TableRow key={lote.id}>
-                    <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{lote.observaciones ?? '-'}</TableCell>
-                    <TableCell>{lote.producto?.nombre ?? '-'}</TableCell>
-                    <TableCell>{lote.donante?.nombre ?? '-'}</TableCell>
-                    <TableCell>{lote.ubicacion?.nombre ?? '-'}</TableCell>
-                    <TableCell>{lote.campania?.nombre ?? '-'}</TableCell>
-                    <TableCell className="text-right font-medium">{lote.cantidad}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {lote.estado}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {new Date(lote.fecha).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {lote.qrUrl && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => setQrLote(lote)}
-                          >
-                            <QrCode className="size-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => { setEditLote(lote); setFormOpen(true) }}
-                        >
-                          <Edit className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            if (confirm('¿Eliminar este lote?')) {
-                              deleteMutation.mutate(lote.id)
-                            }
+                filtered.map((lote) => {
+                  const stockLevel = lote.cantidad >= 100 ? 'high' : lote.cantidad >= 20 ? 'medium' : 'low'
+                  const stockDot = stockLevel === 'high' ? 'bg-emerald-500' : stockLevel === 'medium' ? 'bg-amber-500' : 'bg-red-500'
+                  return (
+                    <TableRow key={lote.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(lote.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedIds((prev) => {
+                              const next = new Set(prev)
+                              if (checked) { next.add(lote.id) } else { next.delete(lote.id) }
+                              return next
+                            })
                           }}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">{lote.producto?.nombre ?? '-'}</div>
+                        {lote.observaciones && (
+                          <div className="text-xs text-muted-foreground truncate max-w-[180px]">{lote.observaciones}</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">{lote.ubicacion?.nombre ?? '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <span className="inline-flex items-center gap-1.5 font-medium tabular-nums">
+                          <span className={`size-2 rounded-full ${stockDot} shrink-0`} />
+                          {lote.cantidad}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{lote.estado}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {lote.qrUrl && (
+                            <Button variant="ghost" size="icon-sm" onClick={() => setQrLote(lote)}>
+                              <QrCode className="size-4" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="icon-sm" onClick={() => { setEditLote(lote); setFormOpen(true) }}>
+                            <Edit className="size-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon-sm" onClick={() => {
+                            if (confirm('¿Eliminar este lote?')) deleteMutation.mutate(lote.id)
+                          }}>
+                            <Trash2 className="size-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
               )}
             </TableBody>
           </Table>
@@ -212,6 +284,61 @@ export default function LotesPage() {
               />
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transferir {selectedIds.size} lote(s)</DialogTitle>
+            <DialogDescription>
+              Selecciona la ubicación de destino para transferir los lotes seleccionados.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="destino">Ubicación de destino</Label>
+              <Select value={destinoId} onValueChange={(v) => setDestinoId(v ?? '')}>
+                <SelectTrigger id="destino">
+                  <SelectValue placeholder="Seleccionar ubicación..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {ubicaciones.map((u) => (
+                    <SelectItem key={u.id} value={u.id.toString()}>{u.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="obs">Observaciones (opcional)</Label>
+              <Input
+                id="obs"
+                value={observaciones}
+                onChange={(e) => setObservaciones(e.target.value)}
+                placeholder="Motivo de la transferencia..."
+              />
+            </div>
+
+            <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+              <Warehouse className="size-4 inline mr-1.5 -mt-0.5" />
+              Los lotes seleccionados cambiarán de ubicación y se generarán movimientos de inventario
+              (<strong>TRANSFERENCIA</strong> en origen, <strong>ENTRADA</strong> en destino).
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setTransferOpen(false)}>Cancelar</Button>
+            <Button
+              disabled={!destinoId || transferMutation.isPending}
+              onClick={() => transferMutation.mutate()}
+            >
+              {transferMutation.isPending ? 'Transfiriendo...' : (
+                <><ArrowRight className="size-4" /> Transferir</>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
