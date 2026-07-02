@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, Truck, User, MapPin, Calendar, CheckCircle, Package } from 'lucide-react'
 import { RecepcionForm } from './recepcion-form'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { formatEstadoViaje } from '@/lib/enums'
 
 interface Recepcion {
   id: number
@@ -88,34 +90,67 @@ export default function RecepcionesPage() {
             </Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {viajesEnCamino.map((viaje) => (
-              <Card key={viaje.id} className="border-primary/20">
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-mono text-sm">{viaje.codigo}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    {viaje.conductor && <p>Conductor: {viaje.conductor}</p>}
-                    {viaje.vehiculo && <p>Vehículo: {viaje.vehiculo}</p>}
-                    {viaje.origen && viaje.destino && (
-                      <p>{viaje.origen.nombre} → {viaje.destino.nombre}</p>
-                    )}
-                    {viaje.fechaEstimada && (
-                      <p>Llegada estimada: {new Date(viaje.fechaEstimada).toLocaleDateString()}</p>
-                    )}
-                  </div>
-                  <Button
-                    className="w-full mt-2"
-                    onClick={() => {
-                      setRecepcionarViajeId(viaje.id)
-                      setFormOpen(true)
-                    }}
-                  >
-                    Marcar recibido
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {viajesEnCamino.map((viaje) => {
+              const esLlego = viaje.estado === 'LLEGO'
+              const colorBar = esLlego ? 'border-l-amber-500' : 'border-l-blue-500'
+              const colorBadge = esLlego ? 'bg-amber-100 text-amber-800 hover:bg-amber-100' : 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+
+              return (
+                <Card key={viaje.id} className={`overflow-hidden border-l-4 ${colorBar} shadow-sm`}>
+                  <CardHeader className="pb-2 flex flex-row items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`shrink-0 flex size-8 items-center justify-center rounded-full ${esLlego ? 'bg-amber-100' : 'bg-blue-100'}`}>
+                        <Truck className={`size-4 ${esLlego ? 'text-amber-600' : 'text-blue-600'}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="font-mono text-sm truncate">{viaje.codigo}</CardTitle>
+                        {viaje.origen && viaje.destino && (
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            <MapPin className="size-3 inline mr-0.5" />
+                            {viaje.origen.nombre} → {viaje.destino.nombre}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Badge className={`shrink-0 ${colorBadge}`}>
+                      {formatEstadoViaje(viaje.estado)}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2 text-sm">
+                      {viaje.conductor && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <User className="size-3.5 shrink-0" />
+                          <span className="truncate">{viaje.conductor}</span>
+                        </div>
+                      )}
+                      {viaje.vehiculo && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Package className="size-3.5 shrink-0" />
+                          <span className="truncate">{viaje.vehiculo}</span>
+                        </div>
+                      )}
+                      {viaje.fechaEstimada && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="size-3.5 shrink-0" />
+                          <span>Llegada: {new Date(viaje.fechaEstimada).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setRecepcionarViajeId(viaje.id)
+                        setFormOpen(true)
+                      }}
+                    >
+                      <CheckCircle className="size-4 mr-2" />
+                      Marcar recibido
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       )}
