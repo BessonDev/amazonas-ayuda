@@ -11,28 +11,28 @@ export class LotesController {
   constructor(private readonly lotesService: LotesService) {}
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Crear lote (genera código y QR automáticamente)' })
   crear(@Body() dto: CreateLoteDto) {
     return this.lotesService.crear(dto)
   }
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar todos los lotes' })
   listar() {
     return this.lotesService.listar()
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener lote por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.lotesService.obtener(id)
   }
 
   @Patch(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Actualizar lote' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLoteDto) {
     return this.lotesService.actualizar(id, dto)

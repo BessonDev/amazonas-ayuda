@@ -11,28 +11,28 @@ export class RecepcionesController {
   constructor(private readonly recepcionesService: RecepcionesService) {}
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Crear recepción (genera movimiento de inventario automáticamente)' })
   crear(@Body() dto: CreateRecepcionDto) {
     return this.recepcionesService.crear(dto)
   }
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar todas las recepciones' })
   listar() {
     return this.recepcionesService.listar()
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener recepción por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.recepcionesService.obtener(id)
   }
 
   @Patch(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Actualizar recepción' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRecepcionDto) {
     return this.recepcionesService.actualizar(id, dto)

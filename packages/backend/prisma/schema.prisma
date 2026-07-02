@@ -38,6 +38,7 @@ enum EstadoLote {
   ENTREGADO
   VERIFICADO
   DISTRIBUIDO
+  AJUSTE
 }
 
 enum TipoMovimiento {
@@ -258,39 +259,46 @@ model Donante {
 }
 
 model Lote {
-  id          Int         @id @default(autoincrement())
-  codigo      String      @unique
-  cantidad    Int
-  fecha       DateTime    @default(now())
+  id            Int      @id @default(autoincrement())
+  codigo        String   @unique
+  cantidad      Int
+  fecha         DateTime @default(now())
   observaciones String?
-  estado      EstadoLote  @default(REGISTRADO)
-  qrUrl       String?
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  estado        EstadoLote @default(REGISTRADO)
+  qrUrl         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  campaniaId  Int
-  campania    Campania    @relation(fields: [campaniaId], references: [id])
+  campaniaId    Int
+  campania      Campania @relation(fields: [campaniaId], references: [id])
 
-  ubicacionId Int
-  ubicacion   Ubicacion   @relation(fields: [ubicacionId], references: [id])
+  ubicacionId   Int
+  ubicacion     Ubicacion @relation(fields: [ubicacionId], references: [id])
 
-  productoId  Int
-  producto    Producto    @relation(fields: [productoId], references: [id])
+  productoId    Int
+  producto      Producto @relation(fields: [productoId], references: [id])
 
-  donanteId   Int?
-  donante     Donante?    @relation(fields: [donanteId], references: [id])
+  donanteId     Int?
+  donante       Donante? @relation(fields: [donanteId], references: [id])
 
   responsableId Int?
-  responsable   Usuario?  @relation("ResponsableLote", fields: [responsableId], references: [id])
+  responsable   Usuario? @relation("ResponsableLote", fields: [responsableId], references: [id])
 
-  movimientos MovimientoInventario[]
-  detalleViajes DetalleViaje[]
-  detalleRecepciones DetalleRecepcion[]
+  lotePadreId   Int?
+  lotePadre     Lote?    @relation("LoteSplit", fields: [lotePadreId], references: [id])
+  lotesHijos    Lote[]   @relation("LoteSplit")
+
+  esSplit       Boolean  @default(false)
+
+  movimientos         MovimientoInventario[]
+  detalleViajes       DetalleViaje[]
+  detalleRecepciones  DetalleRecepcion[]
 
   @@index([campaniaId])
   @@index([ubicacionId])
   @@index([productoId])
   @@index([estado])
+  @@index([lotePadreId])
   @@map("lotes")
 }
 

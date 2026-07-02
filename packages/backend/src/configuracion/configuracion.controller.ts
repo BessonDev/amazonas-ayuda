@@ -18,21 +18,21 @@ export class ConfiguracionController {
   }
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Listar todas las configuraciones' })
   listar() {
     return this.configuracionService.listar()
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Obtener configuración por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.configuracionService.obtener(id)
   }
 
   @Get('clave/:clave')
-  @Roles('ADMINISTRADOR', 'COORDINADOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Obtener configuración por clave' })
   obtenerPorClave(@Param('clave') clave: string) {
     return this.configuracionService.obtenerPorClave(clave)

@@ -10,7 +10,7 @@ export class ArchivosController {
   constructor(private readonly archivosService: ArchivosService) {}
 
   @Post('upload')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Subir archivo' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -41,7 +41,7 @@ export class ArchivosController {
   }
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar archivos (opcional: filtrar por entidad)' })
   listar(
     @Query('entidadTipo') entidadTipo?: string,
@@ -51,14 +51,14 @@ export class ArchivosController {
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener archivo por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.archivosService.obtener(id)
   }
 
   @Get(':id/descargar')
-  @Roles('ADMINISTRADOR', 'COORDINADOR', 'LOGISTICA', 'VOLUNTARIO', 'RECEPTOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Descargar archivo' })
   descargar(@Param('id', ParseIntPipe) id: number) {
     return this.archivosService.descargar(id)
