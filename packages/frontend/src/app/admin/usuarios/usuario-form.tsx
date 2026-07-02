@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,12 +23,11 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 
-const ROLES = [
-  { id: 1, nombre: 'ADMINISTRADOR' },
-  { id: 2, nombre: 'COORDINADOR_LOGISTICO' },
-  { id: 3, nombre: 'OPERADOR_INVENTARIO' },
-  { id: 4, nombre: 'RESPONSABLE_DESTINO' },
-]
+interface Rol {
+  id: number
+  nombre: string
+  descripcion: string | null
+}
 
 interface Props {
   open: boolean
@@ -45,6 +44,11 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
   const [telefono, setTelefono] = useState('')
   const [rolId, setRolId] = useState('')
   const [error, setError] = useState('')
+
+  const { data: roles = [] } = useQuery<Rol[]>({
+    queryKey: ['roles'],
+    queryFn: () => api.get('/usuarios/roles'),
+  })
 
   useEffect(() => {
     if (open) {
@@ -134,13 +138,13 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
                   <SelectValue>
                     {(value: string | null) => {
                       if (!value) return 'Seleccionar...'
-                      const r = ROLES.find(r => r.id.toString() === value)
+                      const r = roles.find(r => r.id.toString() === value)
                       return r?.nombre ?? value
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLES.map((r) => (
+                  {roles.map((r) => (
                     <SelectItem key={r.id} value={r.id.toString()}>
                       {r.nombre}
                     </SelectItem>

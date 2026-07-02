@@ -23,6 +23,13 @@ import { RolesGuard } from '../common/guards/roles.guard'
 export class UsuariosController {
   constructor(private usuariosService: UsuariosService) {}
 
+  @Get('roles')
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Listar roles disponibles' })
+  getRoles() {
+    return this.usuariosService.getRoles()
+  }
+
   @Get()
   @Roles('ADMINISTRADOR')
   @ApiOperation({ summary: 'Listar todos los usuarios' })

@@ -109,4 +109,11 @@ export class UsuariosService {
       },
     })
   }
+
+  async getRoles() {
+    return this.prisma.rol.findMany({
+      select: { id: true, nombre: true, descripcion: true },
+      orderBy: { id: 'asc' },
+    })
+  }
 }
