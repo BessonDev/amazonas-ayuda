@@ -4,17 +4,41 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Truck, ClipboardList, Package, CheckCircle2,
   AlertTriangle, MapPin, Tags, ShoppingCart, Users,
-  FileText, Settings, LayoutDashboard,
+  FileText, Settings,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRole } from '@/hooks/use-role'
 
-const kpiStyles = {
-  warning: { border: 'border-amber-200 dark:border-amber-800', bg: 'bg-amber-50 dark:bg-amber-950/20', icon: 'text-amber-600' },
-  danger: { border: 'border-red-200 dark:border-red-800', bg: 'bg-red-50 dark:bg-red-950/20', icon: 'text-red-600' },
-  success: { border: 'border-emerald-200 dark:border-emerald-800', bg: 'bg-emerald-50 dark:bg-emerald-950/20', icon: 'text-emerald-600' },
-  default: { border: 'border-border', bg: 'bg-muted/50', icon: 'text-primary' },
+const kpiVariants = {
+  warning: {
+    gradient: 'from-amber-500/10 via-amber-500/5 to-transparent',
+    border: 'border-amber-200 dark:border-amber-800',
+    icon: 'text-amber-500',
+    silhouette: 'text-amber-500/10 dark:text-amber-500/15',
+    value: 'text-amber-700 dark:text-amber-300',
+  },
+  danger: {
+    gradient: 'from-red-500/10 via-red-500/5 to-transparent',
+    border: 'border-red-200 dark:border-red-800',
+    icon: 'text-red-500',
+    silhouette: 'text-red-500/10 dark:text-red-500/15',
+    value: 'text-red-700 dark:text-red-300',
+  },
+  success: {
+    gradient: 'from-emerald-500/10 via-emerald-500/5 to-transparent',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    icon: 'text-emerald-500',
+    silhouette: 'text-emerald-500/10 dark:text-emerald-500/15',
+    value: 'text-emerald-700 dark:text-emerald-300',
+  },
+  default: {
+    gradient: 'from-blue-500/10 via-blue-500/5 to-transparent',
+    border: 'border-blue-200 dark:border-blue-800',
+    icon: 'text-blue-500',
+    silhouette: 'text-blue-500/10 dark:text-blue-500/15',
+    value: 'text-blue-700 dark:text-blue-300',
+  },
 }
 
 export default function DashboardPage() {
@@ -42,7 +66,7 @@ export default function DashboardPage() {
 
   const kpis: Array<{
     label: string; value: number; icon: typeof Truck; href: string;
-    subtitle: string; variant: keyof typeof kpiStyles
+    subtitle: string; variant: keyof typeof kpiVariants
   }> = [
     {
       label: 'Viajes en tránsito', value: enTransito, icon: Truck, href: '/admin/viajes',
@@ -63,17 +87,17 @@ export default function DashboardPage() {
     },
   ]
 
-  const { isAdmin, hasRole } = useRole()
+  const { isAdmin } = useRole()
 
   const quickAccess = [
-    { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList },
-    { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin },
-    { label: 'Categorías', href: '/admin/categorias', icon: Tags },
-    { label: 'Productos', href: '/admin/productos', icon: Package },
-    { label: 'Donantes', href: '/admin/donantes', icon: Users },
-    { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart },
-    { label: 'Archivos', href: '/admin/archivos', icon: FileText },
-    ...(isAdmin ? [{ label: 'Usuarios', href: '/admin/usuarios', icon: Settings }] : []),
+    { label: 'Campañas', href: '/admin/campanias', icon: ClipboardList, color: 'from-blue-500/10' },
+    { label: 'Ubicaciones', href: '/admin/ubicaciones', icon: MapPin, color: 'from-violet-500/10' },
+    { label: 'Categorías', href: '/admin/categorias', icon: Tags, color: 'from-pink-500/10' },
+    { label: 'Productos', href: '/admin/productos', icon: Package, color: 'from-emerald-500/10' },
+    { label: 'Donantes', href: '/admin/donantes', icon: Users, color: 'from-amber-500/10' },
+    { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, color: 'from-cyan-500/10' },
+    { label: 'Archivos', href: '/admin/archivos', icon: FileText, color: 'from-orange-500/10' },
+    ...(isAdmin ? [{ label: 'Usuarios', href: '/admin/usuarios', icon: Settings, color: 'from-rose-500/10' }] : []),
   ]
 
   return (
@@ -86,18 +110,20 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => {
           const Icon = kpi.icon
-          const s = kpiStyles[kpi.variant]
+          const v = kpiVariants[kpi.variant]
           return (
-            <a key={kpi.label} href={kpi.href} className="block">
-              <Card className={`relative overflow-hidden transition-all hover:shadow-md cursor-pointer border-2 ${s.border}`}>
-                <CardHeader className="pb-2">
+            <a key={kpi.label} href={kpi.href} className="block group">
+              <Card className={`relative overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer border-2 ${v.border}`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${v.gradient}`} />
+                <Icon className={`absolute -bottom-3 -right-3 size-28 ${v.silhouette} transition-transform group-hover:scale-110 group-hover:rotate-3`} />
+                <CardHeader className="pb-2 relative">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.label}</CardTitle>
-                    <Icon className={`size-5 ${s.icon}`} />
+                    <Icon className={`size-5 ${v.icon}`} />
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{kpi.value}</div>
+                <CardContent className="relative">
+                  <div className={`text-3xl font-bold ${v.value}`}>{kpi.value}</div>
                   <p className="text-xs text-muted-foreground mt-1">{kpi.subtitle}</p>
                 </CardContent>
               </Card>
@@ -112,9 +138,11 @@ export default function DashboardPage() {
           {quickAccess.map((item) => {
             const Icon = item.icon
             return (
-              <a key={item.label} href={item.href} className="block">
-                <Card className="relative overflow-hidden transition-colors hover:bg-muted/50 cursor-pointer">
-                  <CardHeader className="flex flex-row items-center justify-between py-3">
+              <a key={item.label} href={item.href} className="block group">
+                <Card className="relative overflow-hidden transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${item.color} via-transparent to-transparent opacity-60`} />
+                  <Icon className="absolute -bottom-2 -right-2 size-16 text-foreground/5 dark:text-foreground/10 transition-transform group-hover:scale-110 group-hover:rotate-3" />
+                  <CardHeader className="flex flex-row items-center justify-between py-3 relative">
                     <CardTitle className="text-sm font-medium">{item.label}</CardTitle>
                     <Icon className="size-4 text-muted-foreground" />
                   </CardHeader>
