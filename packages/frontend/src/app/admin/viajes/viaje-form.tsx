@@ -29,19 +29,31 @@ import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatEstadoLote } from '@/lib/enums'
 
-interface LoteItem {
+interface ViajeDetalle {
   id: number
   codigo: string
-  cantidad: number
+  nombreResponsable: string | null
+  vehiculo: string | null
+  conductor: string | null
+  fechaSalida: string | null
+  fechaEstimada: string | null
+  observaciones: string | null
   estado: string
-  donante: string | null
-  fecha: string
-}
-
-interface GrupoProducto {
-  producto: { id: number; nombre: string; categoria?: { nombre: string } }
-  total: number
-  lotes: LoteItem[]
+  campania?: { id: number; nombre: string }
+  origen?: { id: number; nombre: string }
+  destino?: { id: number; nombre: string }
+  detalles?: Array<{
+    id: number
+    cantidad: number
+    lote: {
+      id: number
+      codigo: string
+      cantidad: number
+      estado: string
+      producto?: { id: number; nombre: string }
+      donante?: { nombre: string }
+    }
+  }>
 }
 
 interface Ubicacion {
@@ -65,6 +77,7 @@ interface DetalleRow {
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  viaje?: ViajeDetalle
 }
 
 function createRow(lote?: { id: number; codigo: string; productoNombre: string }): DetalleRow {
@@ -77,8 +90,11 @@ function createRow(lote?: { id: number; codigo: string; productoNombre: string }
   }
 }
 
-export function ViajeForm({ open, onOpenChange }: Props) {
+export function ViajeForm({ open, onOpenChange, viaje }: Props) {
   const queryClient = useQueryClient()
+  const isEditing = !!viaje
+  const viajeId = viaje?.id
+
   const [nombreResponsable, setNombreResponsable] = useState('')
   const [vehiculo, setVehiculo] = useState('')
   const [conductor, setConductor] = useState('')
@@ -111,21 +127,43 @@ export function ViajeForm({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (open) {
-      setNombreResponsable('')
-      setVehiculo('')
-      setConductor('')
-      setFechaSalida('')
-      setFechaEstimada('')
-      setObservaciones('')
-      setCampaniaId('')
-      setOrigenId('')
-      setDestinoId('')
-      setDetalles([])
-      setCantidadPorLote({})
+      if (isEditing && viaje) {
+        setNombreResponsable(viaje.nombreResponsable ?? '')
+        setVehiculo(viaje.vehiculo ?? '')
+        setConductor(viaje.conductor ?? '')
+        setFechaSalida(viaje.fechaSalida ? viaje.fechaSalida.split('T')[0] : '')
+        setFechaEstimada(viaje.fechaEstimada ? viaje.fechaEstimada.split('T')[0] : '')
+        setObservaciones(viaje.observaciones ?? '')
+        setCampaniaId(viaje.campania?.id.toString() ?? '')
+        setOrigenId(viaje.origen?.id.toString() ?? '')
+        setDestinoId(viaje.destino?.id.toString() ?? '')
+        const initialDetalles = (viaje.detalles ?? []).map(det => createRow({
+          id: det.lote.id,
+          codigo: det.lote.codigo,
+          productoNombre: det.lote.producto?.nombre ?? '',
+        }))
+        initialDetalles.forEach((row, i) => {
+          row.cantidad = (viaje.detalles?.[i]?.cantidad ?? 1).toString()
+        })
+        setDetalles(initialDetalles)
+        setCantidadPorLote({})
+      } else {
+        setNombreResponsable('')
+        setVehiculo('')
+        setConductor('')
+        setFechaSalida('')
+        setFechaEstimada('')
+        setObservaciones('')
+        setCampaniaId('')
+        setOrigenId('')
+        setDestinoId('')
+        setDetalles([])
+        setCantidadPorLote({})
+      }
       setError('')
       setFotoFile(null)
     }
-  }, [open])
+  }, [open, isEditing, viaje])
 
   const uploadFoto = async (viajeId: number) => {
     if (!fotoFile) return
@@ -144,8 +182,12 @@ export function ViajeForm({ open, onOpenChange }: Props) {
   }
 
   const mutation = useMutation<ViajeResponse, Error, Record<string, unknown>>({
-    mutationFn: (data) =>
-      api.post<ViajeResponse>('/viajes', data),
+    mutationFn: async (data) => {
+      if (isEditing && viajeId) {
+        return api.patch<ViajeResponse>(`/viajes/${viajeId}`, data)
+      }
+      return api.post<ViajeResponse>('/viajes', data)
+    },
     onSuccess: async (viaje: ViajeResponse) => {
       queryClient.invalidateQueries({ queryKey: ['viajes'] })
       queryClient.invalidateQueries({ queryKey: ['lotes-disponibles'] })
@@ -223,9 +265,11 @@ export function ViajeForm({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nuevo Viaje</DialogTitle>
+          <DialogTitle>{isEditing ? 'Editar Viaje' : 'Nuevo Viaje'}</DialogTitle>
           <DialogDescription>
-            Planifica un viaje para transportar lotes entre ubicaciones
+            {isEditing
+              ? 'Modifica los datos del viaje y sus lotes'
+              : 'Planifica un viaje para transportar lotes entre ubicaciones'}
           </DialogDescription>
         </DialogHeader>
 
@@ -484,10 +528,9 @@ export function ViajeForm({ open, onOpenChange }: Props) {
 
           <DialogFooter>
             <DialogClose render={<Button variant="outline" />}>
-              Cancelar
-            </DialogClose>
+              }>Cancelar</DialogClose>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Guardando...' : 'Crear viaje'}
+              {mutation.isPending ? 'Guardando...' : (isEditing ? 'Actualizar viaje' : 'Crear viaje')}
             </Button>
           </DialogFooter>
         </form>

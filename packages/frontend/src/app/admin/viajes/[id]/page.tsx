@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin, Pencil } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { formatEstadoViaje } from '@/lib/enums'
 import { CambiarEstadoDialog } from '../cambiar-estado-dialog'
+import { ViajeForm } from '../viaje-form'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 
@@ -56,6 +57,7 @@ export default function ViajeDetailPage() {
   const router = useRouter()
   const { usuario } = useAuth()
   const [estadoDialogOpen, setEstadstateDialogOpen] = useState(false)
+  const [editFormOpen, setEditFormOpen] = useState(false)
 
   const puedeCambiarEstado = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'COORDINADOR_LOGISTICO'
 
@@ -101,16 +103,23 @@ export default function ViajeDetailPage() {
             {formatEstadoViaje(viaje.estado)}
           </Badge>
           {puedeCambiarEstado && (
-            <Button onClick={() => setEstadstateDialogOpen(true)}>
-              <Truck className="size-4 mr-2" />
-              Cambiar estado
-            </Button>
+            <>
+              <Button onClick={() => setEstadstateDialogOpen(true)}>
+                <Truck className="size-4 mr-2" />
+                Cambiar estado
+              </Button>
+              <Button variant="outline" onClick={() => setEditFormOpen(true)}>
+                <Pencil className="size-4 mr-2" />
+                Editar viaje
+              </Button>
+            </>
           )}
         </div>
       </div>
 
       <CambiarEstadoDialog
         viaje={{ id: viaje.id, codigo: viaje.codigo, estado: viaje.estado }}
+        open={estadoDialogOpen}
         onOpenChange={(open) => { if (!open) setEstadstateDialogOpen(false) }}
       />
 
@@ -227,6 +236,13 @@ export default function ViajeDetailPage() {
           )}
         </CardContent>
       </Card>
+      </div>
+
+      <ViajeForm
+        open={editFormOpen}
+        onOpenChange={setEditFormOpen}
+        viaje={viaje}
+      />
     </div>
   )
 }
