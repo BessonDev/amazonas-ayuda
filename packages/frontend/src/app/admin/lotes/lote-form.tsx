@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import {
   Dialog,
   DialogContent,
@@ -176,24 +177,13 @@ export function LoteForm({ open, onOpenChange, lote }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="producto">Producto</Label>
-                <Select value={productoId} onValueChange={(v) => setProductoId(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {(value: string | null) => {
-                      if (!value) return 'Seleccionar...'
-                      const p = productos.find(p => p.id.toString() === value)
-                      return p?.nombre ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {productos.map((p) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      {p.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Combobox
+                items={productos.map((p) => ({ id: p.id, label: p.nombre }))}
+                value={productoId}
+                onValueChange={(v) => setProductoId(v)}
+                placeholder="Buscar producto..."
+                emptyMessage="No se encontraron productos"
+              />
             </div>
 
             <div className="space-y-2">

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { formatTipoUbicacion } from '@/lib/enums'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -226,14 +227,14 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
                     {(value: string | null) => {
                       if (!value) return 'Seleccionar tipo...'
                       const t = tipos.find(t => t.id.toString() === value)
-                      return t ? (t.descripcion || t.nombre) : value
+                      return t ? formatTipoUbicacion(t.nombre) : value
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {tipos.map((t) => (
                     <SelectItem key={t.id} value={t.id.toString()}>
-                      {t.descripcion || t.nombre}
+                      {formatTipoUbicacion(t.nombre)}
                     </SelectItem>
                   ))}
                 </SelectContent>

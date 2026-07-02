@@ -488,4 +488,13 @@ export class ViajesService {
       })
     })
   }
+
+  async listarRecepciones() {
+    return this.prisma.recepcion.findMany({
+      include: {
+        viaje: { select: { codigo: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
 }

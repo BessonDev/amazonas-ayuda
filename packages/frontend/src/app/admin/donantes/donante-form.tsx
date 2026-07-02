@@ -135,37 +135,7 @@ export function DonanteForm({ open, onOpenChange, donante }: Props) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="documento">Documento</Label>
-            <Input
-              id="documento"
-              value={documento}
-              onChange={(e) => setDocumento(e.target.value)}
-              placeholder="RIF, CI o documento"
-            />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@ejemplo.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="telefono">Teléfono</Label>
-              <Input
-                id="telefono"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                placeholder="Número de contacto"
-              />
-            </div>
-          </div>
 
           {error && (
             <p className="text-sm text-red-600 font-medium">{error}</p>

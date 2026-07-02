@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, Query, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { LotesService } from './lotes.service'
@@ -31,9 +31,9 @@ export class LotesController {
 
   @Get()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
-  @ApiOperation({ summary: 'Listar todos los lotes' })
-  listar() {
-    return this.lotesService.listar()
+  @ApiOperation({ summary: 'Listar todos los lotes (opcional: filtrar por ubicación)' })
+  listar(@Query('ubicacionId') ubicacionId?: string) {
+    return this.lotesService.listar(ubicacionId ? parseInt(ubicacionId) : undefined)
   }
 
   @Get(':id')

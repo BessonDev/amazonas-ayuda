@@ -31,6 +31,13 @@ export class ViajesController {
     return this.viajesService.lotesDisponibles(origenId)
   }
 
+  @Get('recepciones')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
+  @ApiOperation({ summary: 'Listar todas las recepciones (para referenciar imágenes)' })
+  listarRecepciones() {
+    return this.viajesService.listarRecepciones()
+  }
+
   @Get()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar todos los viajes' })

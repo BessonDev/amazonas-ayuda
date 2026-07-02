@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import {
   Dialog,
   DialogContent,
@@ -24,16 +25,16 @@ import {
 } from '@/components/ui/dialog'
 
 const TIPOS_MOVIMIENTO = [
-  { value: 'ENTRADA', label: 'Entrada' },
-  { value: 'TRANSFERENCIA', label: 'Transferencia' },
-  { value: 'ENVIO', label: 'Envío' },
-  { value: 'RECEPCION', label: 'Recepción' },
   { value: 'AJUSTE', label: 'Ajuste' },
 ]
 
 interface Lote {
   id: number
   codigo: string
+  cantidad: number
+  producto?: { id: number; nombre: string }
+  ubicacion?: { id: number; nombre: string }
+  ubicacionId?: number
 }
 
 interface Ubicacion {
@@ -53,7 +54,7 @@ interface Props {
 
 export function MovimientoForm({ open, onOpenChange }: Props) {
   const queryClient = useQueryClient()
-  const [tipo, setTipo] = useState('ENTRADA')
+  const [tipo, setTipo] = useState('AJUSTE')
   const [cantidad, setCantidad] = useState('1')
   const [observaciones, setObservaciones] = useState('')
   const [loteId, setLoteId] = useState('')
@@ -61,9 +62,15 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
   const [campaniaId, setCampaniaId] = useState('')
   const [error, setError] = useState('')
 
+  const ubicacionSeleccionada = ubicacionId
+
   const { data: lotes = [] } = useQuery<Lote[]>({
-    queryKey: ['lotes'],
-    queryFn: () => api.get('/lotes'),
+    queryKey: ['lotes-por-ubicacion', ubicacionId],
+    queryFn: () => {
+      const params = ubicacionId ? `?ubicacionId=${ubicacionId}` : ''
+      return api.get(`/lotes${params}`)
+    },
+    enabled: !!ubicacionId,
   })
 
   const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({
@@ -78,7 +85,7 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (open) {
-      setTipo('ENTRADA')
+      setTipo('AJUSTE')
       setCantidad('1')
       setObservaciones('')
       setLoteId('')
@@ -98,6 +105,11 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
     onError: (err: Error) => {
       setError(err.message)
     },
+  })
+
+  const lotesFiltrados = lotes.filter((l) => {
+    if (!ubicacionSeleccionada) return true
+    return l.ubicacion?.id.toString() === ubicacionSeleccionada || l.ubicacionId?.toString() === ubicacionSeleccionada
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -133,23 +145,12 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="tipo">Tipo</Label>
-              <Select value={tipo} onValueChange={(v) => setTipo(v ?? 'ENTRADA')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {(value: string | null) => {
-                      const t = TIPOS_MOVIMIENTO.find(t => t.value === value)
-                      return t?.label ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPOS_MOVIMIENTO.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="tipo"
+                value="Ajuste"
+                readOnly
+                className="bg-muted"
+              />
             </div>
 
             <div className="space-y-2">
@@ -165,30 +166,8 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lote">Lote</Label>
-              <Select value={loteId} onValueChange={(v) => setLoteId(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {(value: string | null) => {
-                      if (!value) return 'Seleccionar lote...'
-                      const l = lotes.find(l => l.id.toString() === value)
-                      return l?.codigo ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {lotes.map((l) => (
-                    <SelectItem key={l.id} value={l.id.toString()}>
-                      {l.codigo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="ubicacion">Ubicación</Label>
-              <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
+              <Select value={ubicacionId} onValueChange={(v) => { setUbicacionId(v ?? ''); setLoteId('') }}>
                 <SelectTrigger className="w-full">
                   <SelectValue>
                     {(value: string | null) => {
@@ -206,6 +185,21 @@ export function MovimientoForm({ open, onOpenChange }: Props) {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Lote</Label>
+              <Combobox
+                items={lotes.map((l) => ({
+                  id: l.id,
+                  label: l.codigo,
+                  subtitle: `${l.producto?.nombre ?? ''} — ${l.cantidad} und`,
+                }))}
+                value={loteId}
+                onValueChange={(v) => setLoteId(v)}
+                placeholder={ubicacionId ? 'Buscar lote...' : 'Primero selecciona una ubicación'}
+                emptyMessage="No hay lotes en esta ubicación"
+              />
             </div>
 
             <div className="space-y-2 col-span-2">

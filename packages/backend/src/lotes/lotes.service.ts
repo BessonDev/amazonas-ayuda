@@ -23,8 +23,9 @@ export class LotesService {
     return `LOTE-${yymmdd}-${rand}`
   }
 
-  async listar() {
+  async listar(ubicacionId?: number) {
     return this.prisma.lote.findMany({
+      where: ubicacionId ? { ubicacionId } : undefined,
       include: this.include,
       orderBy: { createdAt: 'desc' },
     })

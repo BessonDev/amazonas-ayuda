@@ -13,7 +13,7 @@ import {
   Users,
   Truck,
   ClipboardList,
-  FileText,
+  Image as ImageIcon,
   LogOut,
   ChevronLeft,
   Warehouse,
@@ -90,7 +90,7 @@ const menuItems: MenuGroup[] = [
     label: 'Sistema',
     items: [
       { label: 'Usuarios', href: '/admin/usuarios', icon: Users, roles: ['ADMINISTRADOR'] },
-      { label: 'Archivos', href: '/admin/archivos', icon: FileText, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
+      { label: 'Imágenes', href: '/admin/archivos', icon: ImageIcon, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'] },
     ],
   },
 ]

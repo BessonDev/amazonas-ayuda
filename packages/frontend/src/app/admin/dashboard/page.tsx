@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Truck, ClipboardList, Package, CheckCircle2,
   AlertTriangle, MapPin, Tags, ShoppingCart, Users,
-  FileText, Settings,
+  Image as ImageIcon, Settings,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -102,7 +102,7 @@ export default function DashboardPage() {
     ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO') ? [
       { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, color: 'from-cyan-500/10' },
     ] : []),
-    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO') ? [{ label: 'Archivos', href: '/admin/archivos', icon: FileText, color: 'from-orange-500/10' }] : []),
+    ...(hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO') ? [{ label: 'Imágenes', href: '/admin/archivos', icon: ImageIcon, color: 'from-orange-500/10' }] : []),
     ...(isAdmin ? [{ label: 'Usuarios', href: '/admin/usuarios', icon: Settings, color: 'from-rose-500/10' }] : []),
   ]
 
