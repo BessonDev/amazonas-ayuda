@@ -43,14 +43,27 @@ interface Campania {
   nombre: string
 }
 
+interface Lote {
+  id: number
+  codigo: string
+  cantidad: number
+  observaciones: string | null
+  productoId: number
+  donanteId: number | null
+  ubicacionId: number
+  campaniaId: number
+}
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  lote?: Lote
 }
 
-export function LoteForm({ open, onOpenChange }: Props) {
+export function LoteForm({ open, onOpenChange, lote }: Props) {
   const queryClient = useQueryClient()
-  const [cantidad, setCantidad] = useState('1')
+  const isEditing = !!lote
+  const [cantidad, setCantidad] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [productoId, setProductoId] = useState('')
   const [donanteId, setDonanteId] = useState('')
@@ -80,19 +93,32 @@ export function LoteForm({ open, onOpenChange }: Props) {
 
   useEffect(() => {
     if (open) {
-      setCantidad('1')
-      setObservaciones('')
-      setProductoId('')
-      setDonanteId('')
-      setUbicacionId('')
-      setCampaniaId('')
+      if (isEditing && lote) {
+        setCantidad(lote.cantidad.toString())
+        setObservaciones(lote.observaciones ?? '')
+        setProductoId(lote.productoId.toString())
+        setDonanteId(lote.donanteId?.toString() ?? '')
+        setUbicacionId(lote.ubicacionId.toString())
+        setCampaniaId(lote.campaniaId.toString())
+      } else {
+        setCantidad('1')
+        setObservaciones('')
+        setProductoId('')
+        setDonanteId('')
+        setUbicacionId('')
+        setCampaniaId('')
+      }
       setError('')
     }
-  }, [open])
+  }, [open, isEditing, lote])
 
   const mutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      api.post('/lotes', data),
+    mutationFn: async (data: Record<string, unknown>) => {
+      if (isEditing && lote) {
+        return api.patch(`/lotes/${lote.id}`, data)
+      }
+      return api.post('/lotes', data)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
       onOpenChange(false)
@@ -124,9 +150,13 @@ export function LoteForm({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Nuevo Lote</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Editar Lote' : 'Nuevo Lote'}
+          </DialogTitle>
           <DialogDescription>
-            Ingresa los datos del lote — el código se genera automáticamente
+            {isEditing
+              ? 'Modifica los datos del lote'
+              : 'Ingresa los datos del lote — el código se genera automáticamente'}
           </DialogDescription>
         </DialogHeader>
 
@@ -252,7 +282,7 @@ export function LoteForm({ open, onOpenChange }: Props) {
               Cancelar
             </DialogClose>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Guardando...' : 'Crear lote'}
+              {mutation.isPending ? 'Guardando...' : isEditing ? 'Guardar cambios' : 'Crear lote'}
             </Button>
           </DialogFooter>
         </form>

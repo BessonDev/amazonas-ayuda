@@ -52,6 +52,7 @@ export default function LotesPage() {
   const [search, setSearch] = useState('')
   const [qrLote, setQrLote] = useState<Lote | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [editLote, setEditLote] = useState<Lote | null>(null)
   const queryClient = useQueryClient()
 
   const { data: lotes = [], isLoading } = useQuery({
@@ -160,7 +161,11 @@ export default function LotesPage() {
                             <QrCode className="size-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon-sm">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => { setEditLote(lote); setFormOpen(true) }}
+                        >
                           <Edit className="size-4" />
                         </Button>
                         <Button
@@ -184,7 +189,11 @@ export default function LotesPage() {
         </CardContent>
       </Card>
 
-      <LoteForm open={formOpen} onOpenChange={setFormOpen} />
+      <LoteForm
+        open={formOpen}
+        onOpenChange={(open) => { setFormOpen(open); if (!open) setEditLote(null) }}
+        lote={editLote}
+      />
 
       <Dialog open={!!qrLote} onOpenChange={(open) => !open && setQrLote(null)}>
         <DialogContent className="sm:max-w-sm">
