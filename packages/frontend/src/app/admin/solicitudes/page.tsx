@@ -176,7 +176,11 @@ export default function SolicitudesPage() {
                 filtered.map((sol) => {
                   const prog = calcProgreso(sol)
                   return (
-                    <TableRow key={sol.id}>
+                    <TableRow
+                      key={sol.id}
+                      className="cursor-pointer"
+                      onClick={() => router.push(`/admin/solicitudes/${sol.id}`)}
+                    >
                       <TableCell className="font-medium max-w-[220px]">
                         <div className="truncate">{sol.titulo}</div>
                         {sol.detalles && sol.detalles.length > 0 && (
@@ -204,7 +208,7 @@ export default function SolicitudesPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => router.push(`/admin/solicitudes/${sol.id}`)}
+                            onClick={(e) => { e.stopPropagation(); router.push(`/admin/solicitudes/${sol.id}`) }}
                           >
                             <Eye className="size-4" />
                           </Button>
@@ -212,12 +216,12 @@ export default function SolicitudesPage() {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              onClick={() => setConfirmState({
+                              onClick={(e) => { e.stopPropagation(); setConfirmState({
                                 open: true,
                                 title: 'Eliminar solicitud',
                                 description: `¿Estás seguro de eliminar la solicitud "${sol.titulo}"? Esta acción no se puede deshacer.`,
                                 onConfirm: () => deleteMutation.mutate(sol.id),
-                              })}
+                              })}}
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>

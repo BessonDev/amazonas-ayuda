@@ -383,7 +383,9 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {ubicacionesOrigen.length === 0 ? (
-                    <p className="p-2 text-sm text-muted-foreground">No hay centros de acopio disponibles</p>
+                    <SelectItem value="_none" disabled>
+                      No hay centros de acopio disponibles
+                    </SelectItem>
                   ) : (
                     ubicacionesOrigen.map((u) => (
                       <SelectItem key={u.id} value={u.id.toString()}>

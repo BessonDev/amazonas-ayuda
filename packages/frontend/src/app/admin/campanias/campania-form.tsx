@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner'
 
 const ESTADOS = [
+  { value: 'PLANIFICADA', label: 'Planificada' },
   { value: 'ACTIVA', label: 'Activa' },
   { value: 'PAUSADA', label: 'Pausada' },
   { value: 'FINALIZADA', label: 'Finalizada' },

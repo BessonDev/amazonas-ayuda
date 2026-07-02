@@ -204,7 +204,7 @@ export function LoteForm({ open, onOpenChange, lote }: Props) {
                 <SelectContent>
                   {donantes.map((d) => (
                     <SelectItem key={d.id} value={d.id.toString()}>
-                      {d.nombre}
+                      {d.nombre ?? 'Anónimo'}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DonanteForm } from './donante-form'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { formatTipoDonante } from '@/lib/enums'
 
 interface Donante {
   id: number
@@ -122,7 +123,7 @@ export default function DonantesPage() {
                 filtered.map((donante) => (
                   <TableRow key={donante.id}>
                     <TableCell className="font-medium">{donante.nombre ?? '-'}</TableCell>
-                    <TableCell>{donante.tipo ?? '-'}</TableCell>
+                    <TableCell>{formatTipoDonante(donante.tipo ?? '')}</TableCell>
                     <TableCell>{donante.telefono ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

@@ -3,21 +3,21 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, MapPin, Calendar, ClipboardList, Package, Target, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, ClipboardList, Package, Target, CheckCircle2, Box, Weight, Droplets, Pill, Shirt, FlaskConical, Sofa } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { formatLabel, PRIORIDAD_SOLICITUD_LABELS } from '@/lib/enums'
+import { formatLabel, PRIORIDAD_SOLICITUD_LABELS, UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
 
 interface Detalle {
   id: number
   meta: number
   recibido: number
   descripcion: string | null
-  producto: { id: number; nombre: string; categoria?: { nombre: string } }
+  producto: { id: number; nombre: string; categoria?: { nombre: string }; unidad?: string }
 }
 
 interface SolicitudDetalle {
@@ -206,31 +206,45 @@ export default function SolicitudDetailPage() {
               No hay productos en esta solicitud
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="p-4 grid gap-3">
               {solicitud.detalles.map((det) => {
                 const pct = det.meta > 0 ? Math.round((det.recibido / det.meta) * 100) : 0
                 const completo = det.recibido >= det.meta
+                const borderColor = completo ? 'border-l-green-500' : pct > 0 ? 'border-l-amber-400' : 'border-l-red-300'
+                const unit = det.producto.unidad ? UNIDAD_MEDIDA_ABREV[det.producto.unidad] ?? det.producto.unidad.toLowerCase() : ''
                 return (
-                  <div key={det.id} className="px-6 py-4 space-y-3">
+                  <div
+                    key={det.id}
+                    className={`border border-l-4 ${borderColor} rounded-lg p-4 space-y-3 bg-card shadow-sm transition-shadow hover:shadow-md`}
+                  >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{det.producto.nombre}</p>
-                        {det.producto.categoria && (
-                          <span className="text-xs text-muted-foreground">
-                            {det.producto.categoria.nombre}
-                          </span>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-9 items-center justify-center rounded-md bg-muted">
+                          <Package className="size-4.5 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">{det.producto.nombre}</p>
+                          {det.producto.categoria && (
+                            <span className="text-xs text-muted-foreground">
+                              {det.producto.categoria.nombre}
+                            </span>
+                          )}
+                        </div>
                         {completo && (
-                          <CheckCircle2 className="size-4 text-green-600" />
+                          <Badge variant="secondary" className="text-xs gap-1">
+                            <CheckCircle2 className="size-3" />
+                            Completo
+                          </Badge>
                         )}
                       </div>
-                      <span className="text-sm font-medium tabular-nums">
-                        {det.recibido} / {det.meta}
+                      <span className="text-sm font-bold tabular-nums">
+                        {det.recibido} <span className="text-muted-foreground font-normal">/</span> {det.meta}
+                        {unit && <span className="text-muted-foreground font-normal text-xs ml-1">{unit}</span>}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4">
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
                             completo ? 'bg-green-500' : 'bg-primary'
@@ -238,16 +252,16 @@ export default function SolicitudDetailPage() {
                           style={{ width: `${Math.min(pct, 100)}%` }}
                         />
                       </div>
-                      <span className="text-sm tabular-nums text-muted-foreground min-w-[3ch]">
+                      <span className="text-xs tabular-nums text-muted-foreground min-w-[3ch] font-medium">
                         {pct}%
                       </span>
                     </div>
 
                     {det.descripcion && (
-                      <p className="text-xs text-muted-foreground">{det.descripcion}</p>
+                      <p className="text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5 italic">{det.descripcion}</p>
                     )}
 
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-1 border-t border-dashed">
                       <Input
                         type="number"
                         min={0}

@@ -51,6 +51,19 @@ export const PRIORIDAD_SOLICITUD_LABELS: Record<string, string> = {
   URGENTE: 'Urgente',
 }
 
+export const UNIDAD_MEDIDA_ABREV: Record<string, string> = {
+  UNIDAD: 'und',
+  KILO: 'kg',
+  LITRO: 'L',
+  CAJA: 'caja',
+  BOLSA: 'bolsa',
+  PAQUETE: 'pte',
+  GALON: 'gal',
+  TONELADA: 't',
+  PAR: 'par',
+  OTRO: '',
+}
+
 export function formatLabel(value: string, labels: Record<string, string>): string {
   return labels[value] ?? value
 }

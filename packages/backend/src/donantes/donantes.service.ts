@@ -18,10 +18,11 @@ export class DonantesService {
   }
 
   crear(dto: CreateDonanteDto) {
+    const nombre = dto.tipo === 'ANONIMO' && !dto.nombre ? 'Anónimo' : dto.nombre
     return this.prisma.donante.create({
       data: {
         tipo: dto.tipo as any,
-        nombre: dto.nombre,
+        nombre,
         documento: dto.documento,
         email: dto.email,
         telefono: dto.telefono,

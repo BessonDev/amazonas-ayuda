@@ -68,6 +68,7 @@ interface Ubicacion {
 
 export default function LotesPage() {
   const [search, setSearch] = useState('')
+  const [filtroUbicacion, setFiltroUbicacion] = useState<number | null>(null)
   const [qrLote, setQrLote] = useState<Lote | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editLote, setEditLote] = useState<Lote | undefined>(undefined)
@@ -120,10 +121,21 @@ export default function LotesPage() {
     },
   })
 
-  const filtered = lotes.filter((l) =>
-    l.codigo.toLowerCase().includes(search.toLowerCase()) ||
-    (l.observaciones ?? '').toLowerCase().includes(search.toLowerCase())
-  )
+  const ubicacionesConLotes = lotes.reduce<Record<number, { id: number; nombre: string }>>((acc, l) => {
+    if (l.ubicacion && !acc[l.ubicacionId]) {
+      acc[l.ubicacionId] = { id: l.ubicacionId, nombre: l.ubicacion.nombre }
+    }
+    return acc
+  }, {})
+
+  const filtered = lotes.filter((l) => {
+    if (filtroUbicacion !== null && l.ubicacionId !== filtroUbicacion) return false
+    return (
+      l.codigo.toLowerCase().includes(search.toLowerCase()) ||
+      (l.producto?.nombre ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (l.observaciones ?? '').toLowerCase().includes(search.toLowerCase())
+    )
+  })
 
   const allFilteredSelected = filtered.length > 0 && filtered.every((l) => selectedIds.has(l.id))
   const someFilteredSelected = filtered.some((l) => selectedIds.has(l.id))
@@ -169,6 +181,25 @@ export default function LotesPage() {
           <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
             <X className="size-4" />
             Limpiar selección
+          </Button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        {Object.values(ubicacionesConLotes).map((u) => (
+          <Button
+            key={u.id}
+            variant={filtroUbicacion === u.id ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setFiltroUbicacion(filtroUbicacion === u.id ? null : u.id)}
+          >
+            <MapPin className="size-3.5 mr-1.5" />
+            {u.nombre}
+          </Button>
+        ))}
+        {filtroUbicacion !== null && (
+          <Button variant="ghost" size="sm" onClick={() => setFiltroUbicacion(null)}>
+            Limpiar filtro
           </Button>
         )}
       </div>
@@ -341,7 +372,13 @@ export default function LotesPage() {
               <Label htmlFor="destino">Ubicación de destino</Label>
               <Select value={destinoId} onValueChange={(v) => setDestinoId(v ?? '')}>
                 <SelectTrigger id="destino">
-                  <SelectValue placeholder="Seleccionar ubicación..." />
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar ubicación...'
+                      const u = ubicaciones.find(u => u.id.toString() === value)
+                      return u?.nombre ?? value
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {ubicaciones.map((u) => (

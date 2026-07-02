@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clock, ArrowRight, Users, Route, CheckCircle2, HandHeart } from 'lucide-react'
 import Link from 'next/link'
 import { useCountUp, useFotosRecepciones, type FotoRecepcion } from '@/lib/hooks'
+import { UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
 
@@ -535,7 +536,7 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                           <span className="font-semibold text-sm text-[#1B4332]">{p.producto}</span>
                           <span className="text-xs font-medium text-[#5c4f3d] tabular-nums">
                             <span className="text-[#1B4332] font-bold">{p.recibido}</span>
-                            <span className="text-[#a09585]">/{p.meta} {p.unidad.toLowerCase()}</span>
+                            <span className="text-[#a09585]">/{p.meta} {UNIDAD_MEDIDA_ABREV[p.unidad] ?? p.unidad.toLowerCase()}</span>
                           </span>
                         </div>
                         <div className="h-2 bg-[#e8e0d0] rounded-full overflow-hidden shadow-inner">
