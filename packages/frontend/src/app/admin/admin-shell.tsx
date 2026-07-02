@@ -124,7 +124,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               alt="Logo"
               width={32}
               height={32}
-              className="size-8 rounded-lg"
+              className="size-8 rounded-lg brightness-0 invert"
               priority
             />
             <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
