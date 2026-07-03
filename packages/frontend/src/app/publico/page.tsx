@@ -316,49 +316,41 @@ function formatFecha(fecha: string) {
 // ═══════════ FOTOS CARRUSEL ═══════════
 function FotosCarrusel() {
   const { data: fotos = [], isLoading, error } = useFotosRecepciones(15)
+  const [current, setCurrent] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Autoplay
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+  const startAutoplay = useCallback(() => {
+    intervalRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % fotos.length)
+    }, 4000)
+  }, [fotos.length])
 
-    const startAutoplay = () => {
-      intervalRef.current = setInterval(() => {
-        if (!containerRef.current) return
-        const scrollWidth = containerRef.current.scrollWidth - containerRef.current.clientWidth
-        if (containerRef.current.scrollLeft >= scrollWidth - 10) {
-          containerRef.current.scrollTo({ left: 0, behavior: 'smooth' })
-        } else {
-          containerRef.current.scrollBy({ left: 360, behavior: 'smooth' })
-        }
-      }, 5000)
-    }
-
-    const pauseAutoplay = () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-    }
-
-    startAutoplay()
-    container.addEventListener('mouseenter', pauseAutoplay)
-    container.addEventListener('mouseleave', startAutoplay)
-
-    return () => {
-      pauseAutoplay()
-      container.removeEventListener('mouseenter', pauseAutoplay)
-      container.removeEventListener('mouseleave', startAutoplay)
+  const stopAutoplay = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
   }, [])
 
+  useEffect(() => {
+    if (fotos.length <= 1) return
+    startAutoplay()
+    const container = containerRef.current
+    container?.addEventListener('mouseenter', stopAutoplay)
+    container?.addEventListener('mouseleave', startAutoplay)
+    return () => {
+      stopAutoplay()
+      container?.removeEventListener('mouseenter', stopAutoplay)
+      container?.removeEventListener('mouseleave', startAutoplay)
+    }
+  }, [fotos.length, startAutoplay, stopAutoplay])
+
   if (isLoading) {
     return (
-      <div className="flex gap-4 overflow-x-auto snap-x pb-4" role="region" aria-label="Galería de entregas">
+      <div className="flex justify-center gap-4" role="region" aria-label="Galería de entregas">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex-shrink-0 w-full sm:w-[340px] snap-center animate-pulse">
+          <div key={i} className="w-full sm:w-[340px] animate-pulse flex-shrink-0">
             <div className="aspect-[4/3] bg-[#e8e0d0] rounded-2xl" />
             <div className="mt-3 h-4 bg-[#e8e0d0] rounded w-3/4" />
             <div className="h-3 bg-[#e8e0d0] rounded w-1/2" />
@@ -389,34 +381,49 @@ function FotosCarrusel() {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="flex gap-4 overflow-x-auto snap-x pb-4"
-      role="region"
-      aria-label="Galería de entregas realizadas"
-    >
-      {fotos.map((foto: FotoRecepcion) => (
-        <article
-          key={foto.id}
-          className="flex-shrink-0 w-full sm:w-[340px] snap-center"
-        >
-          <div className="relative group">
-            <img
-              src={foto.url}
-              alt={foto.nombre}
-              loading="lazy"
-              className="w-full aspect-[4/3] object-cover rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-[1.02]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-              <p className="text-sm font-medium truncate">
-                Recepción — {foto.viajeCodigo ?? `Viaje #${foto.recepcionId}`}
-              </p>
-              <p className="text-xs text-white/70 mt-0.5">{formatFecha(foto.createdAt)}</p>
+    <div ref={containerRef} className="relative overflow-hidden" role="region" aria-label="Galería de entregas realizadas">
+      <div
+        className="flex transition-transform duration-700 ease-in-out"
+        style={{ transform: `translateX(-${current * 100}%)` }}
+      >
+        {fotos.map((foto: FotoRecepcion) => (
+          <article key={foto.id} className="min-w-0 w-full shrink-0 flex justify-center">
+            <div className="relative group w-full sm:w-[340px]">
+              <img
+                src={foto.url}
+                alt={foto.nombre}
+                loading="lazy"
+                className="w-full aspect-[4/3] object-cover rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <p className="text-sm font-medium truncate">
+                  Recepción — {foto.viajeCodigo ?? `Viaje #${foto.recepcionId}`}
+                </p>
+                <p className="text-xs text-white/70 mt-0.5">{formatFecha(foto.createdAt)}</p>
+              </div>
             </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        ))}
+      </div>
+
+      {/* Dots */}
+      {fotos.length > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {fotos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { stopAutoplay(); setCurrent(i) }}
+              className={`size-2 rounded-full transition-all duration-300 ${
+                i === current
+                  ? 'w-6 bg-[#2d4a2d]'
+                  : 'bg-[#c4b8a3] hover:bg-[#8b7d6b]'
+              }`}
+              aria-label={`Ir a foto ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
