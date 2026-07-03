@@ -1,4 +1,13 @@
-const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
+export function getApiBase() {
+  if (typeof window !== 'undefined') {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    if (apiUrl) return `${apiUrl}/api`
+    const { hostname, port } = window.location
+    const apiPort = '4000'
+    return `http://${hostname === 'localhost' || hostname === '127.0.0.1' ? 'localhost' : hostname}:${apiPort}/api`
+  }
+  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
+}
 
 interface RespuestaApi<T> {
   exito: boolean
@@ -11,7 +20,7 @@ async function request<T>(
   options: RequestInit = {},
   isFormData = false,
 ): Promise<T> {
-  const url = `${API_BASE}${endpoint}`
+    const url = `${getApiBase()}${endpoint}`
 
   const defaultHeaders: Record<string, string> = isFormData
     ? {}
@@ -69,7 +78,7 @@ export const api = {
     request<T>(endpoint, { method: 'DELETE' }),
 
   downloadBlob: async (endpoint: string) => {
-    const url = `${API_BASE}${endpoint}`
+  const url = `${getApiBase()}${endpoint}`
     const res = await fetch(url, { credentials: 'include' })
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`)
     return res.blob()

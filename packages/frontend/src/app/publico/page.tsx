@@ -5,8 +5,7 @@ import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clo
 import Link from 'next/link'
 import { useCountUp, useFotosRecepciones, type FotoRecepcion } from '@/lib/hooks'
 import { UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
-
-const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
+import { getApiBase } from '@/lib/api'
 
 function cn(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(' ')
@@ -23,7 +22,7 @@ export default function PublicoPage() {
   useEffect(() => {
     if (statsLoaded) return
     setStatsLoaded(true)
-    fetch(`${API_BASE}/publico/stats`)
+    fetch(`${getApiBase()}/publico/stats`)
       .then((r) => r.json())
       .then((d) => setStats(d))
       .catch(() => setStats(null))
@@ -36,7 +35,7 @@ export default function PublicoPage() {
     setLote(null)
     setNotFound(false)
     try {
-      const res = await fetch(`${API_BASE}/publico/lotes/${codigo.trim().toUpperCase()}`)
+      const res = await fetch(`${getApiBase()}/publico/lotes/${codigo.trim().toUpperCase()}`)
       if (!res.ok) { setNotFound(true); return }
       const data = await res.json()
       setLote(data)
@@ -194,10 +193,10 @@ export default function PublicoPage() {
       </section>
 
       {/* ══════════ SOLICITUDES ══════════ */}
-      <SolicitudesVisual API_BASE={API_BASE} />
+      <SolicitudesVisual />
 
       {/* ══════════ VIAJES ══════════ */}
-      <ViajesActivos API_BASE={API_BASE} />
+      <ViajesActivos />
 
       {/* ══════════ TRACKING (oculto) ══════════ */}
       {
@@ -216,7 +215,7 @@ export default function PublicoPage() {
           </p>
         </div>
 
-        <BuscarLote API_BASE={API_BASE} />
+        <BuscarLote getApiBase()={getApiBase()} />
       </section>
       */
       }
@@ -443,15 +442,15 @@ const prioridadIcon: Record<string, any> = {
 
 // ═══════════ SOLICITUDES ═══════════
 
-function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
+function SolicitudesVisual() {
   const [data, setData] = useState<any[] | null>(null)
 
   useEffect(() => {
-    fetch(`${API_BASE}/publico/solicitudes`)
+    fetch(`${getApiBase()}/publico/solicitudes`)
       .then((r) => r.json())
       .then((d) => setData(Array.isArray(d) ? d : []))
       .catch(() => setData([]))
-  }, [API_BASE])
+  }, [])
 
   if (data === null) {
     return <SectionSkeleton id="solicitudes" label="Necesidades activas" title="Lo que están solicitando las comunidades" cols={2} />
@@ -591,15 +590,15 @@ const estadoViajeCfg: Record<string, { label: string; color: string; dot: string
   RECEPCION_PARCIAL: { label: 'Recepción parcial', color: 'text-purple-600 bg-purple-50 border-purple-200', dot: 'bg-purple-500', cardBg: 'bg-purple-50/40', border: 'border-purple-200/50' },
 }
 
-function ViajesActivos({ API_BASE }: { API_BASE: string }) {
+function ViajesActivos() {
   const [data, setData] = useState<any[] | null>(null)
 
   useEffect(() => {
-    fetch(`${API_BASE}/publico/viajes`)
+    fetch(`${getApiBase()}/publico/viajes`)
       .then((r) => r.json())
       .then((d) => setData(Array.isArray(d) ? d : []))
       .catch(() => setData([]))
-  }, [API_BASE])
+  }, [])
 
   if (data === null) {
     return <SectionSkeleton label="En movimiento" title="Viajes activos y programados" cols={2} />

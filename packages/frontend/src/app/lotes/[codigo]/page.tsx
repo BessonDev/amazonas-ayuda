@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Package, Search, ArrowLeft, Route, MapPin } from 'lucide-react'
-
-const API_BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
+import { getApiBase } from '@/lib/api'
 
 export default function LoteTrackingPage() {
   const params = useParams()
@@ -18,7 +17,7 @@ export default function LoteTrackingPage() {
   useEffect(() => {
     const fetchLote = async () => {
       try {
-        const res = await fetch(`${API_BASE}/publico/lotes/${codigo.trim().toUpperCase()}`)
+        const res = await fetch(`${getApiBase()}/publico/lotes/${codigo.trim().toUpperCase()}`)
         if (!res.ok) {
           setNotFound(true)
           return

@@ -16,7 +16,19 @@ async function bootstrap() {
   app.use(cookieParser())
 
   app.enableCors({
-    origin: frontendUrl,
+    origin(origin: string | undefined, callback: (err: Error | null, allowed?: boolean) => void) {
+      const allowedOrigins = [
+        frontendUrl,
+        'http://localhost:3000',
+        'http://localhost:4173',
+        ...configService.get('CORS_ORIGINS', '').split(',').filter(Boolean),
+      ]
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true)
+      } else {
+        callback(new Error(`Origin ${origin} no permitido por CORS`))
+      }
+    },
     credentials: true,
   })
 
