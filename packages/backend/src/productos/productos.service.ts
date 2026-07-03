@@ -7,11 +7,23 @@ import { UpdateProductoDto } from './dto/update-producto.dto'
 export class ProductosService {
   constructor(private prisma: PrismaService) {}
 
-  listar() {
-    return this.prisma.producto.findMany({
+  async listar() {
+    const productos = await this.prisma.producto.findMany({
       include: { categoria: true },
       orderBy: { nombre: 'asc' },
     })
+
+    const stocks = await this.prisma.$queryRaw<Array<{ producto_id: bigint; total: bigint }>>`
+      SELECT l.producto_id, COALESCE(SUM(l.cantidad), 0) AS total
+      FROM lotes l
+      GROUP BY l.producto_id
+    `
+    const stockMap = new Map(stocks.map((s) => [Number(s.producto_id), Number(s.total)]))
+
+    return productos.map((p) => ({
+      ...p,
+      stockTotal: stockMap.get(p.id) ?? 0,
+    }))
   }
 
   async obtener(id: number) {

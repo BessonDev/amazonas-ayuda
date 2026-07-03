@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Edit, Trash2, Package, FileText, Tags, Settings2 } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Package, FileText, Tags, Settings2, Warehouse } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,7 @@ interface Producto {
   unidad: string | null
   categoriaId: number
   categoria?: { nombre?: string }
+  stockTotal?: number
 }
 
 export default function ProductosPage() {
@@ -103,19 +104,20 @@ export default function ProductosPage() {
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Nombre</TableHead>
                 <TableHead><FileText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Descripción</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Categoría</TableHead>
+                <TableHead className="text-right"><Warehouse className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Stock</TableHead>
                 <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     Cargando...
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                     No hay productos registrados
                   </TableCell>
                 </TableRow>
@@ -127,6 +129,9 @@ export default function ProductosPage() {
                       {producto.descripcion ?? '-'}
                     </TableCell>
                     <TableCell>{producto.categoria?.nombre ?? '-'}</TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      {producto.stockTotal ?? 0}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         {canManage && (
