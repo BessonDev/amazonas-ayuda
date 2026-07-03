@@ -1,8 +1,8 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin, Pencil } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin, Pencil, Image, Upload, X, FileText } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,18 @@ import { CambiarEstadoDialog } from '../cambiar-estado-dialog'
 import { ViajeForm } from '../viaje-form'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { FileUpload } from '@/components/ui/file-upload'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 interface ViajeDetalle {
   id: number
@@ -43,6 +55,15 @@ interface ViajeDetalle {
   }>
 }
 
+interface Archivo {
+  id: number
+  nombre: string
+  url: string
+  mimeType: string
+  tamanio: number
+  createdAt: string
+}
+
 const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PLANIFICADO: 'secondary',
   EN_TRANSITO: 'default',
@@ -59,6 +80,45 @@ export default function ViajeDetailPage() {
   const [editFormOpen, setEditFormOpen] = useState(false)
 
   const puedeCambiarEstado = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'COORDINADOR_LOGISTICO'
+  const puedeSubirFoto = usuario?.rol === 'ADMINISTRADOR' || usuario?.rol === 'COORDINADOR_LOGISTICO' || usuario?.rol === 'RESPONSABLE_DESTINO'
+
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadError, setUploadError] = useState('')
+  const queryClient = useQueryClient()
+
+  const { data: fotos = [] } = useQuery<Archivo[]>({
+    queryKey: ['archivos-viaje', params.id],
+    queryFn: () => api.get(`/archivos?entidadTipo=Viaje&entidadId=${params.id}`),
+    enabled: !!params.id,
+  })
+
+  const uploadMutation = useMutation({
+    mutationFn: (formData: FormData) => api.postForm('/archivos/upload', formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['archivos-viaje', params.id] })
+      toast.success('Foto subida correctamente')
+      setUploadOpen(false)
+      setUploadFile(null)
+      setUploadError('')
+    },
+    onError: (err: Error) => {
+      setUploadError(err.message)
+      toast.error(err.message)
+    },
+  })
+
+  const handleUpload = () => {
+    if (!uploadFile) { setUploadError('Selecciona un archivo'); return }
+    if (!viaje) return
+    const formData = new FormData()
+    formData.append('archivo', uploadFile)
+    formData.append('nombre', `${viaje.codigo} — ${uploadFile.name}`)
+    formData.append('entidadTipo', 'Viaje')
+    formData.append('entidadId', String(viaje.id))
+    formData.append('viajeId', String(viaje.id))
+    uploadMutation.mutate(formData)
+  }
 
   const { data: viaje, isLoading } = useQuery<ViajeDetalle>({
     queryKey: ['viaje', params.id],
@@ -234,6 +294,88 @@ export default function ViajeDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Image className="size-4" />
+            Fotos ({fotos.length})
+          </CardTitle>
+          {puedeSubirFoto && (
+            <Button size="sm" onClick={() => setUploadOpen(true)}>
+              <Upload className="size-4 mr-2" />
+              Subir foto
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent>
+          {fotos.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground text-sm">
+              No hay fotos para este viaje
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {fotos.map((foto) => (
+                <a
+                  key={foto.id}
+                  href={`/api/archivos/${foto.id}/descargar`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'group relative aspect-square rounded-lg overflow-hidden border bg-muted',
+                    'hover:ring-2 hover:ring-primary/50 transition-all',
+                  )}
+                >
+                  {foto.mimeType.startsWith('image/') ? (
+                    <img
+                      src={`/api/archivos/${foto.id}/descargar`}
+                      alt={foto.nombre}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center size-full text-muted-foreground">
+                      <FileText className="size-8" />
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs truncate">{foto.nombre}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Subir foto</DialogTitle>
+            <DialogDescription>
+              Sube una foto para este viaje
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <FileUpload
+              accept="image/*"
+              maxSize={10}
+              value={uploadFile}
+              onChange={(f) => { setUploadFile(f); setUploadError('') }}
+            />
+            {uploadError && (
+              <p className="text-sm text-destructive font-medium">{uploadError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>
+              Cancelar
+            </DialogClose>
+            <Button onClick={handleUpload} disabled={!uploadFile || uploadMutation.isPending}>
+              {uploadMutation.isPending ? 'Subiendo...' : 'Subir'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ViajeForm
         open={editFormOpen}

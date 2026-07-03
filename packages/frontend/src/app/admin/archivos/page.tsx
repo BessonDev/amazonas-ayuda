@@ -121,19 +121,20 @@ export default function ArchivosPage() {
     if (!uploadFile) { setUploadError('Selecciona un archivo'); return }
     const formData = new FormData()
     formData.append('archivo', uploadFile)
-    formData.append('nombre', uploadFile.name)
 
+    let nombre = uploadFile.name
     if (uploadRecepcionId) {
       const recepcion = recepciones.find((r) => r.id.toString() === uploadRecepcionId)
       formData.append('entidadTipo', 'Recepcion')
       formData.append('entidadId', uploadRecepcionId)
       if (recepcion?.viaje?.codigo) {
-        formData.append('nombre', `Entrega ${recepcion.viaje.codigo} — ${uploadFile.name}`)
+        nombre = `Entrega ${recepcion.viaje.codigo} — ${uploadFile.name}`
       }
     } else {
       formData.append('entidadTipo', 'General')
       formData.append('entidadId', '0')
     }
+    formData.append('nombre', nombre)
     uploadMutation.mutate(formData)
   }
 
