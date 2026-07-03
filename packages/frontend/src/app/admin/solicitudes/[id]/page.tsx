@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, MapPin, Calendar, ClipboardList, Package, Target, CheckCircle2, Box, Weight, Droplets, Pill, Shirt, FlaskConical, Sofa, Truck, Home, Building2, Church, Users } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, ClipboardList, Package, Target, CheckCircle2, Box, Weight, Droplets, Pill, Shirt, FlaskConical, Sofa, Truck, Home, Building2, Church, Users, XCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { toast } from 'sonner'
 import { formatLabel, PRIORIDAD_SOLICITUD_LABELS, UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
 
 interface Detalle {
@@ -112,6 +114,18 @@ export default function SolicitudDetailPage() {
     },
   })
 
+  const cancelMutation = useMutation({
+    mutationFn: () => api.patch(`/solicitudes/${params.id}`, { estado: 'CANCELADA' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitud', params.id] })
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
+      toast.success('Solicitud cancelada')
+    },
+    onError: () => toast.error('Error al cancelar la solicitud'),
+  })
+
+  const [confirmCancel, setConfirmCancel] = useState(false)
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -166,6 +180,12 @@ export default function SolicitudDetailPage() {
              solicitud.estado === 'EN_PROCESO' ? 'En Proceso' :
              solicitud.estado === 'CANCELADA' ? 'Cancelada' : 'Abierta'}
           </Badge>
+          {solicitud.estado !== 'CANCELADA' && (
+            <Button variant="outline" size="sm" onClick={() => setConfirmCancel(true)}>
+              <XCircle className="size-4" />
+              Cancelar
+            </Button>
+          )}
         </div>
       </div>
 
@@ -355,6 +375,18 @@ export default function SolicitudDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={confirmCancel}
+        onOpenChange={setConfirmCancel}
+        title="Cancelar solicitud"
+        description={`¿Estás seguro de cancelar la solicitud "${solicitud.titulo}"? Esta acción no se puede deshacer.`}
+        variant="destructive"
+        onConfirm={() => {
+          cancelMutation.mutate()
+          setConfirmCancel(false)
+        }}
+      />
     </div>
   )
 }
