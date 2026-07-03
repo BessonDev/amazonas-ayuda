@@ -395,8 +395,8 @@ function FotosCarrusel() {
                 loading="lazy"
                 className="w-full aspect-[4/3] object-cover rounded-2xl shadow-lg transition-transform duration-500 group-hover:scale-[1.02]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent rounded-2xl" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
                 <p className="text-sm font-medium truncate">
                   Recepción — {foto.viajeCodigo ?? `Viaje #${foto.recepcionId}`}
                 </p>

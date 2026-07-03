@@ -25,7 +25,7 @@ interface Solicitud {
   createdAt: string
   campania?: { nombre: string }
   ubicacion?: { nombre: string }
-  detalles?: Array<{ cantidadSolicitada: number; cantidadRecibida: number }>
+  detalles?: Array<{ meta: number; recibido: number }>
 }
 
 const prioridadVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -76,8 +76,8 @@ export default function SolicitudesPage() {
 
   const calcProgreso = (s: Solicitud) => {
     if (!s.detalles || s.detalles.length === 0) return 0
-    const totalSoli = s.detalles.reduce((a, d) => a + d.cantidadSolicitada, 0)
-    const totalRecib = s.detalles.reduce((a, d) => a + d.cantidadRecibida, 0)
+    const totalSoli = s.detalles.reduce((a, d) => a + d.meta, 0)
+    const totalRecib = s.detalles.reduce((a, d) => a + d.recibido, 0)
     if (totalSoli === 0) return 0
     return Math.min(Math.round((totalRecib / totalSoli) * 100), 100)
   }
