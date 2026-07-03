@@ -496,6 +496,16 @@ function SolicitudesVisual({ API_BASE }: { API_BASE: string }) {
                             {pc.label}
                           </span>
                         )}
+                        {s.estado === 'COMPLETADA' && (
+                          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+                            ✅ Meta alcanzada
+                          </span>
+                        )}
+                        {s.estado === 'EN_PROCESO' && (
+                          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-amber-50 text-amber-700 border-amber-200">
+                            En progreso
+                          </span>
+                        )}
                       </div>
                       {s.descripcion && (
                         <p className="text-sm text-[#5c4f3d] line-clamp-2">{s.descripcion}</p>
