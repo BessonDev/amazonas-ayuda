@@ -31,6 +31,7 @@ import {
   Card, CardContent, CardHeader, CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { toast } from 'sonner'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog'
@@ -102,6 +103,7 @@ export default function LotesPage() {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
       toast.success('Lote eliminado')
     },
+    onError: (err: Error) => toast.error(err.message),
   })
 
   const transferMutation = useMutation({

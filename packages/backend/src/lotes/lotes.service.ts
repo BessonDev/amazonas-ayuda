@@ -213,7 +213,13 @@ export class LotesService {
   }
 
   async eliminar(id: number) {
-    await this.obtener(id)
-    await this.prisma.lote.delete({ where: { id } })
+    const lote = await this.obtener(id)
+    await this.prisma.$transaction([
+      this.prisma.movimientoInventario.deleteMany({ where: { loteId: id } }),
+      this.prisma.detalleViaje.deleteMany({ where: { loteId: id } }),
+      this.prisma.detalleRecepcion.deleteMany({ where: { loteId: id } }),
+      this.prisma.lote.delete({ where: { id } }),
+    ])
+    return lote
   }
 }
