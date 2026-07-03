@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Package, MapPin, Tags, Hash, ChevronDown, ChevronUp } from 'lucide-react'
+import { Search, Package, MapPin, Tags, Hash, ChevronDown, ChevronUp, FileDown, Loader2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -62,6 +62,29 @@ export default function InventarioPage() {
     items.some((i) => i.ubicacionId === u.id),
   )
 
+  const [loadingPdf, setLoadingPdf] = useState(false)
+
+  const downloadPDF = async () => {
+    setLoadingPdf(true)
+    try {
+      const params = new URLSearchParams()
+      if (ubicacionId) params.set('ubicacionId', ubicacionId)
+      const blob = await api.downloadBlob(`/inventario/pdf?${params}`)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `inventario${ubicacionId ? `-${ubicaciones.find((u) => u.id.toString() === ubicacionId)?.nombre.toLowerCase().replace(/\s+/g, '-')}` : '-general'}-${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingPdf(false)
+    }
+  }
+
   const toggleExpand = (key: string) => {
     setExpandLotes((prev) => {
       const next = new Set(prev)
@@ -109,6 +132,19 @@ export default function InventarioPage() {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="default"
+          disabled={loadingPdf}
+          onClick={downloadPDF}
+          className="gap-1.5"
+        >
+          {loadingPdf ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <FileDown className="size-4" />
+          )}
+          PDF
+        </Button>
       </div>
 
       <Card>
@@ -127,8 +163,8 @@ export default function InventarioPage() {
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Producto</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Categoría</TableHead>
                 <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Cantidad</TableHead>
-                <TableHead className="text-right"># Lotes</TableHead>
-                <TableHead>Lotes</TableHead>
+                <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" /># Lotes</TableHead>
+                <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Lotes</TableHead>
                 <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>

@@ -1,39 +1,27 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
+import { InventarioService } from '../inventario/inventario.service'
 import PDFDocument from 'pdfkit'
 import * as ExcelJS from 'exceljs'
 import { Response } from 'express'
 
 @Injectable()
 export class ReportesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private inventarioService: InventarioService,
+  ) {}
 
   async generarInventario(formato: 'pdf' | 'excel', res: Response) {
-    const data = await this.prisma.$queryRaw<Array<{
-      ubicacion: string
-      producto: string
-      categoria: string
-      cantidad: bigint
-    }>>`
-      SELECT
-        u.nombre AS ubicacion,
-        p.nombre AS producto,
-        c.nombre AS categoria,
-        COALESCE(SUM(l.cantidad), 0) AS cantidad
-      FROM ubicaciones u
-      CROSS JOIN productos p
-      JOIN categorias c ON c.id = p."categoriaId"
-      LEFT JOIN lotes l ON l."ubicacionId" = u.id AND l."productoId" = p.id AND l."deleted_at" IS NULL
-      WHERE u.activo = true
-      GROUP BY u.id, u.nombre, p.id, p.nombre, c.nombre
-      ORDER BY u.nombre, c.nombre, p.nombre
-    `
+    const data = await this.inventarioService.listar()
 
     const mapped = data.map((r) => ({
-      ubicacion: r.ubicacion,
       producto: r.producto,
       categoria: r.categoria,
-      cantidad: Number(r.cantidad),
+      cantidad: r.cantidad,
+      lotes: r.lotes.join(', '),
+      numLotes: r.numLotes,
+      ubicacion: r.ubicacion,
     }))
 
     if (formato === 'pdf') {
@@ -107,6 +95,8 @@ export class ReportesService {
     producto: 'Producto',
     categoria: 'Categoría',
     cantidad: 'Cantidad',
+    lotes: 'Lotes',
+    numLotes: '#',
     codigo: 'Código',
     donante: 'Donante',
     campania: 'Campaña',
@@ -122,7 +112,7 @@ export class ReportesService {
   }
 
   private enviarPDFInventario(res: Response, data: Record<string, any>[]) {
-    const columns = ['ubicacion', 'producto', 'categoria', 'cantidad']
+    const columns = ['producto', 'categoria', 'cantidad', 'lotes', 'numLotes', 'ubicacion']
     const labels = columns.map((c) => this.columnLabels[c] ?? c)
     this.renderTablaPDF(res, 'Reporte de Inventario', columns, labels, data)
   }
