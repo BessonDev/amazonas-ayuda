@@ -13,30 +13,33 @@ export class ReportesService {
       ubicacion: string
       producto: string
       categoria: string
-      cantidad: number
+      cantidad: bigint
     }>>`
       SELECT
         u.nombre AS ubicacion,
         p.nombre AS producto,
         c.nombre AS categoria,
-        COALESCE((
-          SELECT m.saldo_nuevo
-          FROM movimientos_inventario m
-          WHERE m.ubicacion_id = u.id AND m.producto_id = p.id
-          ORDER BY m.created_at DESC
-          LIMIT 1
-        ), 0) AS cantidad
+        COALESCE(SUM(l.cantidad), 0) AS cantidad
       FROM ubicaciones u
       CROSS JOIN productos p
       JOIN categorias c ON c.id = p.categoria_id
+      LEFT JOIN lotes l ON l.ubicacion_id = u.id AND l.producto_id = p.id
       WHERE u.activo = true
+      GROUP BY u.id, u.nombre, p.id, p.nombre, c.nombre
       ORDER BY u.nombre, c.nombre, p.nombre
     `
 
+    const mapped = data.map((r) => ({
+      ubicacion: r.ubicacion,
+      producto: r.producto,
+      categoria: r.categoria,
+      cantidad: Number(r.cantidad),
+    }))
+
     if (formato === 'pdf') {
-      return this.enviarPDF(res, 'inventario', 'Reporte de Inventario', data)
+      return this.enviarPDFInventario(res, mapped)
     }
-    return this.enviarExcel(res, 'inventario', 'Reporte de Inventario', data)
+    return this.enviarExcel(res, 'inventario', 'Reporte de Inventario', mapped)
   }
 
   async generarDonaciones(formato: 'pdf' | 'excel', res: Response) {
@@ -99,17 +102,67 @@ export class ReportesService {
     return this.enviarExcel(res, 'viajes', 'Reporte de Viajes', rows)
   }
 
+  private readonly columnLabels: Record<string, string> = {
+    ubicacion: 'Ubicación',
+    producto: 'Producto',
+    categoria: 'Categoría',
+    cantidad: 'Cantidad',
+    codigo: 'Código',
+    donante: 'Donante',
+    campania: 'Campaña',
+    fecha: 'Fecha',
+    estado: 'Estado',
+    origen: 'Origen',
+    destino: 'Destino',
+    vehiculo: 'Vehículo',
+    conductor: 'Conductor',
+    responsable: 'Responsable',
+    fechaSalida: 'Fecha Salida',
+    fechaEstimada: 'Fecha Est. Llegada',
+  }
+
+  private enviarPDFInventario(res: Response, data: Record<string, any>[]) {
+    const columns = ['ubicacion', 'producto', 'categoria', 'cantidad']
+    const labels = columns.map((c) => this.columnLabels[c] ?? c)
+    this.renderTablaPDF(res, 'Reporte de Inventario', columns, labels, data)
+  }
+
   private enviarPDF(res: Response, filename: string, titulo: string, data: Record<string, any>[]) {
-    const doc = new PDFDocument({ margin: 30, size: 'A4' })
+    const columns = Object.keys(data[0] ?? {})
+    const labels = columns.map((c) => this.columnLabels[c] ?? c)
+    this.renderTablaPDF(res, titulo, columns, labels, data)
+  }
+
+  private renderTablaPDF(
+    res: Response,
+    titulo: string,
+    columns: string[],
+    labels: string[],
+    data: Record<string, any>[],
+  ) {
+    const doc = new PDFDocument({ margin: 30, size: 'A4', layout: columns.length > 4 ? 'landscape' : 'portrait' })
+    const filename = titulo.toLowerCase().replace(/\s+/g, '-')
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="${filename}-${Date.now()}.pdf"`,
     })
     doc.pipe(res)
 
-    doc.fontSize(18).font('Helvetica-Bold').text(titulo, { align: 'center' })
-    doc.moveDown()
-    doc.fontSize(9).font('Helvetica').text(`Generado: ${new Date().toLocaleString('es-VE')}`, { align: 'right' })
+    const pageW = doc.page.width - 60
+    const colWidths = columns.map((_, i) => {
+      const labelW = labels[i].length * 6 + 12
+      const dataW = Math.max(...data.map((r) => String(r[columns[i]] ?? '').length)) * 5 + 12
+      return Math.max(labelW, dataW, 40)
+    })
+    const totalW = colWidths.reduce((a, b) => a + b, 0)
+    if (totalW > pageW) {
+      const ratio = pageW / totalW
+      for (let i = 0; i < colWidths.length; i++) colWidths[i] = Math.floor(colWidths[i] * ratio)
+    }
+
+    doc.fontSize(16).font('Helvetica-Bold').text(titulo, { align: 'center' })
+    doc.moveDown(0.5)
+    doc.fontSize(8).font('Helvetica').text(`Generado: ${new Date().toLocaleString('es-VE')}`, { align: 'right' })
     doc.moveDown()
 
     if (data.length === 0) {
@@ -118,39 +171,80 @@ export class ReportesService {
       return
     }
 
-    const columns = Object.keys(data[0])
-    const colWidth = Math.min(80, Math.floor((doc.page.width - 60) / columns.length))
-
-    doc.fontSize(8).font('Helvetica-Bold')
+    const rowH = 16
+    const headerBg = '#2563eb'
+    const stripeEven = '#f8fafc'
+    const stripeOdd = '#ffffff'
+    const borderColor = '#cbd5e1'
     let y = doc.y
-    for (let i = 0; i < columns.length; i++) {
-      doc.text(columns[i], 30 + i * colWidth, y, { width: colWidth, align: 'left' })
-    }
-    doc.moveDown(0.5)
 
-    doc.fontSize(7).font('Helvetica')
-    for (const row of data) {
-      y = doc.y
-      if (y > doc.page.height - 60) {
+    const drawHeader = () => {
+      doc.roundedRect(30, y - 4, pageW, rowH, 3).fill(headerBg)
+      doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff')
+      let x = 30
+      for (let i = 0; i < labels.length; i++) {
+        doc.text(labels[i], x + 4, y, { width: colWidths[i] - 8, align: 'left' })
+        x += colWidths[i]
+      }
+      y += rowH
+    }
+
+    const drawRow = (row: Record<string, any>, idx: number) => {
+      if (y + rowH > doc.page.height - 40) {
         doc.addPage()
         y = doc.y
+        drawHeader()
       }
-      const values = columns.map((c) => String(row[c] ?? ''))
-      for (let i = 0; i < values.length; i++) {
-        doc.text(values[i], 30 + i * colWidth, y, { width: colWidth, align: 'left' })
+
+      doc.fillColor(idx % 2 === 0 ? stripeEven : stripeOdd)
+        .rect(30, y - 4, pageW, rowH)
+        .fill()
+
+      doc.fontSize(8).font('Helvetica').fillColor('#1e293b')
+      let x = 30
+      for (let i = 0; i < columns.length; i++) {
+        const val = String(row[columns[i]] ?? '')
+        doc.text(val, x + 4, y, { width: colWidths[i] - 8, align: i === columns.length - 1 ? 'right' : 'left' })
+        x += colWidths[i]
       }
-      doc.moveDown(0.3)
+
+      doc.strokeColor(borderColor).lineWidth(0.5)
+        .rect(30, y - 4, pageW, rowH).stroke()
+
+      y += rowH
+    }
+
+    drawHeader()
+
+    let total = 0
+    const cantIdx = columns.indexOf('cantidad')
+    for (let i = 0; i < data.length; i++) {
+      drawRow(data[i], i)
+      if (cantIdx >= 0) total += Number(data[i].cantidad ?? 0)
+    }
+
+    if (cantIdx >= 0 && data.length > 1) {
+      doc.moveDown(0.5)
+      y = doc.y + 4
+      doc.fontSize(9).font('Helvetica-Bold').fillColor('#1e293b')
+      let x = 30
+      for (let i = 0; i < columns.length; i++) {
+        const val = i === cantIdx ? String(total) : i === columns.length - 1 ? 'TOTAL' : ''
+        doc.text(val, x + 4, y, { width: colWidths[i] - 8, align: i === columns.length - 1 ? 'right' : 'left' })
+        x += colWidths[i]
+      }
     }
 
     doc.end()
   }
 
   private async enviarExcel(res: Response, filename: string, titulo: string, data: Record<string, any>[]) {
+    const keys = Object.keys(data[0] ?? {})
     const workbook = new ExcelJS.Workbook()
     const sheet = workbook.addWorksheet(titulo)
 
-    sheet.columns = Object.keys(data[0] ?? {}).map((key) => ({
-      header: key,
+    sheet.columns = keys.map((key) => ({
+      header: this.columnLabels[key] ?? key,
       key,
       width: 20,
     }))
