@@ -31,7 +31,6 @@ import {
   Card, CardContent, CardHeader, CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog'
@@ -42,6 +41,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { useRole } from '@/hooks/use-role'
 import { toast } from 'sonner'
+import { formatEstadoLote } from '@/lib/enums'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface Lote {
@@ -65,6 +65,12 @@ interface Lote {
 interface Ubicacion {
   id: number
   nombre: string
+}
+
+const estadoLoteVariants: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  DISPONIBLE: 'default',
+  EN_TRANSITO: 'secondary',
+  ENTREGADO: 'outline',
 }
 
 export default function LotesPage() {
@@ -287,7 +293,7 @@ export default function LotesPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{lote.estado}</Badge>
+                        <Badge variant={estadoLoteVariants[lote.estado] ?? 'outline'}>{formatEstadoLote(lote.estado)}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">

@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import { formatEstadoViaje } from '@/lib/enums'
+import { formatEstadoViaje, formatEstadoLote } from '@/lib/enums'
 import { CambiarEstadoDialog } from '../cambiar-estado-dialog'
 import { ViajeForm } from '../viaje-form'
 import { useState } from 'react'
@@ -70,6 +70,12 @@ const estadoVariants: Record<string, 'default' | 'secondary' | 'destructive' | '
   RECEPCION_PARCIAL: 'outline',
   COMPLETADO: 'default',
   CANCELADO: 'destructive',
+}
+
+const estadoLoteVariants: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  DISPONIBLE: 'default',
+  EN_TRANSITO: 'secondary',
+  ENTREGADO: 'outline',
 }
 
 export default function ViajeDetailPage() {
@@ -284,8 +290,8 @@ export default function ViajeDetailPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{det.cantidad} und</p>
-                    <Badge variant="outline" className="text-xs">
-                      {det.lote.estado}
+                    <Badge variant={estadoLoteVariants[det.lote.estado] ?? 'outline'} className="text-xs">
+                      {formatEstadoLote(det.lote.estado)}
                     </Badge>
                   </div>
                 </div>
