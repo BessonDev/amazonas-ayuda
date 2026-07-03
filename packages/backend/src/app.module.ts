@@ -17,6 +17,7 @@ import { SolicitudesModule } from './solicitudes/solicitudes.module'
 import { ArchivosModule } from './archivos/archivos.module'
 import { ConfiguracionModule } from './configuracion/configuracion.module'
 import { PublicoModule } from './publico/publico.module';
+import { InventarioModule } from './inventario/inventario.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
 import { MinioModule } from './common/minio/minio.module';
@@ -43,6 +44,7 @@ import { MinioModule } from './common/minio/minio.module';
     ArchivosModule,
     ConfiguracionModule,
     PublicoModule,
+    InventarioModule,
     ReportesModule,
     AuditoriaModule,
   ],

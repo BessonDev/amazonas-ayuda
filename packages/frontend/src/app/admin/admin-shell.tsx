@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   Warehouse,
   FileText,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
 import {
@@ -76,7 +77,8 @@ const menuItems: MenuGroup[] = [
   {
     label: 'Inventario',
     items: [
-      { label: 'Inventario', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      { label: 'Resumen', href: '/admin/inventario', icon: BarChart3, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
+      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
       { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },
