@@ -104,10 +104,10 @@ export default function LotesPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => api.delete(`/lotes/${id}`),
-    onSuccess: () => {
+    mutationFn: (id: number) => api.delete<{ soft?: boolean }>(`/lotes/${id}`),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
-      toast.success('Lote eliminado')
+      toast.success(data?.soft ? 'Lote ocultado (tenía trazabilidad)' : 'Lote eliminado')
     },
     onError: (err: Error) => toast.error(err.message),
   })

@@ -57,7 +57,7 @@ export default function MovimientosPage() {
     mutationFn: (id: number) => api.delete(`/movimientos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movimientos'] })
-      toast.success('Movimiento eliminado')
+      toast.success('Movimiento ocultado (la trazabilidad se conserva)')
     },
   })
 

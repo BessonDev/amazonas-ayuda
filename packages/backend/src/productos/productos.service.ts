@@ -16,6 +16,7 @@ export class ProductosService {
     const stocks = await this.prisma.$queryRaw<Array<{ productoId: bigint; total: bigint }>>`
       SELECT l."productoId", COALESCE(SUM(l.cantidad), 0) AS total
       FROM lotes l
+      WHERE l."deletedAt" IS NULL
       GROUP BY l."productoId"
     `
     const stockMap = new Map(stocks.map((s) => [Number(s.productoId), Number(s.total)]))

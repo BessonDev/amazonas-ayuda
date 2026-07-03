@@ -16,6 +16,7 @@ export class MovimientosInventarioService {
 
   listar() {
     return this.prisma.movimientoInventario.findMany({
+      where: { deletedAt: null },
       include: this.include,
       orderBy: { createdAt: 'desc' },
     })
@@ -75,6 +76,9 @@ export class MovimientosInventarioService {
 
   async eliminar(id: number) {
     await this.obtener(id)
-    await this.prisma.movimientoInventario.delete({ where: { id } })
+    await this.prisma.movimientoInventario.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    })
   }
 }

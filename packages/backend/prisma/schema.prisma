@@ -258,6 +258,7 @@ model Lote {
   qrUrl         String?
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   campaniaId    Int
   campania      Campania @relation(fields: [campaniaId], references: [id])
@@ -293,6 +294,7 @@ model MovimientoInventario {
   saldoNuevo    Int?            @map("saldo_nuevo")
   observaciones String?
   createdAt     DateTime        @default(now()) @map("created_at")
+  deletedAt     DateTime?       @map("deleted_at")
 
   loteId        Int
   lote          Lote            @relation(fields: [loteId], references: [id])

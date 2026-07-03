@@ -25,7 +25,10 @@ export class LotesService {
 
   async listar(ubicacionId?: number) {
     return this.prisma.lote.findMany({
-      where: ubicacionId ? { ubicacionId } : undefined,
+      where: {
+        deletedAt: null,
+        ...(ubicacionId ? { ubicacionId } : {}),
+      },
       include: this.include,
       orderBy: { createdAt: 'desc' },
     })
@@ -145,7 +148,7 @@ export class LotesService {
 
   async transferir(dto: TransferirLotesDto) {
     const lotes = await this.prisma.lote.findMany({
-      where: { id: { in: dto.loteIds } },
+      where: { id: { in: dto.loteIds }, deletedAt: null },
     })
 
     if (lotes.length !== dto.loteIds.length) {
@@ -213,13 +216,28 @@ export class LotesService {
   }
 
   async eliminar(id: number) {
-    const lote = await this.obtener(id)
+    const lote = await this.prisma.lote.findUnique({
+      where: { id },
+      include: { detalleViajes: true, detalleRecepciones: true },
+    })
+    if (!lote) throw new NotFoundException('Lote no encontrado')
+
+    const tieneTrazabilidad = lote.detalleViajes.length > 0 || lote.detalleRecepciones.length > 0
+
+    if (tieneTrazabilidad) {
+      await this.prisma.lote.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      })
+      return { ...lote, soft: true }
+    }
+
     await this.prisma.$transaction([
       this.prisma.movimientoInventario.deleteMany({ where: { loteId: id } }),
       this.prisma.detalleViaje.deleteMany({ where: { loteId: id } }),
       this.prisma.detalleRecepcion.deleteMany({ where: { loteId: id } }),
       this.prisma.lote.delete({ where: { id } }),
     ])
-    return lote
+    return { ...lote, soft: false }
   }
 }
