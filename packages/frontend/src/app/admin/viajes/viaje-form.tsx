@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2, Package, Image } from 'lucide-react'
 import { api } from '@/lib/api'
@@ -124,6 +124,16 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
   const [fotoFile, setFotoFile] = useState<File | null>(null)
   const [cantidadPorLote, setCantidadPorLote] = useState<Record<number, string>>({})
 
+  const asignadoPorLote = useMemo(() => {
+    const map = new Map<number, number>()
+    for (const d of detalles) {
+      const id = Number(d.loteId)
+      const cant = parseInt(d.cantidad, 10) || 0
+      map.set(id, (map.get(id) || 0) + cant)
+    }
+    return map
+  }, [detalles])
+
   const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({
     queryKey: ['ubicaciones'],
     queryFn: () => api.get('/ubicaciones'),
@@ -229,14 +239,13 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
   const agregarLote = (lote: LoteItem) => {
     const cantidad = parseInt(cantidadPorLote[lote.id] ?? '1', 10) || 1
     if (isNaN(cantidad) || cantidad <= 0) return
-    if (cantidad > lote.cantidad) {
-      setError(`La cantidad máxima para ${lote.codigo} es ${lote.cantidad}`)
+    const disponible = lote.cantidad - (asignadoPorLote.get(lote.id) ?? 0)
+    if (cantidad > disponible) {
+      setError(`La cantidad máxima para ${lote.codigo} es ${disponible}`)
       return
     }
 
-    const producto = grupos.flatMap(g => g.lotes).find(l => l.id === lote.id)
     const productoNombre = grupos.find(g => g.lotes.some(l => l.id === lote.id))?.producto.nombre ?? ''
-    setDetalles(prev => [...prev, createRow({ id: lote.id, codigo: lote.codigo, productoNombre })])
     setDetalles(prev => {
       const existing = prev.find(d => d.loteId === lote.id.toString())
       if (existing) {
@@ -451,46 +460,52 @@ export function ViajeForm({ open, onOpenChange, viaje }: Props) {
                   </TableHeader>
                   <TableBody>
                     {grupos.flatMap((grupo) =>
-                      grupo.lotes.map((lote) => (
-                        <TableRow key={lote.id}>
-                          <TableCell className="text-xs">
-                            <div className="flex items-center gap-2">
-                              <Package className="size-3.5 text-muted-foreground" />
-                              <span className="font-medium">{grupo.producto.nombre}</span>
-                              {grupo.producto.categoria && (
-                                <Badge variant="outline" className="text-[10px]">{grupo.producto.categoria.nombre}</Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
-                          <TableCell className="text-xs">{lote.cantidad}</TableCell>
-                          <TableCell className="text-xs">{lote.donante ?? '—'}</TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              min="1"
-                              max={lote.cantidad}
-                              placeholder="Cant."
-                              className="h-8 text-xs"
-                              value={cantidadPorLote[lote.id] ?? ''}
-                              onChange={(e) => setCantidadPorLote(prev => ({ ...prev, [lote.id]: e.target.value }))}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-8 text-xs"
-                              disabled={!cantidadPorLote[lote.id] || parseInt(cantidadPorLote[lote.id] ?? '0', 10) <= 0}
-                              onClick={() => agregarLote(lote)}
-                            >
-                              <Plus className="size-3 mr-1" />
-                              Agregar
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      grupo.lotes
+                        .map((lote) => ({
+                          ...lote,
+                          disponible: lote.cantidad - (asignadoPorLote.get(lote.id) ?? 0),
+                        }))
+                        .filter((lote) => lote.disponible > 0)
+                        .map((lote) => (
+                          <TableRow key={lote.id}>
+                            <TableCell className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <Package className="size-3.5 text-muted-foreground" />
+                                <span className="font-medium">{grupo.producto.nombre}</span>
+                                {grupo.producto.categoria && (
+                                  <Badge variant="outline" className="text-[10px]">{grupo.producto.categoria.nombre}</Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">{lote.codigo}</TableCell>
+                            <TableCell className="text-xs">{lote.disponible}</TableCell>
+                            <TableCell className="text-xs">{lote.donante ?? '—'}</TableCell>
+                            <TableCell>
+                              <Input
+                                type="number"
+                                min="1"
+                                max={lote.disponible}
+                                placeholder="Cant."
+                                className="h-8 text-xs"
+                                value={cantidadPorLote[lote.id] ?? ''}
+                                onChange={(e) => setCantidadPorLote(prev => ({ ...prev, [lote.id]: e.target.value }))}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs"
+                                disabled={!cantidadPorLote[lote.id] || parseInt(cantidadPorLote[lote.id] ?? '0', 10) <= 0}
+                                onClick={() => agregarLote(lote)}
+                              >
+                                <Plus className="size-3 mr-1" />
+                                Agregar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
                     )}
                   </TableBody>
                 </Table>

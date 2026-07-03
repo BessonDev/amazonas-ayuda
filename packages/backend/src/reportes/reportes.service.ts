@@ -23,7 +23,7 @@ export class ReportesService {
       FROM ubicaciones u
       CROSS JOIN productos p
       JOIN categorias c ON c.id = p."categoriaId"
-      LEFT JOIN lotes l ON l."ubicacionId" = u.id AND l."productoId" = p.id AND l."deletedAt" IS NULL
+      LEFT JOIN lotes l ON l."ubicacionId" = u.id AND l."productoId" = p.id AND l."deleted_at" IS NULL
       WHERE u.activo = true
       GROUP BY u.id, u.nombre, p.id, p.nombre, c.nombre
       ORDER BY u.nombre, c.nombre, p.nombre
