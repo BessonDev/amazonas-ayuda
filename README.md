@@ -298,6 +298,39 @@ pnpm dev
 
 > 🌐 **Swagger UI:** Disponible en `http://localhost:4000/api/docs`
 
+### 🌐 Probar desde LAN (móvil / otro PC)
+
+Para acceder desde otro dispositivo en la misma red (ej. celular):
+
+1. Obtené tu IP local:
+   ```bash
+   # Windows
+   ipconfig | findstr IPv4
+
+   # Linux / macOS
+   hostname -I
+   ```
+
+2. Iniciá el **backend** con `CORS_ORIGINS`:
+   ```bash
+   CORS_ORIGINS=http://192.168.x.x:3000 pnpm --filter @donaciones/backend dev
+   ```
+
+3. Iniciá el **frontend** con `ALLOWED_DEV_ORIGINS`:
+   ```bash
+   # PowerShell
+   $env:ALLOWED_DEV_ORIGINS="192.168.x.x"; pnpm --filter @donaciones/frontend dev
+
+   # Bash
+   ALLOWED_DEV_ORIGINS=192.168.x.x pnpm --filter @donaciones/frontend dev
+   ```
+
+4. Accedé desde el celular a `http://192.168.x.x:3000`
+
+> ⚠️ `ALLOWED_DEV_ORIGINS` solo aplica en desarrollo (`next dev`). En producción no se necesita.
+>
+> Si querés múltiples IPs, separalas con coma: `CORS_ORIGINS=http://192.168.1.50:3000,http://192.168.1.60:3000`
+
 ---
 
 ## 📦 Módulos
