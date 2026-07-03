@@ -188,10 +188,12 @@ export default function ViajeDetailPage() {
       />
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
+        <Card className="relative overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <User className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-blue-100 text-blue-600">
+                <User className="size-4" />
+              </div>
               Responsable
             </CardTitle>
           </CardHeader>
@@ -203,10 +205,12 @@ export default function ViajeDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden border-amber-200 bg-gradient-to-br from-amber-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Truck className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-amber-100 text-amber-600">
+                <Truck className="size-4" />
+              </div>
               Vehículo
             </CardTitle>
           </CardHeader>
@@ -218,10 +222,12 @@ export default function ViajeDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden border-purple-200 bg-gradient-to-br from-purple-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-purple-100 text-purple-600">
+                <Calendar className="size-4" />
+              </div>
               Fechas
             </CardTitle>
           </CardHeader>
@@ -236,10 +242,12 @@ export default function ViajeDetailPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="relative overflow-hidden border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <MapPin className="size-4" />
+            <div className="flex size-7 items-center justify-center rounded-md bg-emerald-100 text-emerald-600">
+              <MapPin className="size-4" />
+            </div>
             Ruta
           </CardTitle>
         </CardHeader>
@@ -257,7 +265,7 @@ export default function ViajeDetailPage() {
       </Card>
 
       {viaje.observaciones && (
-        <Card>
+        <Card className="relative overflow-hidden border-slate-200 bg-gradient-to-br from-slate-50/50 to-transparent">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">Observaciones</CardTitle>
           </CardHeader>
@@ -267,7 +275,7 @@ export default function ViajeDetailPage() {
         </Card>
       )}
 
-      <Card>
+      <Card className="relative overflow-hidden border-slate-200 bg-gradient-to-br from-slate-50/30 to-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium">
             Lotes ({viaje.detalles?.length ?? 0})

@@ -170,10 +170,12 @@ export default function SolicitudDetailPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
+        <Card className="relative overflow-hidden border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <ClipboardList className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-emerald-100 text-emerald-600">
+                <ClipboardList className="size-4" />
+              </div>
               Campaña
             </CardTitle>
           </CardHeader>
@@ -182,10 +184,12 @@ export default function SolicitudDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden border-amber-200 bg-gradient-to-br from-amber-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-amber-100 text-amber-600">
+                <MapPin className="size-4" />
+              </div>
               Ubicación
             </CardTitle>
           </CardHeader>
@@ -194,10 +198,12 @@ export default function SolicitudDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50/80 to-transparent transition-all hover:shadow-md hover:-translate-y-0.5">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="size-4" />
+              <div className="flex size-7 items-center justify-center rounded-md bg-blue-100 text-blue-600">
+                <Calendar className="size-4" />
+              </div>
               Creada
             </CardTitle>
           </CardHeader>
@@ -208,9 +214,14 @@ export default function SolicitudDetailPage() {
       </div>
 
       {solicitud.descripcion && (
-        <Card>
+        <Card className="relative overflow-hidden border-slate-200 bg-gradient-to-br from-slate-50/50 to-transparent">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Descripción</CardTitle>
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+                <ClipboardList className="size-4" />
+              </div>
+              Descripción
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm whitespace-pre-wrap text-muted-foreground">{solicitud.descripcion}</p>
@@ -218,10 +229,12 @@ export default function SolicitudDetailPage() {
         </Card>
       )}
 
-      <Card>
+      <Card className={`relative overflow-hidden border-2 transition-all ${progress >= 100 ? 'border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-transparent' : progress > 0 ? 'border-amber-200 bg-gradient-to-br from-amber-50/80 to-transparent' : 'border-red-200 bg-gradient-to-br from-red-50/80 to-transparent'}`}>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Target className="size-4" />
+            <div className={`flex size-7 items-center justify-center rounded-md ${progress >= 100 ? 'bg-emerald-100 text-emerald-600' : progress > 0 ? 'bg-amber-100 text-amber-600' : 'bg-red-100 text-red-600'}`}>
+              <Target className="size-4" />
+            </div>
             Progreso general
           </CardTitle>
         </CardHeader>
