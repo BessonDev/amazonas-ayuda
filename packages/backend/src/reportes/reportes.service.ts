@@ -22,8 +22,8 @@ export class ReportesService {
         COALESCE(SUM(l.cantidad), 0) AS cantidad
       FROM ubicaciones u
       CROSS JOIN productos p
-      JOIN categorias c ON c.id = p.categoria_id
-      LEFT JOIN lotes l ON l.ubicacion_id = u.id AND l.producto_id = p.id
+      JOIN categorias c ON c.id = p."categoriaId"
+      LEFT JOIN lotes l ON l."ubicacionId" = u.id AND l."productoId" = p.id
       WHERE u.activo = true
       GROUP BY u.id, u.nombre, p.id, p.nombre, c.nombre
       ORDER BY u.nombre, c.nombre, p.nombre
