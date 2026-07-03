@@ -300,36 +300,19 @@ pnpm dev
 
 ### 🌐 Probar desde LAN (móvil / otro PC)
 
-Para acceder desde otro dispositivo en la misma red (ej. celular):
+No necesitas configuración adicional. Solo obtené tu IP local y accedé:
 
-1. Obtené tu IP local:
-   ```bash
-   # Windows
-   ipconfig | findstr IPv4
+```bash
+# Windows — obtener IP
+ipconfig | findstr IPv4
 
-   # Linux / macOS
-   hostname -I
-   ```
+# Linux / macOS
+hostname -I
+```
 
-2. Iniciá el **backend** con `CORS_ORIGINS`:
-   ```bash
-   CORS_ORIGINS=http://192.168.x.x:3000 pnpm --filter @donaciones/backend dev
-   ```
+Luego desde cualquier dispositivo en la misma red entrá a `http://192.168.x.x:3000`.
 
-3. Iniciá el **frontend** con `ALLOWED_DEV_ORIGINS`:
-   ```bash
-   # PowerShell
-   $env:ALLOWED_DEV_ORIGINS="192.168.x.x"; pnpm --filter @donaciones/frontend dev
-
-   # Bash
-   ALLOWED_DEV_ORIGINS=192.168.x.x pnpm --filter @donaciones/frontend dev
-   ```
-
-4. Accedé desde el celular a `http://192.168.x.x:3000`
-
-> ⚠️ `ALLOWED_DEV_ORIGINS` solo aplica en desarrollo (`next dev`). En producción no se necesita.
->
-> Si querés múltiples IPs, separalas con coma: `CORS_ORIGINS=http://192.168.1.50:3000,http://192.168.1.60:3000`
+> ⚡ El frontend (puerto 3000) hace de proxy al backend (puerto 4000) mediante el rewrite de Next.js, así que **no necesitás abrir el puerto 4000 ni configurar CORS**. Todo pasa por el mismo puerto 3000.
 
 ---
 

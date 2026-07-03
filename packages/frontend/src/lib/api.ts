@@ -1,12 +1,6 @@
 export function getApiBase() {
-  if (typeof window !== 'undefined') {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL
-    if (apiUrl) return `${apiUrl}/api`
-    const { hostname, port } = window.location
-    const apiPort = '4000'
-    return `http://${hostname === 'localhost' || hostname === '127.0.0.1' ? 'localhost' : hostname}:${apiPort}/api`
-  }
-  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api`
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL
+  return apiUrl ? `${apiUrl}/api` : '/api'
 }
 
 interface RespuestaApi<T> {
