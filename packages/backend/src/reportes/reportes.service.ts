@@ -161,7 +161,8 @@ export class ReportesService {
       return
     }
 
-    const rowH = 16
+    const minRowH = 16
+    const lineH = 10
     const headerBg = '#2563eb'
     const stripeEven = '#f8fafc'
     const stripeOdd = '#ffffff'
@@ -169,39 +170,58 @@ export class ReportesService {
     let y = doc.y
 
     const drawHeader = () => {
-      doc.roundedRect(30, y - 4, pageW, rowH, 3).fill(headerBg)
+      doc.roundedRect(30, y - 4, pageW, minRowH, 3).fill(headerBg)
       doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff')
       let x = 30
       for (let i = 0; i < labels.length; i++) {
         doc.text(labels[i], x + 4, y, { width: colWidths[i] - 8, align: 'left' })
         x += colWidths[i]
       }
-      y += rowH
+      y += minRowH
+    }
+
+    const calcRowH = (row: Record<string, any>) => {
+      const lines = Math.max(
+        1,
+        ...columns.map((col) => {
+          const val = String(row[col] ?? '')
+          const ci = columns.indexOf(col)
+          const maxChars = Math.max(1, Math.floor((colWidths[ci] - 12) / 4.5))
+          return Math.ceil(val.length / maxChars)
+        }),
+      )
+      return Math.max(minRowH, lines * lineH + 4)
     }
 
     const drawRow = (row: Record<string, any>, idx: number) => {
-      if (y + rowH > doc.page.height - 40) {
+      const actualRowH = calcRowH(row)
+
+      if (y + actualRowH > doc.page.height - 40) {
         doc.addPage()
         y = doc.y
         drawHeader()
       }
 
       doc.fillColor(idx % 2 === 0 ? stripeEven : stripeOdd)
-        .rect(30, y - 4, pageW, rowH)
+        .rect(30, y - 4, pageW, actualRowH)
         .fill()
 
       doc.fontSize(8).font('Helvetica').fillColor('#1e293b')
       let x = 30
       for (let i = 0; i < columns.length; i++) {
         const val = String(row[columns[i]] ?? '')
-        doc.text(val, x + 4, y, { width: colWidths[i] - 8, align: i === columns.length - 1 ? 'right' : 'left' })
+        doc.text(val, x + 4, y, {
+          width: colWidths[i] - 8,
+          align: i === columns.length - 1 ? 'right' : 'left',
+          lineGap: -1,
+        })
         x += colWidths[i]
       }
 
       doc.strokeColor(borderColor).lineWidth(0.5)
-        .rect(30, y - 4, pageW, rowH).stroke()
+        .rect(30, y - 4, pageW, actualRowH).stroke()
 
-      y += rowH
+      y += actualRowH
     }
 
     drawHeader()
