@@ -445,3 +445,9 @@ Este proyecto está bajo la licencia **MIT**.
 <p align="center">
   <sub>¿Preguntas? harold@besson.dev</sub>
 </p>
+
+## 📋 Changelog
+
+### 2026-07-03
+
+- **fix(backend):** restore `return` in `ArchivosService.eliminar()` y `MovimientosInventarioService.eliminar()` — los métodos no devolvían el resultado, causando que el frontend reciba body vacío, el `onSuccess` de la mutación nunca se disparara y no se mostrara el toast ni se invalidara la query.

@@ -67,7 +67,7 @@ export class ArchivosService {
   async eliminar(id: number) {
     const archivo = await this.obtener(id)
     await this.minio.remove(archivo.url)
-    await this.prisma.archivo.delete({ where: { id } })
+    return this.prisma.archivo.delete({ where: { id } })
   }
 }
 

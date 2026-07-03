@@ -76,7 +76,7 @@ export class MovimientosInventarioService {
 
   async eliminar(id: number) {
     await this.obtener(id)
-    await this.prisma.movimientoInventario.update({
+    return this.prisma.movimientoInventario.update({
       where: { id },
       data: { deletedAt: new Date() },
     })
