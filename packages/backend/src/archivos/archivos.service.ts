@@ -38,7 +38,7 @@ export class ArchivosService {
 
     return this.prisma.archivo.create({
       data: {
-        nombre: dto.nombre || file.originalname,
+        nombre: `${dto.entidadTipo}-${dto.entidadId}-${Date.now()}${extname(file.originalname)}`,
         url: filename,
         mimeType: file.mimetype,
         tamanio: file.size,
@@ -56,7 +56,7 @@ export class ArchivosService {
     try {
       const stream = await this.minio.getStream(archivo.url)
       return new StreamableFile(stream, {
-        disposition: `attachment; filename="${archivo.nombre}"`,
+        disposition: `inline; filename="${sanitizeHeaderFilename(archivo.nombre)}"`,
         type: archivo.mimeType,
       })
     } catch {
@@ -69,4 +69,8 @@ export class ArchivosService {
     await this.minio.remove(archivo.url)
     await this.prisma.archivo.delete({ where: { id } })
   }
+}
+
+function sanitizeHeaderFilename(name: string): string {
+  return name.replace(/[^\x20-\x7E]/g, '').trim() || 'archivo'
 }
