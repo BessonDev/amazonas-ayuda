@@ -82,8 +82,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   })
 
   const { data: campanias = [] } = useQuery<Campania[]>({
-    queryKey: ['campanias'],
-    queryFn: () => api.get('/campanias'),
+    queryKey: ['campanias', 'ACTIVA'],
+    queryFn: () => api.get('/campanias?estado=ACTIVA'),
   })
 
   const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({

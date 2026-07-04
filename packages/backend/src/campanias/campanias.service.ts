@@ -7,8 +7,11 @@ import { UpdateCampaniaDto } from './dto/update-campania.dto'
 export class CampaniasService {
   constructor(private prisma: PrismaService) {}
 
-  listar() {
+  listar(estado?: string) {
+    const where: any = {}
+    if (estado) where.estado = estado
     return this.prisma.campania.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
     })
   }

@@ -18,14 +18,14 @@ export class CategoriasController {
   constructor(private categoriasService: CategoriasService) {}
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar categorías' })
   listar() {
     return this.categoriasService.listar()
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener categoría por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.categoriasService.obtener(id)

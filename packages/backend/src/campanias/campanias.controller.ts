@@ -18,10 +18,11 @@ export class CampaniasController {
   constructor(private campaniasService: CampaniasService) {}
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar campañas' })
-  listar() {
-    return this.campaniasService.listar()
+  @ApiQuery({ name: 'estado', required: false, enum: ['PLANIFICADA', 'ACTIVA', 'CERRADA', 'CANCELADA'] })
+  listar(@Query('estado') estado?: string) {
+    return this.campaniasService.listar(estado)
   }
 
   @Get(':id')
