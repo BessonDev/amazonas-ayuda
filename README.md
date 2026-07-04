@@ -457,9 +457,10 @@ Este proyecto está bajo la licencia **MIT**.
   - `productos`: modal "crear rápido" (+) desde el formulario de solicitud
   - `inventario`: se oculta "Resumen" para RESPONSABLE_DESTINO
 
-- **fix(backend+frontend):** RESPONSABLE_DESTINO puede ver campañas y categorías
+- **fix(backend+frontend):** RESPONSABLE_DESTINO puede ver campañas, categorías y ubicaciones
   - `campanias`: rol `RESPONSABLE_DESTINO` en `listar` + filtro `?estado=ACTIVA` para formularios
   - `categorias`: rol `RESPONSABLE_DESTINO` en `listar` y `obtener`
+  - `ubicaciones`: rol `RESPONSABLE_DESTINO` en `listar` y `obtener` (para auto-completar en solicitudes)
   - `solicitudes`: usa `/campanias?estado=ACTIVA` para mostrar solo campañas activas
   - `productos` (crear rápido): ahora carga categorías correctamente
 
