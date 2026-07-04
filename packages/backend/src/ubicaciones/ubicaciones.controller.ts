@@ -18,7 +18,7 @@ export class UbicacionesController {
   constructor(private ubicacionesService: UbicacionesService) {}
 
   @Get()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar ubicaciones' })
   listar() {
     return this.ubicacionesService.listar()
@@ -32,7 +32,7 @@ export class UbicacionesController {
   }
 
   @Get(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener ubicación por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
     return this.ubicacionesService.obtener(id)
