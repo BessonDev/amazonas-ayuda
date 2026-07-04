@@ -94,6 +94,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   const puedeAutoCompletar = esReceptor && !!usuario?.ubicacionId
   const [productoFormOpen, setProductoFormOpen] = useState(false)
 
+  // Effect 1: reset form when dialog opens
   useEffect(() => {
     if (open) {
       setTitulo('')
@@ -101,22 +102,23 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
       setPrioridad('MEDIA')
       setDetalles([createRow()])
       setError('')
-
-      if (puedeAutoCompletar && ubicaciones.length > 0) {
-        setUbicacionId(usuario!.ubicacionId!.toString())
-        const miUbicacion = ubicaciones.find((u) => u.id === usuario!.ubicacionId)
-        if (miUbicacion) {
-          setCampaniaId(miUbicacion.campaniaId.toString())
-        } else {
-          setCampaniaId('')
-        }
-      } else {
+      if (!puedeAutoCompletar) {
         setCampaniaId('')
         setUbicacionId('')
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, puedeAutoCompletar])
+
+  // Effect 2: auto-complete location when ubicaciones loads and we can auto-complete
+  useEffect(() => {
+    if (puedeAutoCompletar && ubicaciones.length > 0) {
+      setUbicacionId(usuario!.ubicacionId!.toString())
+      const miUbicacion = ubicaciones.find((u) => u.id === usuario!.ubicacionId)
+      if (miUbicacion) {
+        setCampaniaId(miUbicacion.campaniaId.toString())
+      }
+    }
+  }, [puedeAutoCompletar, ubicaciones, usuario?.ubicacionId])
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
