@@ -47,8 +47,11 @@ export class ViajesService {
     return origen
   }
 
-  async listar() {
+  async listar(destinoId?: number) {
+    const where: any = {}
+    if (destinoId) where.destinoId = destinoId
     return this.prisma.viaje.findMany({
+      where,
       include: this.include,
       orderBy: { createdAt: 'desc' },
     })
@@ -215,9 +218,16 @@ export class ViajesService {
   async recibir(
     id: number,
     detalles: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[],
-    options?: { observaciones?: string; responsableId?: number }
+    options?: { observaciones?: string; responsableId?: number; user?: any }
   ) {
     const viaje = await this.obtener(id)
+
+    // Validar que el usuario tenga acceso a este destino
+    if (options?.user?.rol === 'RESPONSABLE_DESTINO') {
+      if (!options.user.ubicacionId || options.user.ubicacionId !== viaje.destinoId) {
+        throw new BadRequestException('No tiene permisos para recibir viajes de este destino')
+      }
+    }
 
     if (viaje.estado !== 'EN_TRANSITO') {
       throw new BadRequestException('Solo se puede recibir un viaje en estado EN_TRANSITO')

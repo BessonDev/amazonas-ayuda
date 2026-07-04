@@ -24,6 +24,7 @@ interface Usuario {
   ultimoAcceso: string | null
   createdAt: string
   rol: { id: number; nombre: string }
+  ubicacionId?: number | null
 }
 
 export default function UsuariosPage() {
@@ -157,7 +158,7 @@ export default function UsuariosPage() {
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => { setEditUser(u); setFormOpen(true) }}
+                            onClick={() => { setEditUser({ ...u, ubicacionId: u.ubicacionId }); setFormOpen(true) }}
                           >
                             <Edit className="size-4" />
                           </Button>

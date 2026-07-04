@@ -54,9 +54,10 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   producto?: Producto | null
+  onCreated?: () => void
 }
 
-export function ProductoForm({ open, onOpenChange, producto }: Props) {
+export function ProductoForm({ open, onOpenChange, producto, onCreated }: Props) {
   const editando = !!producto
   const queryClient = useQueryClient()
   const [nombre, setNombre] = useState('')
@@ -88,6 +89,7 @@ export function ProductoForm({ open, onOpenChange, producto }: Props) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productos'] })
       toast.success(editando ? 'Producto actualizado' : 'Producto creado')
+      if (!editando && onCreated) onCreated()
       onOpenChange(false)
     },
     onError: (err: Error) => {

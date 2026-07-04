@@ -73,7 +73,7 @@ export default function PublicoPage() {
             <div className="size-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
               <Heart className="size-5 text-[#D4A373]" />
             </div>
-            <span className="text-sm font-semibold tracking-wide">Amazonas Ayuda</span>
+            <span className="text-sm font-semibold tracking-wide">Amazonas Donaciones</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="#impact" className="text-sm text-white/70 hover:text-white transition-colors hidden sm:block">
@@ -92,18 +92,17 @@ export default function PublicoPage() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/8 backdrop-blur-sm text-xs font-semibold tracking-wider uppercase mb-8 border border-white/10">
               <span className="size-2 rounded-full bg-[#D4A373] animate-pulse" />
-              Transparencia y trazabilidad
+              De AMAZONAS para VENEZUELA
             </div>
 
             <h1 className="heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.08] mb-6 tracking-tight">
               Cada donación
               <br />
-              <span className="text-[#D4A373]">llega a su destino</span>
+              <span className="text-[#D4A373]">un acto de amor</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-white/70 max-w-xl mb-10 leading-relaxed">
-              Gestionamos la logística humanitaria en el Estado Amazonas con trazabilidad completa.
-              Cada lote, cada viaje, cada entrega — todo transparente.
+              Somos un grupo de voluntarios de la sociedad civil del estado Amazonas. Nuestro objetivo es que cada lote recaudado y enviado lleve consigo un mensaje de fe, esperanza y fuerza desde nuestra tierra hasta el lugar donde más se necesita.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -169,9 +168,9 @@ export default function PublicoPage() {
             <div className="hidden md:block absolute top-1/2 left-[16.66%] right-[16.66%] h-0.5 bg-gradient-to-r from-[#D4A373]/0 via-[#D4A373]/30 to-[#D4A373]/0 -translate-y-1/2" />
 
             {[
-              { step: '01', icon: Package, title: 'Registro', desc: 'Donantes entregan alimentos, medicinas e insumos. Cada lote recibe un código único trazable.' },
-              { step: '02', icon: Route, title: 'Transporte', desc: 'Coordinamos viajes desde centros de acopio hasta las comunidades que más lo necesitan.' },
-              { step: '03', icon: CheckCircle2, title: 'Entrega', desc: 'Las donaciones llegan a su destino. Cada recepción se registra con total transparencia.' },
+              { step: '01', icon: Package, title: 'Recepción', desc: 'Los donantes realizan la entrega de alimentos, medicinas e insumos en los centros de acopio o puntos de recepción voluntarios.' },
+              { step: '02', icon: Route, title: 'Transporte', desc: 'Se coordina el traslado y la logística de los viajes desde los centros de origen de nuestra localidad hasta los centros de acopio dispuestos en las ciudades afectadas.' },
+              { step: '03', icon: CheckCircle2, title: 'Entrega', desc: 'Al momento de ser entregadas las donaciones, se efectúa un registro fotográfico y se realizan las verificaciones.' },
             ].map((s) => {
               const Icon = s.icon
               return (
@@ -250,7 +249,7 @@ export default function PublicoPage() {
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="heading text-4xl sm:text-5xl mb-6">¿Eres una organización?</h2>
           <p className="text-white/70 text-lg mb-10 max-w-lg mx-auto">
-            Forma parte de la red de ayuda humanitaria en el Estado Amazonas. Coordinamos donaciones con trazabilidad completa.
+            Forma parte de la red de ayuda humanitaria en el Estado Amazonas.
           </p>
           <Link
             href="/admin"
@@ -269,12 +268,12 @@ export default function PublicoPage() {
             <div className="size-8 rounded-lg bg-white/5 flex items-center justify-center">
               <Heart className="size-4 text-[#D4A373]/70" />
             </div>
-            <span className="text-sm font-medium text-white/60">Amazonas Ayuda</span>
+            <span className="text-sm font-medium text-white/60">Amazonas Donaciones</span>
           </div>
           <div className="flex items-center gap-6 text-xs">
             <span>© {new Date().getFullYear()}</span>
             <span className="text-white/20">·</span>
-            <span>Transparencia y trazabilidad</span>
+            <span>De Amazonas para Venezuela</span>
             <span className="text-white/20">·</span>
             <span>Estado Amazonas, Venezuela</span>
           </div>
@@ -618,7 +617,7 @@ function ViajesActivos() {
           </span>
           <h2 className="heading text-4xl sm:text-5xl text-[#1B4332] mb-4">Viajes activos y programados</h2>
           <p className="text-[#5c4f3d] max-w-xl mx-auto">
-            Conoce las rutas de distribución hacia las comunidades del Estado Amazonas.
+            Conoce las rutas de distribución desde nuestra localidad hasta los centros de acopio en las ciudades afectadas.
           </p>
         </div>
 

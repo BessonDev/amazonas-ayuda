@@ -18,6 +18,7 @@ export class UsuariosService {
         activo: true,
         ultimoAcceso: true,
         createdAt: true,
+        ubicacionId: true,
         rol: { select: { id: true, nombre: true } },
       },
       orderBy: { id: 'asc' },
@@ -35,6 +36,7 @@ export class UsuariosService {
         activo: true,
         ultimoAcceso: true,
         createdAt: true,
+        ubicacionId: true,
         rol: { select: { id: true, nombre: true } },
       },
     })
@@ -53,6 +55,7 @@ export class UsuariosService {
         passwordHash,
         telefono: dto.telefono,
         rolId: dto.rolId,
+        ubicacionId: dto.ubicacionId,
       },
       select: {
         id: true,
@@ -61,6 +64,7 @@ export class UsuariosService {
         telefono: true,
         activo: true,
         createdAt: true,
+        ubicacionId: true,
         rol: { select: { id: true, nombre: true } },
       },
     })
@@ -88,6 +92,7 @@ export class UsuariosService {
         telefono: true,
         activo: true,
         createdAt: true,
+        ubicacionId: true,
         rol: { select: { id: true, nombre: true } },
       },
     })

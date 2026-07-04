@@ -30,10 +30,22 @@ interface Rol {
   descripcion: string | null
 }
 
+interface Ubicacion {
+  id: number
+  nombre: string
+}
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  editUser?: { id: number; nombre: string; email: string; telefono: string | null; rol: { id: number; nombre: string } }
+  editUser?: {
+    id: number
+    nombre: string
+    email: string
+    telefono: string | null
+    rol: { id: number; nombre: string }
+    ubicacionId?: number | null
+  }
 }
 
 export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
@@ -44,12 +56,22 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
   const [password, setPassword] = useState('')
   const [telefono, setTelefono] = useState('')
   const [rolId, setRolId] = useState('')
+  const [ubicacionId, setUbicacionId] = useState('')
   const [error, setError] = useState('')
 
   const { data: roles = [] } = useQuery<Rol[]>({
     queryKey: ['roles'],
     queryFn: () => api.get('/usuarios/roles'),
   })
+
+  const { data: ubicaciones = [] } = useQuery<Ubicacion[]>({
+    queryKey: ['ubicaciones'],
+    queryFn: () => api.get('/ubicaciones'),
+  })
+
+  // Determinar si el rol seleccionado es RESPONSABLE_DESTINO
+  const rolSeleccionado = roles.find((r) => r.id.toString() === rolId)
+  const esResponsableDestino = rolSeleccionado?.nombre === 'RESPONSABLE_DESTINO'
 
   useEffect(() => {
     if (open) {
@@ -59,12 +81,14 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
         setPassword('')
         setTelefono(editUser.telefono ?? '')
         setRolId(editUser.rol.id.toString())
+        setUbicacionId(editUser.ubicacionId?.toString() ?? '')
       } else {
         setNombre('')
         setEmail('')
         setPassword('')
         setTelefono('')
         setRolId('')
+        setUbicacionId('')
       }
       setError('')
     }
@@ -90,6 +114,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
     if (!email.trim()) { setError('El email es obligatorio'); return }
     if (!esEdicion && !password) { setError('La contraseña es obligatoria'); return }
     if (!rolId) { setError('Selecciona un rol'); return }
+    if (esResponsableDestino && !ubicacionId) { setError('Selecciona una ubicación para RESPONSABLE_DESTINO'); return }
 
     const data: Record<string, unknown> = {
       nombre: nombre.trim(),
@@ -97,6 +122,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
       telefono: telefono.trim() || undefined,
       rolId: Number(rolId),
     }
+    if (esResponsableDestino) data.ubicacionId = Number(ubicacionId)
     if (password) data.password = password
 
     mutation.mutate(data)
@@ -155,6 +181,30 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
                 </SelectContent>
               </Select>
             </div>
+
+            {esResponsableDestino && (
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="ubicacion">Ubicación</Label>
+                <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {(value: string | null) => {
+                        if (!value) return 'Seleccionar ubicación...'
+                        const u = ubicaciones.find(u => u.id.toString() === value)
+                        return u?.nombre ?? value
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ubicaciones.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           {error && <p className="text-sm text-red-600 font-medium">{error}</p>}

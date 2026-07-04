@@ -8,6 +8,7 @@ import { CambiarEstadoViajeDto } from './dto/cambiar-estado-viaje.dto'
 import { RecibirViajeDto } from './dto/recibir-viaje.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
+import { CurrentUser } from '../common/decorators/current-user.decorator'
 
 @ApiTags('Viajes')
 @ApiBearerAuth()
@@ -41,8 +42,13 @@ export class ViajesController {
   @Get()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar todos los viajes' })
-  listar() {
-    return this.viajesService.listar()
+  @ApiQuery({ name: 'destinoId', type: Number, required: false, description: 'Filtrar por destino (se usa internamente para RESPONSABLE_DESTINO)' })
+  listar(@Query('destinoId') destinoId?: number, @CurrentUser() user?: any) {
+    // Auto-filtrar para RESPONSABLE_DESTINO
+    if (user?.rol === 'RESPONSABLE_DESTINO' && user.ubicacionId) {
+      return this.viajesService.listar(user.ubicacionId)
+    }
+    return this.viajesService.listar(destinoId)
   }
 
   @Get(':id')
@@ -62,9 +68,10 @@ export class ViajesController {
   @Post(':id/recibir')
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Recibir viaje (determina automáticamente COMPLETADO o RECEPCION_PARCIAL)' })
-  recibir(@Param('id', ParseIntPipe) id: number, @Body() dto: RecibirViajeDto) {
+  recibir(@Param('id', ParseIntPipe) id: number, @Body() dto: RecibirViajeDto, @CurrentUser() user: any) {
     return this.viajesService.recibir(id, dto.detallesRecepcion, {
       observaciones: dto.observaciones,
+      user,
     })
   }
 

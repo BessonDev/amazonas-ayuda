@@ -163,8 +163,8 @@ export default function InventarioPage() {
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Producto</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Categoría</TableHead>
                 <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Cantidad</TableHead>
-                <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" /># Lotes</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Lotes</TableHead>
+                <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" /></TableHead>
                 <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
                 <TableHead className="w-10"></TableHead>
               </TableRow>
@@ -195,9 +195,6 @@ export default function InventarioPage() {
                       <TableCell className="text-right font-medium tabular-nums">
                         {item.cantidad}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {item.numLotes}
-                      </TableCell>
                       <TableCell className="max-w-xs">
                         <div className="flex flex-wrap gap-1">
                           {(expanded ? item.lotes : item.lotes.slice(0, 3)).map((lote) => (
@@ -211,6 +208,9 @@ export default function InventarioPage() {
                             </span>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {item.numLotes}
                       </TableCell>
                       <TableCell className="text-sm">{item.ubicacion}</TableCell>
                       <TableCell>

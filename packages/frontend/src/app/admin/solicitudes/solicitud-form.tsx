@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Trash2 } from 'lucide-react'
@@ -26,6 +24,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+import { ProductoForm } from '@/app/admin/productos/producto-form'
 
 const PRIORIDADES = [
   { value: 'MEDIA', label: 'Media' },
@@ -93,6 +92,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   })
 
   const puedeAutoCompletar = esReceptor && !!usuario?.ubicacionId
+  const [productoFormOpen, setProductoFormOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -169,7 +169,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nueva Solicitud</DialogTitle>
@@ -201,73 +202,71 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="prioridad">Prioridad</Label>
+              <Select value={prioridad} onValueChange={(v) => setPrioridad(v ?? 'MEDIA')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {(value: string | null) => {
+                      const p = PRIORIDADES.find(p => p.value === value)
+                      return p?.label ?? value
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIORIDADES.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="campania">Campaña</Label>
+              <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar campaña...'
+                      const c = campanias.find(c => c.id.toString() === value)
+                      return c?.nombre ?? value
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {campanias.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {(!puedeAutoCompletar) && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="prioridad">Prioridad</Label>
-                  <Select value={prioridad} onValueChange={(v) => setPrioridad(v ?? 'MEDIA')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {(value: string | null) => {
-                          const p = PRIORIDADES.find(p => p.value === value)
-                          return p?.label ?? value
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PRIORIDADES.map((p) => (
-                        <SelectItem key={p.value} value={p.value}>
-                          {p.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="campania">Campaña</Label>
-                  <Select value={campaniaId} onValueChange={(v) => setCampaniaId(v ?? '')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {(value: string | null) => {
-                          if (!value) return 'Seleccionar campaña...'
-                          const c = campanias.find(c => c.id.toString() === value)
-                          return c?.nombre ?? value
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {campanias.map((c) => (
-                        <SelectItem key={c.id} value={c.id.toString()}>
-                          {c.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="ubicacion">Ubicación</Label>
-                  <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {(value: string | null) => {
-                          if (!value) return 'Seleccionar ubicación...'
-                          const u = ubicaciones.find(u => u.id.toString() === value)
-                          return u?.nombre ?? value
-                        }}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ubicaciones.map((u) => (
-                        <SelectItem key={u.id} value={u.id.toString()}>
-                          {u.nombre}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="ubicacion">Ubicación</Label>
+                <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {(value: string | null) => {
+                        if (!value) return 'Seleccionar ubicación...'
+                        const u = ubicaciones.find(u => u.id.toString() === value)
+                        return u?.nombre ?? value
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ubicaciones.map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>
+                        {u.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </div>
 
@@ -284,13 +283,24 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
               <div key={d.key} className="flex gap-3 items-start p-3 border rounded-lg">
                 <div className="flex-1 space-y-2">
                   <Label className="text-xs">Producto</Label>
-                  <Combobox
-                    items={productos.map((p) => ({ id: p.id, label: p.nombre }))}
-                    value={d.productoId}
-                    onValueChange={(v) => updateDetalle(d.key, 'productoId', v)}
-                    placeholder="Buscar producto..."
-                    emptyMessage="No se encontraron productos"
-                  />
+                  <div className="flex gap-2">
+                    <Combobox
+                      items={productos.map((p) => ({ id: p.id, label: p.nombre }))}
+                      value={d.productoId}
+                      onValueChange={(v) => updateDetalle(d.key, 'productoId', v)}
+                      placeholder="Buscar producto..."
+                      emptyMessage="No se encontraron productos"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => setProductoFormOpen(true)}
+                      title="Crear producto rápido"
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="w-24 space-y-2">
@@ -342,5 +352,15 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
         </form>
       </DialogContent>
     </Dialog>
+
+    <ProductoForm
+      open={productoFormOpen}
+      onOpenChange={setProductoFormOpen}
+      onCreated={() => {
+        queryClient.invalidateQueries({ queryKey: ['productos'] })
+        setProductoFormOpen(false)
+      }}
+    />
+  </>
   )
 }

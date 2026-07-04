@@ -74,14 +74,14 @@ const menuItems: MenuGroup[] = [
       { label: 'Donantes', href: '/admin/donantes', icon: Users, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
     ],
   },
-  {
-    label: 'Inventario',
-    items: [
-      { label: 'Resumen', href: '/admin/inventario', icon: BarChart3, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO'] },
-      { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
-      { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
-    ],
-  },
+{
+      label: 'Inventario',
+      items: [
+        { label: 'Resumen', href: '/admin/inventario', icon: BarChart3, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+        { label: 'Lotes', href: '/admin/lotes', icon: Warehouse, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+        { label: 'Movimientos', href: '/admin/movimientos', icon: ShoppingCart, roles: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'] },
+      ],
+    },
   {
     label: 'Operaciones',
     items: [

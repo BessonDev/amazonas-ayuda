@@ -24,4 +24,9 @@ export class CreateUsuarioDto {
   @ApiProperty()
   @IsInt()
   rolId: number
+
+  @ApiPropertyOptional()
+  @IsInt()
+  @IsOptional()
+  ubicacionId?: number
 }

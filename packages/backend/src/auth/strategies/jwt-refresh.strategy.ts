@@ -43,6 +43,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
       nombre: usuario.nombre,
       rol: usuario.rol.nombre,
       refreshToken,
+      ubicacionId: usuario.ubicacionId,
     }
   }
 }

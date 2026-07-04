@@ -448,6 +448,15 @@ Este proyecto está bajo la licencia **MIT**.
 
 ## 📋 Changelog
 
+### 2026-07-04
+
+- **feat(backend+frontend):** RESPONSABLE_DESTINO ahora tiene ubicación asignable por Admin
+  - `usuarios`: nuevo campo `ubicacionId` en CRUD; select de Ubicación solo visible para rol RESPONSABLE_DESTINO
+  - `viajes`: filtrado automático por `destinoId` = `user.ubicacionId` para RESPONSABLE_DESTINO; validación en `recibir` para evitar que reciba viajes de otro destino
+  - `solicitudes`: prioridad y campaña siempre obligatorias; ubicación auto-completa si tiene asignada
+  - `productos`: modal "crear rápido" (+) desde el formulario de solicitud
+  - `inventario`: se oculta "Resumen" para RESPONSABLE_DESTINO
+
 ### 2026-07-03
 
 - **fix(backend):** restore `return` in `ArchivosService.eliminar()` y `MovimientosInventarioService.eliminar()` — los métodos no devolvían el resultado, causando que el frontend reciba body vacío, el `onSuccess` de la mutación nunca se disparara y no se mostrara el toast ni se invalidara la query.
