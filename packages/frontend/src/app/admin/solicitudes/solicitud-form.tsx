@@ -116,7 +116,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, puedeAutoCompletar, ubicaciones])
+  }, [open, puedeAutoCompletar])
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
