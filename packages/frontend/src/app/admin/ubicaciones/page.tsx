@@ -40,7 +40,7 @@ export default function UbicacionesPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canManage, canDelete } = useRole()
+  const { canManage, canDeleteUbicaciones } = useRole()
 
   const { data: ubicaciones = [], isLoading } = useQuery({
     queryKey: ['ubicaciones'],
@@ -140,7 +140,7 @@ export default function UbicacionesPage() {
                             <Edit className="size-4" />
                           </Button>
                         )}
-                        {canDelete && (
+                        {canDeleteUbicaciones && (
                           <Button
                             variant="ghost"
                             size="icon-sm"

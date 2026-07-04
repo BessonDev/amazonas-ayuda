@@ -35,7 +35,7 @@ export default function ProductosPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canManage, canDelete } = useRole()
+  const { canManage, canDelete, canCreateProductos } = useRole()
 
   const { data: productos = [], isLoading } = useQuery({
     queryKey: ['productos'],
@@ -134,7 +134,7 @@ export default function ProductosPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {canManage && (
+{canCreateProductos && (
                           <Button variant="ghost" size="icon-sm" onClick={() => openEdit(producto)}>
                             <Edit className="size-4" />
                           </Button>

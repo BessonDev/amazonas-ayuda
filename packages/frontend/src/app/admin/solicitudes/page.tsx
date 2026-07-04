@@ -43,7 +43,7 @@ export default function SolicitudesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [filtroPrioridad, setFiltroPrioridad] = useState<string | null>(null)
   const queryClient = useQueryClient()
-  const { canDelete } = useRole()
+  const { canCreateSolicitudes, canDeleteSolicitudes } = useRole()
 
   const [confirmState, setConfirmState] = useState<{
     open: boolean
@@ -89,10 +89,12 @@ export default function SolicitudesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Solicitudes</h1>
           <p className="text-muted-foreground">Gestión de solicitudes de recursos</p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="size-4 mr-2" />
-          Nueva solicitud
-        </Button>
+        {canCreateSolicitudes && (
+          <Button onClick={() => setFormOpen(true)}>
+            <Plus className="size-4 mr-2" />
+            Nueva solicitud
+          </Button>
+        )}
       </div>
 
       <SolicitudForm open={formOpen} onOpenChange={setFormOpen} />
@@ -212,7 +214,7 @@ export default function SolicitudesPage() {
                           >
                             <Eye className="size-4" />
                           </Button>
-                          {canDelete && (
+                          {canDeleteSolicitudes && (
                             <Button
                               variant="ghost"
                               size="icon-sm"

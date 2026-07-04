@@ -15,9 +15,16 @@ export function useRole() {
     isResponsable: rol === 'RESPONSABLE_DESTINO',
     canManage: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canDelete: ['ADMINISTRADOR', 'OPERADOR_INVENTARIO'].includes(rol),
+    canDeleteViajes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
+    canDeleteSolicitudes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
+    canDeleteUbicaciones: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
+    canDeleteCategorias: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canTransfer: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canChangeStatus: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canManageDonantes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
     canDeleteDonantes: ['ADMINISTRADOR'].includes(rol),
+    canCreateSolicitudes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO'].includes(rol),
+    canCreateLotes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
+    canCreateProductos: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
 }
 }

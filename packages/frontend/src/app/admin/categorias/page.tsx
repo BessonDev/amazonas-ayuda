@@ -31,7 +31,7 @@ export default function CategoriasPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canManage, canDelete } = useRole()
+  const { canManage, canDeleteCategorias } = useRole()
 
   const { data: categorias = [], isLoading } = useQuery({
     queryKey: ['categorias'],
@@ -129,7 +129,7 @@ export default function CategoriasPage() {
                             <Edit className="size-4" />
                           </Button>
                         )}
-                        {canDelete && (
+                        {canDeleteCategorias && (
                           <Button
                             variant="ghost"
                             size="icon-sm"

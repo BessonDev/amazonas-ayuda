@@ -58,7 +58,7 @@ export default function ViajesPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canChangeStatus, canManage, canDelete, hasRole } = useRole()
+  const { canChangeStatus, canManage, canDeleteViajes, hasRole } = useRole()
   const router = useRouter()
 
   const { data: viajes = [], isLoading } = useQuery({
@@ -229,7 +229,7 @@ export default function ViajesPage() {
                             <Send className="size-4" />
                           </Button>
                         )}
-                        {canDelete && (
+                        {canDeleteViajes && (
                           <Button
                             variant="ghost"
                             size="icon-sm"

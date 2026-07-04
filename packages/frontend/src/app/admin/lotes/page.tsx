@@ -94,7 +94,7 @@ export default function LotesPage() {
   } | null>(null)
   const queryClient = useQueryClient()
   const { usuario } = useAuth()
-  const { canManage, canDelete, canTransfer, isOperator } = useRole()
+  const { canManage, canDelete, canTransfer, isOperator, canCreateLotes } = useRole()
 
   // Helper to check if user can edit/delete this lote
   const puedeEditar = (lote: Lote) => {
@@ -182,7 +182,7 @@ export default function LotesPage() {
               Transferir ({selectedIds.size})
             </Button>
           )}
-          {canManage && (
+          {canCreateLotes && (
             <Button onClick={() => setFormOpen(true)}>
               <Plus className="size-4" />
               Nuevo Lote
