@@ -92,6 +92,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
     queryFn: () => api.get('/ubicaciones'),
   })
 
+  const puedeAutoCompletar = esReceptor && !!usuario?.ubicacionId
+
   useEffect(() => {
     if (open) {
       setTitulo('')
@@ -100,18 +102,21 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
       setDetalles([createRow()])
       setError('')
 
-      if (esReceptor && usuario?.ubicacionId) {
-        setUbicacionId(usuario.ubicacionId.toString())
-        const miUbicacion = ubicaciones.find((u) => u.id === usuario.ubicacionId)
+      if (puedeAutoCompletar && ubicaciones.length > 0) {
+        setUbicacionId(usuario!.ubicacionId!.toString())
+        const miUbicacion = ubicaciones.find((u) => u.id === usuario!.ubicacionId)
         if (miUbicacion) {
           setCampaniaId(miUbicacion.campaniaId.toString())
+        } else {
+          setCampaniaId('')
         }
       } else {
         setCampaniaId('')
         setUbicacionId('')
       }
     }
-  }, [open, esReceptor, usuario?.ubicacionId, ubicaciones])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, puedeAutoCompletar, ubicaciones])
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
@@ -140,8 +145,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!titulo.trim()) { setError('El título es obligatorio'); return }
-    if (!esReceptor && !campaniaId) { setError('Selecciona una campaña'); return }
-    if (!esReceptor && !ubicacionId) { setError('Selecciona una ubicación'); return }
+    if (!campaniaId) { setError('Selecciona una campaña'); return }
+    if (!ubicacionId) { setError('Selecciona una ubicación'); return }
 
     const detallesData = detalles
       .filter((d) => d.productoId)
@@ -196,7 +201,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
               />
             </div>
 
-            {!esReceptor && (
+            {(!puedeAutoCompletar) && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="prioridad">Prioridad</Label>
