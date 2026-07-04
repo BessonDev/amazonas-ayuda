@@ -71,7 +71,7 @@ export default function ProductosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Productos</h1>
           <p className="text-muted-foreground">Gestión de productos</p>
         </div>
-        {canManage && (
+        {canCreateProductos && (
           <Button onClick={openCreate}>
             <Plus className="size-4" />
             Nuevo Producto
@@ -104,7 +104,6 @@ export default function ProductosPage() {
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Nombre</TableHead>
                 <TableHead><FileText className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Descripción</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Categoría</TableHead>
-                <TableHead className="text-right"><Warehouse className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Stock</TableHead>
                 <TableHead className="text-right"><Settings2 className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -129,9 +128,6 @@ export default function ProductosPage() {
                       {producto.descripcion ?? '-'}
                     </TableCell>
                     <TableCell>{producto.categoria?.nombre ?? '-'}</TableCell>
-                    <TableCell className="text-right font-medium tabular-nums">
-                      {producto.stockTotal ?? 0}
-                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
 {canCreateProductos && (

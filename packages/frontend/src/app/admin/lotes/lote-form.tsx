@@ -123,6 +123,7 @@ export function LoteForm({ open, onOpenChange, lote }: Props) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
       toast.success(isEditing ? 'Lote actualizado' : 'Lote creado')
       onOpenChange(false)
     },

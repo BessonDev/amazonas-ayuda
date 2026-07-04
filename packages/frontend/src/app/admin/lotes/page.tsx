@@ -137,6 +137,7 @@ export default function LotesPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lotes'] })
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
       toast.success('Lote(s) transferido(s) correctamente')
       setSelectedIds(new Set())
       setDestinoId('')
