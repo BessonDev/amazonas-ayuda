@@ -218,7 +218,7 @@ export class ViajesService {
   async recibir(
     id: number,
     detalles: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[],
-    options?: { observaciones?: string; responsableId?: number; user?: any }
+    options?: { observaciones?: string; responsableId?: number; user?: any; fotoRecepcionUrl?: string }
   ) {
     const viaje = await this.obtener(id)
 
@@ -251,18 +251,19 @@ export class ViajesService {
       detallesRecepcion: detalles,
       observaciones: options?.observaciones,
       responsableId: options?.responsableId,
+      fotoRecepcionUrl: options?.fotoRecepcionUrl,
     })
   }
 
   async cambiarEstado(
     id: number,
     nuevoEstado: EstadoViaje,
-    options?: { observaciones?: string; responsableId?: number; detallesRecepcion?: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[] }
+    options?: { observaciones?: string; responsableId?: number; detallesRecepcion?: { loteId: number; cantidadRecibida: number; cantidadDanada?: number; observaciones?: string }[]; fotoRecepcionUrl?: string }
   ) {
     const viaje = await this.obtener(id)
     this.validarTransicion(viaje.estado, nuevoEstado)
 
-    const { observaciones, responsableId, detallesRecepcion } = options ?? {}
+    const { observaciones, responsableId, detallesRecepcion, fotoRecepcionUrl } = options ?? {}
 
     return this.prisma.$transaction(async (tx) => {
       const detalles = await tx.detalleViaje.findMany({
@@ -302,6 +303,12 @@ export class ViajesService {
               },
             })
             loteEnviadoId = nuevoLote.id
+
+            // Actualizar DetalleViaje para que apunte al lote ENV (el que viaja)
+            await tx.detalleViaje.update({
+              where: { id: det.id },
+              data: { loteId: nuevoLote.id },
+            })
           } else {
             await tx.lote.update({
               where: { id: lote.id },
@@ -366,6 +373,7 @@ export class ViajesService {
             fecha: new Date(),
             viajeId: id,
             responsableId,
+            fotoRecepcionUrl,
             detalles: {
               createMany: {
                 data: detallesRecepcion.map(d => ({
@@ -422,6 +430,7 @@ export class ViajesService {
           }
 
           if (faltante > 0 && nuevoEstado === 'RECEPCION_PARCIAL') {
+            // Crear lote FALTANTE
             await tx.lote.create({
               data: {
                 codigo: `${lote.codigo}-FALTANTE-${Date.now().toString(36).toUpperCase()}`,
@@ -433,6 +442,26 @@ export class ViajesService {
                 donanteId: lote.donanteId,
                 responsableId: lote.responsableId,
                 observaciones: `Faltante recepción viaje ${viaje.codigo} (${faltante} und no llegaron)`,
+              },
+            })
+
+            // Registrar pérdida en inventario (movimiento AJUSTE)
+            const ultimoOrigen = await tx.movimientoInventario.findFirst({
+              where: { loteId: lote.id, ubicacionId: viaje.origenId },
+              orderBy: { createdAt: 'desc' },
+            })
+            const saldoOrigen = ultimoOrigen?.saldoNuevo ?? 0
+            await tx.movimientoInventario.create({
+              data: {
+                tipo: 'AJUSTE',
+                cantidad: faltante,
+                saldoAnterior: saldoOrigen,
+                saldoNuevo: saldoOrigen - faltante,
+                observaciones: `Pérdida por recepción parcial - Viaje ${viaje.codigo} (${faltante} und faltantes)`,
+                loteId: lote.id,
+                ubicacionId: viaje.origenId,
+                campaniaId: viaje.campaniaId,
+                viajeId: id,
               },
             })
           }

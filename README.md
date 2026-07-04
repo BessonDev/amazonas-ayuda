@@ -72,7 +72,8 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 |:--:|:---------------------------|
 | | Planificación de viajes con rutas, responsables y lotes consolidados por producto |
 | | Recepción y verificación en destino con foto |
-| | Transiciones de estado automáticas: Planificado → Preparando Carga → En Tránsito → Llegó → Completado |
+| | Per-lote state selector: Completo / Parcial / No recibido con inputs de cantidad |
+| | Transiciones de estado automáticas: Planificado → Preparando Carga → En Tránsito → Llegó → Completado / Recepción Parcial |
 | | Manejo de faltantes y dañados en recepción parcial (lotes split) |
 | | Inventario automático: movimientos ENTRADA/ENVIO/RECEPCION/AJUSTE al crear lote, despachar viaje y recepcionar |
 
@@ -128,7 +129,7 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | Campañas | CRUD completo | ✅ | ✅ | ❌ | ❌ |
 | Ubicaciones | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
 | Categorías | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
-| Productos | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ✅ (solo listar) |
+| Productos | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ✅ (listar + crear rápido desde solicitud) |
 | Donantes | CRUD completo | ✅ | ✅ | ✅ (solo listar) | ❌ |
 | Inventario | CRUD completo | ✅ | ✅ | ✅ | ❌ |
 | Movimientos | CRUD completo | ✅ | ✅ | ✅ | ❌ |
@@ -362,7 +363,7 @@ pnpm --filter @donaciones/backend test:coverage
 | 🤝 **Donantes** | CRUD + form dialog con tipo enum |
 | 🏷️ **Inventario** | CRUD + QR modal + form dialog con Combobox de producto + transferencia múltiple entre ubicaciones |
 | 📊 **Movimientos** | Listado con saldos y tipo badge |
-| 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas, botón Recibir + `RecibirDialog` para ADMIN/COORD_LOG/RESP |
+| 🚚 **Viajes** | CRUD + form con lotes consolidados por producto (FIFO), detalle con cards + cambio de estado inline, transiciones guiadas, botón Recibir + `RecibirDialog` con selector por lote (Completo/Parcial/No recibido), inputs de cantidad y foto, para ADMIN/COORD_LOG/RESP |
 | 📋 **Recepciones** | CRUD + form con detalle anidado + subida de foto con preview + "Viajes en camino" con Receptionar |
 | 📝 **Solicitudes** | CRUD + form dialog + versión simplificada para RECEPTOR |
 | 👥 **Usuarios** | CRUD + form dialog con asignación de rol |
@@ -450,6 +451,17 @@ Este proyecto está bajo la licencia **MIT**.
 
 ### 2026-07-04
 
+- **fix(backend):** RESPONSABLE_DESTINO puede crear productos desde el formulario de solicitud
+  - Agregado `RESPONSABLE_DESTINO` al endpoint `POST /productos` (antes solo ADMIN/COORD_LOG)
+  - Actualizada matriz de permisos: Productos → RESPONSABLE_DESTINO ahora puede listar + crear rápido desde solicitud
+
+- **feat(frontend):** `RecibirDialog` con selector de estado por lote (Completo/Parcial/No recibido)
+  - Cada lote tiene 3 botones de selección que auto-configuran las cantidades
+  - Modo Parcial habilita inputs de cantidad en buen estado, dañado y faltante calculado
+  - Resumen dinámico en header y footer indica si el viaje irá a COMPLETADO o RECEPCION_PARCIAL
+  - Upload opcional de foto de recepción (FileUpload) que se envía como `fotoRecepcionUrl`
+  - La mutación sube la foto primero (multipart a /archivos/upload), luego envía el POST a /viajes/:id/recibir
+
 - **feat(backend+frontend):** RESPONSABLE_DESTINO ahora tiene ubicación asignable por Admin
   - `usuarios`: nuevo campo `ubicacionId` en CRUD; select de Ubicación solo visible para rol RESPONSABLE_DESTINO
   - `viajes`: filtrado automático por `destinoId` = `user.ubicacionId` para RESPONSABLE_DESTINO; validación en `recibir` para evitar que reciba viajes de otro destino
@@ -463,6 +475,32 @@ Este proyecto está bajo la licencia **MIT**.
   - `ubicaciones`: rol `RESPONSABLE_DESTINO` en `listar` y `obtener` (para auto-completar en solicitudes)
   - `solicitudes`: usa `/campanias?estado=ACTIVA` para mostrar solo campañas activas
   - `productos` (crear rápido): ahora carga categorías correctamente
+
+- **fix(frontend):** Fechas de viaje se mostraban incorrectas por zona horaria
+  - Portal público y detalle de viaje ahora usan `{ timeZone: 'UTC' }` al mostrar fechas
+
+- **fix(backend+frontend):** Foto de recepción se guarda como imagen de viaje (no pública)
+  - Upload con `entidadTipo: 'Viaje'` en lugar de `'Recepcion'`
+  - Eliminado `fotoArchivoId` del DTO, controller y service
+  - Admin/Coordinador puede re-subirla manualmente si quiere que sea pública
+
+- **feat(publico):** Icono de categoría visible junto al nombre del producto en solicitudes
+  - Backend incluye `categoria.icono` en la query de productos
+  - Frontend renderiza el emoji al lado del nombre
+
+- **fix(backend):** Viajes `RECEPCION_PARCIAL` ocultos del portal público
+  - Filtro cambiado de `['PLANIFICADO', 'EN_TRANSITO', 'RECEPCION_PARCIAL']` a `['PLANIFICADO', 'EN_TRANSITO']`
+
+- **feat(frontend):** Texto "+X más" en columna de lotes ahora es clickeable
+  - Inventario: el texto expande la lista de lotes, igual que el chevrón
+
+- **fix(backend):** Corregido bug de `loteId` en envío parcial de viaje
+  - `DetalleViaje` ahora apunta al nuevo lote ENV (el que viaja), no al original
+  - El lote original queda intacto con su cantidad reducida y `DISPONIBLE`
+
+- **fix(backend):** Registro contable de faltantes en recepción parcial
+  - Al crear lote FALTANTE se genera un movimiento `AJUSTE` que descuenta del inventario de origen
+  - El faltante queda reflejado en el ledger, permitiendo cerrar el viaje a `COMPLETADO` limpiamente
 
 ### 2026-07-03
 

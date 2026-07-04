@@ -32,7 +32,7 @@ export class ProductosController {
   }
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Crear producto' })
   crear(@Body() dto: CreateProductoDto) {
     return this.productosService.crear(dto)

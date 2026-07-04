@@ -15,4 +15,9 @@ export class RecibirViajeDto {
   @IsString()
   @IsOptional()
   observaciones?: string
+
+  @ApiPropertyOptional({ description: 'URL de la foto de recepción' })
+  @IsString()
+  @IsOptional()
+  fotoRecepcionUrl?: string
 }

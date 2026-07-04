@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Package, MapPin, Tags, Hash, ChevronDown, ChevronUp, FileDown, Loader2 } from 'lucide-react'
+import { Search, Package, MapPin, Tags, Hash, ChevronDown, ChevronUp, FileDown, Loader2, Warehouse } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -162,7 +162,7 @@ export default function InventarioPage() {
               <TableRow>
                 <TableHead><Package className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Producto</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Categoría</TableHead>
-                <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Cantidad</TableHead>
+                <TableHead className="text-center"><Warehouse className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Stock</TableHead>
                 <TableHead><Tags className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Lotes</TableHead>
                 <TableHead className="text-right"><Hash className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" /></TableHead>
                 <TableHead><MapPin className="size-3.5 inline mr-1.5 -mt-0.5 text-muted-foreground" />Ubicación</TableHead>
@@ -192,7 +192,7 @@ export default function InventarioPage() {
                       <TableCell>
                         <Badge variant="outline" className="text-xs">{item.categoria}</Badge>
                       </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">
+                      <TableCell className="text-center font-medium tabular-nums">
                         {item.cantidad}
                       </TableCell>
                       <TableCell className="max-w-xs">
@@ -203,9 +203,13 @@ export default function InventarioPage() {
                             </Badge>
                           ))}
                           {item.lotes.length > 3 && !expanded && (
-                            <span className="text-[10px] text-muted-foreground self-center">
+                            <button
+                              type="button"
+                              className="text-[10px] text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer self-center transition-colors"
+                              onClick={() => toggleExpand(key)}
+                            >
                               +{item.lotes.length - 3} más
-                            </span>
+                            </button>
                           )}
                         </div>
                       </TableCell>

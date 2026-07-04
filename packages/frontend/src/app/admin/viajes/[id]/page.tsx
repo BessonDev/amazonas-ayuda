@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin, Pencil, Image, Upload, X, FileText } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Truck, Calendar, User, MapPin, Pencil, Image, Upload, X, FileText, CheckCircle2 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -52,6 +52,12 @@ interface ViajeDetalle {
       producto?: { id: number; nombre: string }
       donante?: { nombre: string }
     }
+  }>
+  recepciones?: Array<{
+    id: number
+    fecha: string
+    fotoRecepcionUrl: string | null
+    responsable?: { id: number; nombre: string }
   }>
 }
 
@@ -233,10 +239,10 @@ export default function ViajeDetailPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm">
-              Salida: <span className="font-semibold">{viaje.fechaSalida ? new Date(viaje.fechaSalida).toLocaleDateString() : '—'}</span>
+              Salida: <span className="font-semibold">{viaje.fechaSalida ? new Date(viaje.fechaSalida).toLocaleDateString('es', { timeZone: 'UTC' }) : '—'}</span>
             </p>
             <p className="text-sm mt-1">
-              Estimada: <span className="font-semibold">{viaje.fechaEstimada ? new Date(viaje.fechaEstimada).toLocaleDateString() : '—'}</span>
+              Estimada: <span className="font-semibold">{viaje.fechaEstimada ? new Date(viaje.fechaEstimada).toLocaleDateString('es', { timeZone: 'UTC' }) : '—'}</span>
             </p>
           </CardContent>
         </Card>
@@ -308,6 +314,46 @@ export default function ViajeDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {viaje.recepciones && viaje.recepciones.length > 0 && viaje.recepciones[0] && (
+        <Card className="relative overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50/50 to-transparent">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CheckCircle2 className="size-4 text-blue-600" />
+              Recepción
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {viaje.recepciones.map((rec) => (
+              <div key={rec.id} className="space-y-2">
+                <p className="text-sm">
+                  Recibido el{' '}
+                  <span className="font-semibold">
+                    {new Date(rec.fecha).toLocaleString()}
+                  </span>
+                  {rec.responsable && (
+                    <> por <span className="font-semibold">{rec.responsable.nombre}</span></>
+                  )}
+                </p>
+                {rec.fotoRecepcionUrl && (
+                  <a
+                    href={rec.fotoRecepcionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mt-2"
+                  >
+                    <img
+                      src={rec.fotoRecepcionUrl}
+                      alt="Foto de recepción"
+                      className="max-h-48 rounded-lg border object-contain bg-muted"
+                    />
+                  </a>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-3">

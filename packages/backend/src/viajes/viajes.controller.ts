@@ -72,6 +72,7 @@ export class ViajesController {
     return this.viajesService.recibir(id, dto.detallesRecepcion, {
       observaciones: dto.observaciones,
       user,
+      fotoRecepcionUrl: dto.fotoRecepcionUrl,
     })
   }
 

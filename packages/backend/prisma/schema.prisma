@@ -370,6 +370,7 @@ model Recepcion {
   id          Int      @id @default(autoincrement())
   fecha       DateTime @default(now())
   observaciones String?
+  fotoRecepcionUrl String? @map("foto_recepcion_url")
   createdAt   DateTime @default(now()) @map("created_at")
 
   viajeId     Int

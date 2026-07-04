@@ -35,7 +35,7 @@ export class PublicoService {
         ubicacion: { select: { id: true, nombre: true } },
         detalles: {
           include: {
-            producto: { select: { id: true, nombre: true, unidad: true } },
+            producto: { select: { id: true, nombre: true, unidad: true, categoria: { select: { icono: true } } } },
           },
         },
       },
@@ -56,6 +56,7 @@ export class PublicoService {
         producto: d.producto.nombre,
         productoId: d.producto.id,
         unidad: d.producto.unidad,
+        icono: d.producto.categoria?.icono ?? null,
         meta: d.meta,
         recibido: d.recibido,
         pct: d.meta > 0 ? Math.round((d.recibido / d.meta) * 100) : 0,
@@ -66,7 +67,7 @@ export class PublicoService {
 
   async viajes() {
     const items = await this.prisma.viaje.findMany({
-      where: { estado: { in: ['PLANIFICADO', 'EN_TRANSITO', 'RECEPCION_PARCIAL'] } },
+      where: { estado: { in: ['PLANIFICADO', 'EN_TRANSITO'] } },
       include: {
         origen: { select: { nombre: true } },
         destino: { select: { nombre: true } },

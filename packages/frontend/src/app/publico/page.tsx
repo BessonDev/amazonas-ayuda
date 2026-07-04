@@ -548,7 +548,7 @@ function SolicitudesVisual() {
                     {s.productos?.map((p: any) => (
                       <div key={p.id} className="bg-[#FEFCF3] rounded-xl p-3.5 border border-[#e8e0d0] group-hover:border-[#D4A373]/10 transition-colors">
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-semibold text-sm text-[#1B4332]">{p.producto}</span>
+                          <span className="font-semibold text-sm text-[#1B4332]">{p.icono && <span className="mr-1.5">{p.icono}</span>}{p.producto}</span>
                           <span className="text-xs font-medium text-[#5c4f3d] tabular-nums">
                             <span className="text-[#1B4332] font-bold">{p.recibido}</span>
                             <span className="text-[#a09585]">/{p.meta} {UNIDAD_MEDIDA_ABREV[p.unidad] ?? p.unidad.toLowerCase()}</span>
@@ -661,13 +661,13 @@ function ViajesActivos() {
                   {v.fechaSalida && (
                     <span className="inline-flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#2D6A4F]" />
-                      Sale: {new Date(v.fechaSalida).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      Sale: {new Date(v.fechaSalida).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' })}
                     </span>
                   )}
                   {v.fechaEstimada && (
                     <span className="inline-flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-[#D4A373]" />
-                      Llega: {new Date(v.fechaEstimada).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      Llega: {new Date(v.fechaEstimada).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' })}
                     </span>
                   )}
                 </div>

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useRole } from '@/hooks/use-role'
 import { toast } from 'sonner'
 import { formatLabel, PRIORIDAD_SOLICITUD_LABELS, UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
 
@@ -97,6 +98,7 @@ export default function SolicitudDetailPage() {
   const params = useParams()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { isResponsable } = useRole()
   const [editValues, setEditValues] = useState<Record<number, string>>({})
 
   const { data: solicitud, isLoading } = useQuery<SolicitudDetalle>({
@@ -340,33 +342,35 @@ export default function SolicitudDetailPage() {
                         <p className="text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5 italic">{det.descripcion}</p>
                       )}
 
-                      <div className="flex items-center gap-2 pt-1 border-t border-dashed">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={det.meta}
-                          className="w-20 h-8 text-xs"
-                          placeholder="Recibido"
-                          value={editValues[det.id] ?? ''}
-                          onChange={(e) =>
-                            setEditValues((prev) => ({ ...prev, [det.id]: e.target.value }))
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleSaveRecibido(det.id)
+                      {!isResponsable && (
+                        <div className="flex items-center gap-2 pt-1 border-t border-dashed">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={det.meta}
+                            className="w-20 h-8 text-xs"
+                            placeholder="Recibido"
+                            value={editValues[det.id] ?? ''}
+                            onChange={(e) =>
+                              setEditValues((prev) => ({ ...prev, [det.id]: e.target.value }))
                             }
-                          }}
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs"
-                          disabled={mutation.isPending}
-                          onClick={() => handleSaveRecibido(det.id)}
-                        >
-                          Actualizar
-                        </Button>
-                      </div>
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleSaveRecibido(det.id)
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            disabled={mutation.isPending}
+                            onClick={() => handleSaveRecibido(det.id)}
+                          >
+                            Actualizar
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )
