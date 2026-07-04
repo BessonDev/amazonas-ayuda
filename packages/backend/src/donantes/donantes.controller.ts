@@ -32,14 +32,14 @@ export class DonantesController {
   }
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Crear donante' })
   crear(@Body() dto: CreateDonanteDto) {
     return this.donantesService.crear(dto)
   }
 
   @Patch(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Actualizar donante' })
   actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateDonanteDto) {
     return this.donantesService.actualizar(id, dto)

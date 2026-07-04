@@ -33,7 +33,7 @@ export default function DonantesPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canManage, canDelete } = useRole()
+  const { canManageDonantes, canDeleteDonantes } = useRole()
 
   const { data: donantes = [], isLoading } = useQuery({
     queryKey: ['donantes'],
@@ -70,7 +70,7 @@ export default function DonantesPage() {
           <h1 className="text-2xl font-bold tracking-tight">Donantes</h1>
           <p className="text-muted-foreground">Gestión de donantes</p>
         </div>
-        {canManage && (
+        {canManageDonantes && (
           <Button onClick={openCreate}>
             <Plus className="size-4" />
             Nuevo Donante
@@ -127,12 +127,12 @@ export default function DonantesPage() {
                     <TableCell>{donante.telefono ?? '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {canManage && (
-                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(donante)}>
-                            <Edit className="size-4" />
-                          </Button>
-                        )}
-                        {canDelete && (
+{canManageDonantes && (
+          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(donante)}>
+            <Edit className="size-4" />
+          </Button>
+        )}
+        {canDeleteDonantes && (
                           <Button
                             variant="ghost"
                             size="icon-sm"

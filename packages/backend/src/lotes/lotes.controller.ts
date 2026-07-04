@@ -7,6 +7,7 @@ import { UpdateLoteDto } from './dto/update-lote.dto'
 import { TransferirLotesDto } from './dto/transferir-lotes.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
+import { CurrentUser } from '../common/decorators/current-user.decorator'
 
 @ApiTags('Lotes')
 @ApiBearerAuth()
@@ -16,10 +17,10 @@ export class LotesController {
   constructor(private readonly lotesService: LotesService) {}
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Crear lote (genera código y QR automáticamente)' })
-  crear(@Body() dto: CreateLoteDto) {
-    return this.lotesService.crear(dto)
+  crear(@Body() dto: CreateLoteDto, @CurrentUser() user: any) {
+    return this.lotesService.crear(dto, user)
   }
 
   @Post('transferir')
@@ -44,16 +45,16 @@ export class LotesController {
   }
 
   @Patch(':id')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Actualizar lote' })
-  actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLoteDto) {
-    return this.lotesService.actualizar(id, dto)
+  actualizar(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLoteDto, @CurrentUser() user: any) {
+    return this.lotesService.actualizar(id, dto, user)
   }
 
   @Delete(':id')
-  @Roles('ADMINISTRADOR')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Eliminar lote' })
-  eliminar(@Param('id', ParseIntPipe) id: number) {
-    return this.lotesService.eliminar(id)
+  eliminar(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: any) {
+    return this.lotesService.eliminar(id, user)
   }
 }

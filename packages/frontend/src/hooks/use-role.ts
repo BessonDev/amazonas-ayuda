@@ -14,8 +14,10 @@ export function useRole() {
     isOperator: rol === 'OPERADOR_INVENTARIO',
     isResponsable: rol === 'RESPONSABLE_DESTINO',
     canManage: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
-    canDelete: rol === 'ADMINISTRADOR',
+    canDelete: ['ADMINISTRADOR', 'OPERADOR_INVENTARIO'].includes(rol),
     canTransfer: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canChangeStatus: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
-  }
+    canManageDonantes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
+    canDeleteDonantes: ['ADMINISTRADOR'].includes(rol),
+}
 }

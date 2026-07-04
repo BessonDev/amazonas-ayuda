@@ -40,6 +40,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useRole } from '@/hooks/use-role'
+import { useAuth } from '@/contexts/auth-context'
 import { toast } from 'sonner'
 import { formatEstadoLote } from '@/lib/enums'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -60,6 +61,7 @@ interface Lote {
   producto?: { nombre: string }
   ubicacion?: { nombre: string }
   campania?: { nombre: string }
+  responsableId?: number | null
 }
 
 interface Ubicacion {
@@ -91,7 +93,21 @@ export default function LotesPage() {
     onConfirm: () => void
   } | null>(null)
   const queryClient = useQueryClient()
-  const { canManage, canDelete, canTransfer } = useRole()
+  const { usuario } = useAuth()
+  const { canManage, canDelete, canTransfer, isOperator } = useRole()
+
+  // Helper to check if user can edit/delete this lote
+  const puedeEditar = (lote: Lote) => {
+    if (canManage) return true
+    if (isOperator) return lote.responsableId === usuario?.id
+    return false
+  }
+
+  const puedeEliminar = (lote: Lote) => {
+    if (canManage) return true
+    if (isOperator) return lote.responsableId === usuario?.id
+    return false
+  }
 
   const { data: lotes = [], isLoading } = useQuery({
     queryKey: ['lotes'],
@@ -302,12 +318,12 @@ export default function LotesPage() {
                               <QrCode className="size-4" />
                             </Button>
                           )}
-                          {canManage && (
+                          {puedeEditar(lote) && (
                             <Button variant="ghost" size="icon-sm" onClick={() => { setEditLote(lote); setFormOpen(true) }}>
                               <Edit className="size-4" />
                             </Button>
                           )}
-                          {canDelete && (
+                          {puedeEliminar(lote) && (
                             <Button variant="ghost" size="icon-sm" onClick={() => setConfirmState({
                               open: true,
                               title: 'Eliminar lote',

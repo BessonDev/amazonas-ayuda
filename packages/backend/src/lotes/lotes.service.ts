@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateLoteDto } from './dto/create-lote.dto'
 import { UpdateLoteDto } from './dto/update-lote.dto'
@@ -43,7 +43,7 @@ export class LotesService {
     return lote
   }
 
-  async crear(dto: CreateLoteDto) {
+  async crear(dto: CreateLoteDto, user?: { id: number; rol: string }) {
     const codigo = this.generarCodigo()
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
     const qrData = `${baseUrl}/lotes/${codigo}`
@@ -60,6 +60,7 @@ export class LotesService {
           ubicacionId: dto.ubicacionId,
           productoId: dto.productoId,
           donanteId: dto.donanteId,
+          responsableId: user?.id, // Track who created it
         },
         include: this.include,
       })
@@ -137,8 +138,14 @@ export class LotesService {
     }
   }
 
-  async actualizar(id: number, dto: UpdateLoteDto) {
-    await this.obtener(id)
+  async actualizar(id: number, dto: UpdateLoteDto, user?: { id: number; rol: string }) {
+    const lote = await this.obtener(id)
+
+    // OPERADOR_INVENTARIO solo puede actualizar sus propios lotes
+    if (user?.rol === 'OPERADOR_INVENTARIO' && lote.responsableId !== user.id) {
+      throw new ForbiddenException('Solo puede actualizar lotes que usted creó')
+    }
+
     return this.prisma.lote.update({
       where: { id },
       data: dto,
@@ -215,12 +222,17 @@ export class LotesService {
     })
   }
 
-  async eliminar(id: number) {
+  async eliminar(id: number, user?: { id: number; rol: string }) {
     const lote = await this.prisma.lote.findUnique({
       where: { id },
       include: { detalleViajes: true, detalleRecepciones: true },
     })
     if (!lote) throw new NotFoundException('Lote no encontrado')
+
+    // OPERADOR_INVENTARIO solo puede eliminar sus propios lotes
+    if (user?.rol === 'OPERADOR_INVENTARIO' && lote.responsableId !== user.id) {
+      throw new ForbiddenException('Solo puede eliminar lotes que usted creó')
+    }
 
     const tieneTrazabilidad = lote.detalleViajes.length > 0 || lote.detalleRecepciones.length > 0
 
