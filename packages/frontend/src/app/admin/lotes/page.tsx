@@ -167,7 +167,7 @@ export default function LotesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
           <p className="text-muted-foreground">Gestión de inventario y lotes de productos</p>
@@ -176,6 +176,7 @@ export default function LotesPage() {
           {canTransfer && (
             <Button
               variant="outline"
+              size="sm"
               disabled={selectedIds.size === 0}
               onClick={() => { setDestinoId(''); setObservaciones(''); setTransferOpen(true) }}
             >
@@ -184,7 +185,7 @@ export default function LotesPage() {
             </Button>
           )}
           {canCreateLotes && (
-            <Button onClick={() => setFormOpen(true)}>
+            <Button size="sm" onClick={() => setFormOpen(true)}>
               <Plus className="size-4" />
               Nuevo Lote
             </Button>
@@ -235,7 +236,7 @@ export default function LotesPage() {
             {filtered.length} lote(s) encontrado(s)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

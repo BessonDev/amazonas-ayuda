@@ -156,7 +156,7 @@ export default function InventarioPage() {
             <span className="font-semibold text-foreground">{totalLotes}</span> lote(s)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

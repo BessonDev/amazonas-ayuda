@@ -148,13 +148,13 @@ export default function ArchivosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Imágenes</h1>
           <p className="text-muted-foreground">Imágenes del sistema</p>
         </div>
         {canManage && (
-          <Button onClick={() => setUploadOpen(true)}>
+          <Button size="sm" onClick={() => setUploadOpen(true)}>
             <Upload className="size-4 mr-2" />
             Subir imagen
           </Button>
@@ -170,7 +170,7 @@ export default function ArchivosPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             <FileUpload
               accept="image/*"
               maxSize={10}
@@ -238,7 +238,7 @@ export default function ArchivosPage() {
             {filtered.length} imagen(es) encontrada(s)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

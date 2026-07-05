@@ -486,8 +486,8 @@ function SolicitudesVisual() {
                 <div className="p-6 sm:p-7">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <h3 className="heading text-xl text-[#1B4332] truncate">{s.titulo}</h3>
+                      <div className="flex items-start gap-2 mb-1.5 flex-wrap">
+                        <h3 className="heading text-xl text-[#1B4332]">{s.titulo}</h3>
                         {pc && (
                           <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${pc.classes}`}>
                             <PI className="size-3" />
@@ -615,7 +615,7 @@ function ViajesActivos() {
           <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-[#D4A373] mb-4 bg-[#D4A373]/8 px-4 py-1.5 rounded-full">
             En movimiento
           </span>
-          <h2 className="heading text-4xl sm:text-5xl text-[#1B4332] mb-4">Viajes activos y programados</h2>
+          <h2 className="heading text-2xl sm:text-5xl text-[#1B4332] mb-4">Viajes activos y programados</h2>
           <p className="text-[#5c4f3d] max-w-xl mx-auto">
             Conoce las rutas de distribución desde nuestra localidad hasta los centros de acopio en las ciudades afectadas.
           </p>
@@ -625,13 +625,13 @@ function ViajesActivos() {
           {data.map((v: any) => {
             const cfg = estadoViajeCfg[v.estado]
             return (
-              <div key={v.id} className={`group rounded-2xl border ${cfg?.cardBg || 'bg-[#FEFCF3]'} ${cfg?.border || 'border-[#e8e0d0]'} hover:shadow-lg transition-all duration-300 p-5 sm:p-6`}>
+              <div key={v.id} className={`group rounded-2xl border ${cfg?.cardBg || 'bg-[#FEFCF3]'} ${cfg?.border || 'border-[#e8e0d0]'} hover:shadow-lg transition-all duration-300 p-5 sm:p-6 overflow-hidden`}>
                 <div className="flex items-start gap-3 mb-4">
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-[#a09585] font-mono mb-1">{v.codigo}</p>
-                    <div className="text-[#1B4332]">
-                      <p className="heading text-lg truncate">{v.origen}</p>
-                      <p className="heading text-lg truncate flex items-center gap-1.5">
+                    <div className="text-[#1B4332] break-words">
+                      <p className="heading text-lg">{v.origen}</p>
+                      <p className="heading text-lg flex items-center gap-1.5">
                         <ArrowRight className="size-4 text-[#D4A373] shrink-0" />
                         <span>{v.destino}</span>
                       </p>

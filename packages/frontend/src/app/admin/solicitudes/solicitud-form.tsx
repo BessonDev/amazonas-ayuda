@@ -182,7 +182,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
               <Label htmlFor="titulo">Título</Label>
               <Input
@@ -282,8 +282,8 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
             </div>
 
             {detalles.map((d, i) => (
-              <div key={d.key} className="flex gap-3 items-start p-3 border rounded-lg">
-                <div className="flex-1 space-y-2">
+              <div key={d.key} className="flex flex-col sm:flex-row gap-3 items-start p-3 border rounded-lg">
+                <div className="flex-1 w-full sm:w-auto space-y-2">
                   <Label className="text-xs">Producto</Label>
                   <div className="flex gap-2">
                     <Combobox
@@ -305,7 +305,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                   </div>
                 </div>
 
-                <div className="w-24 space-y-2">
+                <div className="w-full sm:w-24 space-y-2">
                   <Label className="text-xs">Meta</Label>
                   <Input
                     type="number"
@@ -315,7 +315,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                   />
                 </div>
 
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 w-full sm:w-auto space-y-2">
                   <Label className="text-xs">Descripción</Label>
                   <Input
                     value={d.descripcion}
@@ -329,7 +329,7 @@ export function SolicitudForm({ open, onOpenChange }: Props) {
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="mt-6 shrink-0"
+                    className="self-end sm:mt-6 shrink-0"
                     onClick={() => removeDetalle(d.key)}
                   >
                     <Trash2 className="size-4 text-destructive" />

@@ -258,12 +258,13 @@ export default function ViajeDetailPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4 text-lg">
-            <Badge variant="secondary" className="text-sm px-3 py-1.5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-lg">
+            <Badge variant="secondary" className="text-sm px-3 py-1.5 max-w-full whitespace-normal break-words">
               {viaje.origen?.nombre ?? '?'}
             </Badge>
-            <ArrowRight className="size-5 text-muted-foreground" />
-            <Badge variant="secondary" className="text-sm px-3 py-1.5">
+            <ArrowRight className="size-5 text-muted-foreground shrink-0 hidden sm:block" />
+            <ArrowRight className="size-4 text-muted-foreground rotate-90 sm:hidden" />
+            <Badge variant="secondary" className="text-sm px-3 py-1.5 max-w-full whitespace-normal break-words">
               {viaje.destino?.nombre ?? '?'}
             </Badge>
           </div>

@@ -11,9 +11,10 @@ interface FileUploadProps {
   disabled?: boolean
   value: File | null
   onChange: (file: File | null) => void
+  className?: string
 }
 
-export function FileUpload({ accept = 'image/*', maxSize = 10, disabled, value, onChange }: FileUploadProps) {
+export function FileUpload({ accept = 'image/*', maxSize = 10, disabled, value, onChange, className }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -54,12 +55,12 @@ export function FileUpload({ accept = 'image/*', maxSize = 10, disabled, value, 
   }
 
   return (
-    <div className="space-y-3">
+    <div className={cn('space-y-3', className)}>
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         className={cn(
-          'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors',
+          'relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 sm:p-6 transition-colors',
           value
             ? 'border-green-300 bg-green-50/50'
             : 'border-muted-foreground/25 hover:border-muted-foreground/50 bg-muted/30',
@@ -85,13 +86,13 @@ export function FileUpload({ accept = 'image/*', maxSize = 10, disabled, value, 
           </div>
         ) : value && !preview ? (
           <div className="flex items-center gap-2 text-sm">
-            <File className="size-5 text-muted-foreground" />
-            <span className="font-medium truncate max-w-[200px]">{value.name}</span>
+            <File className="size-5 text-muted-foreground shrink-0" />
+            <span className="font-medium truncate max-w-[160px] sm:max-w-[200px]">{value.name}</span>
             <Button
               type="button"
               variant="ghost"
               size="icon-sm"
-              className="size-6"
+              className="size-6 shrink-0"
               onClick={() => { onChange(null); setPreview(null); if (inputRef.current) inputRef.current.value = '' }}
             >
               <X className="size-3" />
@@ -100,7 +101,7 @@ export function FileUpload({ accept = 'image/*', maxSize = 10, disabled, value, 
         ) : (
           <>
             <Upload className="size-8 text-muted-foreground mb-2" />
-            <p className="text-sm font-medium">Arrastra una imagen o haz click para subir</p>
+            <p className="text-sm font-medium text-center">Arrastra una imagen o haz click para subir</p>
             <p className="text-xs text-muted-foreground mt-1">
               PNG, JPG, WEBP hasta {maxSize}MB
             </p>
