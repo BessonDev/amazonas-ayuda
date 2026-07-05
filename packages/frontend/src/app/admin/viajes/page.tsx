@@ -86,13 +86,13 @@ export default function ViajesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Viajes</h1>
           <p className="text-muted-foreground">Gestión de viajes y transportes</p>
         </div>
         {canManage && (
-          <Button onClick={() => setFormOpen(true)}>
+          <Button size="sm" onClick={() => setFormOpen(true)}>
             <Plus className="size-4 mr-2" />
             Nuevo viaje
           </Button>
@@ -158,7 +158,7 @@ export default function ViajesPage() {
             {filtered.length} viaje(s) encontrado(s)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

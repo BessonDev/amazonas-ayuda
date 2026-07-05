@@ -196,7 +196,7 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="max-w-full sm:max-w-xl max-h-[90dvh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle2 className="size-5 text-emerald-500" />
@@ -234,7 +234,7 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-5 min-w-0">
             <div>
               <Label>Lotes a recibir</Label>
               <div className="mt-2 space-y-3">
@@ -320,14 +320,14 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
                                 key={opt.key}
                                 type="button"
                                 data-active={active}
-                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 text-xs font-medium ring-1 ring-inset transition-all cursor-pointer
+                                className={`flex flex-1 items-center justify-center gap-1 rounded-md border px-1.5 py-1 text-[11px] sm:text-xs font-medium ring-1 ring-inset transition-all cursor-pointer sm:gap-1.5 sm:px-2 sm:py-1.5
                                   ${active ? `${opt.color} ${opt.bg}` : 'text-muted-foreground border-transparent hover:bg-muted/50'}
                                 `}
                                 onClick={() =>
                                   cambiarEstado(det.lote.id, opt.key, det.cantidad)
                                 }
                               >
-                                <Icon className="size-3.5" />
+                                <Icon className="size-3 sm:size-3.5" />
                                 {opt.label}
                               </button>
                             )
@@ -335,7 +335,7 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
                         </div>
 
                         {estado === 'parcial' && (
-                          <div className="mt-2 flex items-center gap-3">
+                          <div className="mt-2 grid grid-cols-3 gap-2 sm:gap-3">
                             <div className="flex-1">
                               <Label className="text-xs text-muted-foreground">
                                 Buen estado
@@ -418,8 +418,8 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
           </div>
         )}
 
-        <DialogFooter className="flex items-center justify-between gap-4">
-          <div className="text-xs text-muted-foreground">
+        <DialogFooter className="flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs text-muted-foreground text-center sm:text-left">
             {resumen && resumen.parciales + resumen.noRecibidos > 0
               ? 'El viaje quedará como RECEPCIÓN_PARCIAL'
               : 'Todos los lotes completos → COMPLETADO'}
@@ -427,11 +427,13 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              className="flex-1 sm:flex-none"
               onClick={() => onOpenChange(false)}
             >
               Cancelar
             </Button>
             <Button
+              className="flex-1 sm:flex-none"
               disabled={
                 lotes.length === 0 || mutation.isPending || cargando
               }
@@ -441,7 +443,7 @@ export function RecibirDialog({ viaje, onOpenChange }: RecibirDialogProps) {
                 <Loader2 className="size-4 mr-2 animate-spin" />
               )}
               <ArrowRight className="size-4 mr-2" />
-              Confirmar recepción
+              Confirmar
             </Button>
           </div>
         </DialogFooter>
