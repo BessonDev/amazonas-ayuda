@@ -502,6 +502,11 @@ Este proyecto está bajo la licencia **MIT**.
   - Al crear lote FALTANTE se genera un movimiento `AJUSTE` que descuenta del inventario de origen
   - El faltante queda reflejado en el ledger, permitiendo cerrar el viaje a `COMPLETADO` limpiamente
 
+- **fix(backend):** Movimiento AJUSTE ahora actualiza `lote.cantidad` realmente
+  - Al crear un AJUSTE desde el formulario de movimientos, descuenta `lote.cantidad`
+  - Si el lote llega a 0, se oculta automáticamente del inventario (sin borrarse)
+  - Permite registrar pérdidas/daños con observación y que el stock se refleje correctamente
+
 ### 2026-07-03
 
 - **fix(backend):** restore `return` in `ArchivosService.eliminar()` y `MovimientosInventarioService.eliminar()` — los métodos no devolvían el resultado, causando que el frontend reciba body vacío, el `onSuccess` de la mutación nunca se disparara y no se mostrara el toast ni se invalidara la query.

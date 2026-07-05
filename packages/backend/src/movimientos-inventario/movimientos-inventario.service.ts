@@ -32,29 +32,44 @@ export class MovimientosInventarioService {
   }
 
   async crear(dto: CreateMovimientoDto) {
-    const ultimo = await this.prisma.movimientoInventario.findFirst({
-      where: { loteId: dto.loteId, ubicacionId: dto.ubicacionId },
-      orderBy: { createdAt: 'desc' },
-    })
+    return this.prisma.$transaction(async (tx) => {
+      const ultimo = await tx.movimientoInventario.findFirst({
+        where: { loteId: dto.loteId, ubicacionId: dto.ubicacionId },
+        orderBy: { createdAt: 'desc' },
+      })
 
-    const saldoAnterior = ultimo?.saldoNuevo ?? 0
-    const esEntrada = TIPOS_ENTRADA.includes(dto.tipo)
-    const saldoNuevo = esEntrada
-      ? saldoAnterior + dto.cantidad
-      : saldoAnterior - dto.cantidad
+      const saldoAnterior = ultimo?.saldoNuevo ?? 0
+      const esEntrada = TIPOS_ENTRADA.includes(dto.tipo)
+      const saldoNuevo = esEntrada
+        ? saldoAnterior + dto.cantidad
+        : saldoAnterior - dto.cantidad
 
-    return this.prisma.movimientoInventario.create({
-      data: {
-        tipo: dto.tipo as any,
-        cantidad: dto.cantidad,
-        saldoAnterior,
-        saldoNuevo,
-        observaciones: dto.observaciones,
-        loteId: dto.loteId,
-        ubicacionId: dto.ubicacionId,
-        campaniaId: dto.campaniaId,
-      },
-      include: this.include,
+      const movimiento = await tx.movimientoInventario.create({
+        data: {
+          tipo: dto.tipo as any,
+          cantidad: dto.cantidad,
+          saldoAnterior,
+          saldoNuevo,
+          observaciones: dto.observaciones,
+          loteId: dto.loteId,
+          ubicacionId: dto.ubicacionId,
+          campaniaId: dto.campaniaId,
+        },
+        include: this.include,
+      })
+
+      // AJUSTE: actualizar cantidad del lote
+      if (dto.tipo === 'AJUSTE') {
+        const lote = await tx.lote.findUnique({ where: { id: dto.loteId } })
+        if (lote) {
+          await tx.lote.update({
+            where: { id: dto.loteId },
+            data: { cantidad: Math.max(0, lote.cantidad - dto.cantidad) },
+          })
+        }
+      }
+
+      return movimiento
     })
   }
 
