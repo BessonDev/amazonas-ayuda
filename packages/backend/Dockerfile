@@ -14,7 +14,7 @@ COPY packages/backend/ packages/backend/
 RUN cd packages/shared && npx tsc
 RUN cd packages/backend && npx prisma generate && npx nest build
 
-RUN pnpm deploy --filter=@donaciones/backend /prod
+RUN pnpm deploy --legacy --filter=@donaciones/backend /prod
 
 FROM node:22-alpine
 RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
