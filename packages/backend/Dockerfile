@@ -30,7 +30,8 @@ RUN cd packages/backend && npx prisma generate
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
-RUN rm -rf node_modules/prisma node_modules/.pnpm/prisma@* node_modules/.pnpm/@prisma+engines@* node_modules/.pnpm/@prisma+get-platform@* node_modules/.pnpm/@prisma+fetch-engine@* node_modules/.pnpm/@prisma+schema-engine-*
+COPY packages/backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 4000
-CMD ["node", "packages/backend/dist/src/main"]
+ENTRYPOINT ["docker-entrypoint.sh"]
