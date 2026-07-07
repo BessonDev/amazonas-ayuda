@@ -63,6 +63,7 @@ export enum PrioridadSolicitud {
 
 export enum EstadoSolicitud {
   ABIERTA = 'ABIERTA',
+  APROBADA = 'APROBADA',
   EN_PROCESO = 'EN_PROCESO',
   COMPLETADA = 'COMPLETADA',
   CANCELADA = 'CANCELADA',

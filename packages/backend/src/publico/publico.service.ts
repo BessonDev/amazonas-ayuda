@@ -27,7 +27,7 @@ export class PublicoService {
 
   async solicitudes() {
     const items = await this.prisma.solicitud.findMany({
-      where: { estado: { in: ['ABIERTA', 'EN_PROCESO', 'COMPLETADA'] } },
+      where: { estado: { in: ['APROBADA', 'EN_PROCESO', 'COMPLETADA'] } },
       include: {
         campania: { select: { nombre: true } },
         ubicacion: { select: { id: true, nombre: true } },

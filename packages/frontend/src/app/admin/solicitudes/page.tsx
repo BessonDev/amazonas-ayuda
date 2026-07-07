@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Trash2, Eye, Tag, User, MapPin, Calendar, Activity, AlertTriangle, ClipboardList, Settings2 } from 'lucide-react'
+import { Plus, Search, Trash2, Eye, CheckCircle2, Tag, User, MapPin, Calendar, Activity, AlertTriangle, ClipboardList, Settings2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { SolicitudForm } from './solicitud-form'
 import { api } from '@/lib/api'
@@ -43,7 +43,7 @@ export default function SolicitudesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [filtroPrioridad, setFiltroPrioridad] = useState<string | null>(null)
   const queryClient = useQueryClient()
-  const { canCreateSolicitudes, canDeleteSolicitudes } = useRole()
+  const { canCreateSolicitudes, canDeleteSolicitudes, canAprobarSolicitudes } = useRole()
 
   const [confirmState, setConfirmState] = useState<{
     open: boolean
@@ -63,6 +63,17 @@ export default function SolicitudesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
       toast.success('Solicitud eliminada')
+    },
+  })
+
+  const aprobarMutation = useMutation({
+    mutationFn: (id: number) => api.patch(`/solicitudes/${id}/aprobar`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitudes'] })
+      toast.success('Solicitud aprobada')
+    },
+    onError: (err: Error) => {
+      toast.error(err.message)
     },
   })
 
@@ -214,6 +225,18 @@ export default function SolicitudesPage() {
                           >
                             <Eye className="size-4" />
                           </Button>
+                          {canAprobarSolicitudes && sol.estado === 'ABIERTA' && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                aprobarMutation.mutate(sol.id)
+                              }}
+                            >
+                              <CheckCircle2 className="size-4 text-emerald-600" />
+                            </Button>
+                          )}
                           {canDeleteSolicitudes && (
                             <Button
                               variant="ghost"

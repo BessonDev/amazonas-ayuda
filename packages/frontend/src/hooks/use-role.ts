@@ -24,6 +24,7 @@ export function useRole() {
     canManageDonantes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
     canDeleteDonantes: ['ADMINISTRADOR'].includes(rol),
     canCreateSolicitudes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO'].includes(rol),
+    canAprobarSolicitudes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO'].includes(rol),
     canCreateLotes: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
     canCreateProductos: ['ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO'].includes(rol),
 }

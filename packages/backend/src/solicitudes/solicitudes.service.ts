@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateSolicitudDto } from './dto/create-solicitud.dto'
 import { UpdateSolicitudDto } from './dto/update-solicitud.dto'
@@ -76,6 +76,18 @@ export class SolicitudesService {
   async eliminar(id: number) {
     await this.obtener(id)
     await this.prisma.solicitud.delete({ where: { id } })
+  }
+
+  async aprobar(id: number) {
+    const solicitud = await this.obtener(id)
+    if (solicitud.estado !== 'ABIERTA') {
+      throw new ConflictException('Solo se pueden aprobar solicitudes en estado ABIERTA')
+    }
+    return this.prisma.solicitud.update({
+      where: { id },
+      data: { estado: 'APROBADA' },
+      include: this.include,
+    })
   }
 
   async actualizarRecibidoDetalle(

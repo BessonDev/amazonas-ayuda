@@ -61,6 +61,7 @@ enum PrioridadSolicitud {
 
 enum EstadoSolicitud {
   ABIERTA
+  APROBADA
   EN_PROCESO
   COMPLETADA
   CANCELADA

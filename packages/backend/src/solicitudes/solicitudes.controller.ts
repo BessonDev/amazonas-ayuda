@@ -50,6 +50,13 @@ export class SolicitudesController {
     return this.solicitudesService.eliminar(id)
   }
 
+  @Patch(':id/aprobar')
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @ApiOperation({ summary: 'Aprobar solicitud (cambia estado a APROBADA)' })
+  aprobar(@Param('id', ParseIntPipe) id: number) {
+    return this.solicitudesService.aprobar(id)
+  }
+
   @Patch(':id/detalles/:detalleId')
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Actualizar recibido de un detalle de solicitud' })
