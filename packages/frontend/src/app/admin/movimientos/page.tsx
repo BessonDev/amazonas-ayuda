@@ -76,7 +76,7 @@ export default function MovimientosPage() {
           <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
           <p className="text-muted-foreground">Historial de movimientos de inventario</p>
         </div>
-        {hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO') && (
+        {hasRole('ADMINISTRADOR', 'COORDINADOR_LOGISTICO') && (
           <Button onClick={() => setFormOpen(true)}>
             <Plus className="size-4 mr-2" />
             Nuevo movimiento

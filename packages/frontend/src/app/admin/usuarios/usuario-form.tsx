@@ -1,5 +1,6 @@
 'use client'
 
+import { Eye, EyeOff } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -57,6 +58,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
   const [telefono, setTelefono] = useState('')
   const [rolId, setRolId] = useState('')
   const [ubicacionId, setUbicacionId] = useState('')
+  const [mostrarPassword, setMostrarPassword] = useState(false)
   const [error, setError] = useState('')
 
   const { data: roles = [] } = useQuery<Rol[]>({
@@ -152,7 +154,17 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
 
             <div className="space-y-2 col-span-2">
               <Label htmlFor="password">{esEdicion ? 'Nueva contraseña (opcional)' : 'Contraseña'}</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={esEdicion ? 'Dejar vacío para mantener' : 'Mínimo 6 caracteres'} required={!esEdicion} />
+              <div className="relative">
+                <Input id="password" type={mostrarPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={esEdicion ? 'Dejar vacío para mantener' : 'Mínimo 6 caracteres'} required={!esEdicion} className="pr-10" />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {mostrarPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
