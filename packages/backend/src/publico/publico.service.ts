@@ -6,13 +6,13 @@ export class PublicoService {
   constructor(private prisma: PrismaService) {}
 
   async stats() {
-    const [lotes, viajes, ubicaciones, donantes, solicitudesActivas] = await Promise.all([
+    const [lotes, viajes, ubicaciones, donantes, solicitudesAprobadas] = await Promise.all([
       this.prisma.lote.count({ where: { deletedAt: null } }),
       this.prisma.viaje.count({ where: { estado: 'COMPLETADO' } }),
       this.prisma.ubicacion.count(),
       this.prisma.donante.count(),
       this.prisma.solicitud.count({
-        where: { estado: { in: ['ABIERTA', 'EN_PROCESO'] } },
+        where: { estado: 'APROBADA' },
       }),
     ])
 
@@ -21,7 +21,7 @@ export class PublicoService {
       viajesCompletados: viajes,
       ubicaciones,
       donantes,
-      solicitudesActivas,
+      solicitudesAprobadas,
     }
   }
 

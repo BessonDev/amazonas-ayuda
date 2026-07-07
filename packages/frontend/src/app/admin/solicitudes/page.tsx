@@ -231,7 +231,13 @@ export default function SolicitudesPage() {
                               size="icon-sm"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                aprobarMutation.mutate(sol.id)
+                                setConfirmState({
+                                  open: true,
+                                  title: 'Aprobar solicitud',
+                                  description: `¿Estás seguro de aprobar la solicitud "${sol.titulo}"? Esto hará que sea visible públicamente.`,
+                                  variant: 'default',
+                                  onConfirm: () => aprobarMutation.mutate(sol.id),
+                                })
                               }}
                             >
                               <CheckCircle2 className="size-4 text-emerald-600" />

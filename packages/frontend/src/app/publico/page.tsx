@@ -131,7 +131,7 @@ export default function PublicoPage() {
         <div className="relative z-10 pb-8 sm:pb-16 px-6 max-w-6xl mx-auto w-full">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <StatCard
-              icon={Users} value={stats?.solicitudesActivas ?? 0} label="Solicitudes activas"
+              icon={Users} value={stats?.solicitudesAprobadas ?? 0} label="Solicitudes aprobadas"
               loading={!stats} accent="from-[#D4A373] to-[#c4955f]"
             />
             <StatCard
