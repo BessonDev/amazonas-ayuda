@@ -28,11 +28,22 @@ export default function LoginPage() {
       await login({ email, password });
       router.push("/admin/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+      setError(normalizarErrorLogin(err));
     } finally {
       setCargando(false);
     }
   };
+
+  function normalizarErrorLogin(err: unknown): string {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError"))
+      return "Error al conectar con el servidor. Verifica tu conexión.";
+    if (msg.includes("401") || msg.includes("no encontrado") || msg.includes("incorrecta") || msg.includes("credencial"))
+      return "Credenciales inválidas. Verifica tu correo y contraseña.";
+    if (msg.includes("500"))
+      return "Error interno del servidor. Intenta de nuevo más tarde.";
+    return msg || "Error al iniciar sesión";
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">

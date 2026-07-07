@@ -58,34 +58,32 @@ export default function DashboardPage() {
   })
 
   const enTransito = viajes.filter((v) => v.estado === 'EN_TRANSITO').length
-  const urgentes = solicitudes.filter(
-    (s) => (s.prioridad === 'URGENTE' || s.prioridad === 'ALTA') && (s.estado === 'ABIERTA' || s.estado === 'EN_PROCESO'),
-  ).length
+  const porAceptar = solicitudes.filter((s) => s.estado === 'ABIERTA').length
   const disponibles = lotes.filter((l) => l.estado === 'DISPONIBLE').length
   const completados = viajes.filter((v) => v.estado === 'COMPLETADO' || v.estado === 'RECEPCION_PARCIAL').length
 
-  const kpis: Array<{
-    label: string; value: number; icon: typeof Truck; href: string;
-    subtitle: string; variant: keyof typeof kpiVariants
-  }> = [
-    {
-      label: 'Viajes en tránsito', value: enTransito, icon: Truck, href: '/admin/viajes',
-      subtitle: 'Requieren seguimiento', variant: enTransito > 0 ? 'warning' : 'default',
-    },
-    {
-      label: 'Solicitudes urgentes', value: urgentes, icon: AlertTriangle, href: '/admin/solicitudes',
-      subtitle: urgentes > 0 ? 'Requieren atención inmediata' : 'Ninguna pendiente',
-      variant: urgentes > 0 ? 'danger' : 'success',
-    },
-    {
-      label: 'Stock disponible', value: disponibles, icon: Package, href: '/admin/lotes',
-      subtitle: 'Listos para asignar', variant: 'success',
-    },
-    {
-      label: 'Viajes completados', value: completados, icon: CheckCircle2, href: '/admin/viajes',
-      subtitle: 'Este período', variant: 'default',
-    },
-  ]
+    const kpis: Array<{
+        label: string; value: number; icon: typeof Truck; href: string;
+        subtitle: string; variant: keyof typeof kpiVariants
+    }> = [
+        {
+            label: 'Viajes en tránsito', value: enTransito, icon: Truck, href: '/admin/viajes',
+            subtitle: 'Requieren seguimiento', variant: enTransito > 0 ? 'warning' : 'default',
+        },
+        {
+            label: 'Solicitudes por aceptar', value: porAceptar, icon: AlertTriangle, href: '/admin/solicitudes',
+            subtitle: porAceptar > 0 ? 'Pendientes de aprobación' : 'Todas aprobadas',
+            variant: porAceptar > 0 ? 'warning' : 'success',
+        },
+        {
+            label: 'Stock disponible', value: disponibles, icon: Package, href: '/admin/lotes',
+            subtitle: 'Listos para asignar', variant: 'success',
+        },
+        {
+            label: 'Viajes completados', value: completados, icon: CheckCircle2, href: '/admin/viajes',
+            subtitle: 'Este período', variant: 'default',
+        },
+    ]
 
   const { isAdmin, hasRole } = useRole()
 
