@@ -98,7 +98,7 @@ export default function SolicitudDetailPage() {
   const params = useParams()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { isResponsable, isOperator, isCoord } = useRole()
+  const { isResponsable, isOperator, isCoord, isAdmin } = useRole()
   const [editValues, setEditValues] = useState<Record<number, string>>({})
 
   const { data: solicitud, isLoading } = useQuery<SolicitudDetalle>({
@@ -342,7 +342,7 @@ export default function SolicitudDetailPage() {
                         <p className="text-xs text-muted-foreground bg-muted/30 rounded px-2 py-1.5 italic">{det.descripcion}</p>
                       )}
 
-{!(isResponsable || isOperator || isCoord) && (
+{isAdmin && (
   <div className="flex items-center gap-2 pt-1 border-t border-dashed">
     <Input
       type="number"
