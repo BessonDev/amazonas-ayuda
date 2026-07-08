@@ -449,6 +449,25 @@ Este proyecto está bajo la licencia **MIT**.
 
 ## 📋 Changelog
 
+### 2026-07-07
+
+- **feat(backend+frontend):** Implementado flujo completo de aprobación de solicitudes
+  - Agregado estado `APROBADA` al `EstadoSolicitud` enum (entre ABIERTA y EN_PROCESO)
+  - Migración PostgreSQL: `ALTER TYPE "EstadoSolicitud" ADD VALUE 'APROBADA'`
+  - Endpoint `PATCH /solicitudes/:id/aprobar` para ADMINISTRADOR y COORDINADOR_LOGISTICO
+  - Endpoint público `/publico/solicitudes` ahora filtra solo `APROBADA`, `EN_PROCESO` y `COMPLETADA` (oculta ABIERTA)
+  - Interfaz de solicitudes: botón de confirmación con ícono CheckCircle2 para aprobar solicitudes ABIERTA
+  - Toast de éxito: "Solicitud aprobada" al completar la acción
+  - Hero estadística pública: "Unidades donadas" → "Solicitudes aprobadas" (cuenta solo donde estado = 'APROBADA')
+  - Botón "Nuevo movimiento" oculto para rol OPERADOR_INVENTARIO (solo ADMIN y COORD_LOGISTICO pueden crear movimientos)
+  - Login: tema visual amazonía (gradiente verde selva, glassmorphism, logo blanco con filtros)
+  - Login: manejo de errores amigable (mensajes para redes caídas, 401, 500 en lugar de "Failed to fetch")
+  - Login: spinner de carga al autenticar + ojo para mostrar/ocultar contraseña
+  - Detalle de solicitud: ocultados inputs de actualización de progreso para OPERADOR_INVENTARIO y COORDINADOR_LOGISTICO (solo ADMIN puede editar cantidades recibidas)
+  - Dashboard: KPI "Solicitudes urgentes" → "Solicitudes por aceptar" (cuenta de solicitudes en estado ABIERTA)
+  - Todos los cambios probados y compilados exitosamente
+
+
 ### 2026-07-04
 
 - **fix(backend):** RESPONSABLE_DESTINO puede crear productos desde el formulario de solicitud
