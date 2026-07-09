@@ -36,7 +36,6 @@ export class MinioService implements OnModuleInit {
   }
 
   async upload(filename: string, buffer: Buffer, mimeType: string): Promise<string> {
-    await this.ensureBucket()
     await this.client.putObject(this.bucket, filename, buffer, buffer.length, {
       'Content-Type': mimeType,
     })
@@ -44,7 +43,6 @@ export class MinioService implements OnModuleInit {
   }
 
   async getStream(filename: string) {
-    await this.ensureBucket()
     return this.client.getObject(this.bucket, filename)
   }
 
