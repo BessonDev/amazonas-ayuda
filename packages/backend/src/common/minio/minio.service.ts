@@ -11,14 +11,12 @@ export class MinioService implements OnModuleInit {
 
   onModuleInit() {
     const endpoint = this.config.get<string>('MINIO_ENDPOINT', 'localhost')
-    const port = this.config.get<number>('MINIO_PORT', 9000)
+    const port = Number(this.config.get<string>('MINIO_PORT', '9000'))
     const accessKey = this.config.get<string>('MINIO_ACCESS_KEY', 'minioadmin')
     const secretKey = this.config.get<string>('MINIO_SECRET_KEY', 'minioadmin')
     const useSSL = this.config.get<string>('MINIO_USE_SSL', 'false') === 'true'
     const region = this.config.get<string>('MINIO_REGION', 'us-east-1')
     this.bucket = this.config.get<string>('MINIO_BUCKET', 'donaciones-amazonas')
-
-    console.log('[MinioService] Config loaded:', { endpoint, port, useSSL, region, bucket: this.bucket, accessKey: accessKey ? '***' : undefined })
 
     this.client = new Minio.Client({
       endPoint: endpoint,
@@ -27,7 +25,6 @@ export class MinioService implements OnModuleInit {
       accessKey,
       secretKey,
       region,
-      pathStyle: true,
     })
   }
 
