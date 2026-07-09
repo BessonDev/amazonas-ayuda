@@ -15,6 +15,7 @@ export class MinioService implements OnModuleInit {
     const accessKey = this.config.get<string>('MINIO_ACCESS_KEY', 'minioadmin')
     const secretKey = this.config.get<string>('MINIO_SECRET_KEY', 'minioadmin')
     const useSSL = this.config.get<string>('MINIO_USE_SSL', 'false') === 'true'
+    const region = this.config.get<string>('MINIO_REGION', 'us-east-1')
     this.bucket = this.config.get<string>('MINIO_BUCKET', 'donaciones-amazonas')
 
     this.client = new Minio.Client({
@@ -23,6 +24,7 @@ export class MinioService implements OnModuleInit {
       useSSL,
       accessKey,
       secretKey,
+      region,
     })
   }
 
