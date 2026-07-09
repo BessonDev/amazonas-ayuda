@@ -205,6 +205,7 @@ Donante ──> Lote (QR) ──> Centro de Acopio ──> Viaje ──> Destino
 | [JWT](https://jwt.io/) + Passport | — | Autenticación segura (HttpOnly cookies) |
 | [Swagger](https://swagger.io/) | — | Documentación de API |
 | [Multer](https://github.com/expressjs/multer) | — | Upload de archivos |
+| [MinIO](https://min.io/) | — | Almacenamiento S3-compatible (imágenes y archivos) |
 
 ### Frontend
 
@@ -273,6 +274,7 @@ MINIO_ENDPOINT="localhost"
 MINIO_PORT=9000
 MINIO_ACCESS_KEY="minioadmin"
 MINIO_SECRET_KEY="minioadmin"
+MINIO_REGION="us-east-1"
 ```
 
 ```bash
@@ -449,6 +451,17 @@ Este proyecto está bajo la licencia **MIT**.
 
 ## 📋 Changelog
 
+### 2026-07-09
+
+- **fix(backend):** Conexión a MinIO S3 API — diagnosticados y resueltos 5 errores consecutivos
+  - `ECONNREFUSED` → backend y MinIO en redes Docker distintas (solución: usar URL pública del S3 API)
+  - `InvalidEndpointError` → el endpoint incluía `https://` (solución: solo hostname, el protocolo lo controla `useSSL`)
+  - `SignatureDoesNotMatch` (primero) → faltaba `region` en el cliente minio.js (solución: agregar `region: 'us-east-1'`)
+  - `AccessDenied` en `bucketExists` → el bucket ya existe creado manualmente y las credenciales no tienen `s3:HeadBucket` (solución: eliminar `ensureBucket()` de `upload()` y `getStream()`)
+  - `SignatureDoesNotMatch` (persistente) → `MINIO_PORT` se leía como string desde env var, el cliente minio.js v8 espera número (solución: `Number()` explícito)
+  - Agregada env `MINIO_REGION` (default `us-east-1`) para control desde Dokploy
+  - Lección: `ConfigService.get<number>()` de NestJS no parsea — siempre usar `Number()` en envs numéricas
+
 ### 2026-07-07
 
 - **feat(backend+frontend):** Implementado flujo completo de aprobación de solicitudes
@@ -466,7 +479,6 @@ Este proyecto está bajo la licencia **MIT**.
   - Detalle de solicitud: ocultados inputs de actualización de progreso para OPERADOR_INVENTARIO y COORDINADOR_LOGISTICO (solo ADMIN puede editar cantidades recibidas)
   - Dashboard: KPI "Solicitudes urgentes" → "Solicitudes por aceptar" (cuenta de solicitudes en estado ABIERTA)
   - Todos los cambios probados y compilados exitosamente
-
 
 ### 2026-07-04
 
