@@ -90,10 +90,10 @@ export class LotesService {
     codigo: string,
   ) {
     const solicitudes = await tx.solicitud.findMany({
-      where: {
-        estado: { in: ['ABIERTA', 'EN_PROCESO'] },
-        detalles: { some: { productoId: dto.productoId } },
-      },
+       where: {
+         estado: { in: ['ABIERTA', 'APROBADA', 'EN_PROCESO'] },
+         detalles: { some: { productoId: dto.productoId } },
+       },
       include: {
         detalles: {
           where: { productoId: dto.productoId },
