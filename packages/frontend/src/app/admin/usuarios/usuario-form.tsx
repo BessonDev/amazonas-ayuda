@@ -71,9 +71,9 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
     queryFn: () => api.get('/ubicaciones'),
   })
 
-  // Determinar si el rol seleccionado es RESPONSABLE_DESTINO
+  // Determinar si el rol seleccionado requiere ubicación (OPERADOR_INVENTARIO o RESPONSABLE_DESTINO)
   const rolSeleccionado = roles.find((r) => r.id.toString() === rolId)
-  const esResponsableDestino = rolSeleccionado?.nombre === 'RESPONSABLE_DESTINO'
+  const requiereUbicacion = rolSeleccionado?.nombre === 'OPERADOR_INVENTARIO' || rolSeleccionado?.nombre === 'RESPONSABLE_DESTINO'
 
   useEffect(() => {
     if (open) {
@@ -116,7 +116,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
     if (!email.trim()) { setError('El email es obligatorio'); return }
     if (!esEdicion && !password) { setError('La contraseña es obligatoria'); return }
     if (!rolId) { setError('Selecciona un rol'); return }
-    if (esResponsableDestino && !ubicacionId) { setError('Selecciona una ubicación para RESPONSABLE_DESTINO'); return }
+    if (requiereUbicacion && !ubicacionId) { setError('Selecciona una ubicación para este rol'); return }
 
     const data: Record<string, unknown> = {
       nombre: nombre.trim(),
@@ -124,7 +124,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
       telefono: telefono.trim() || undefined,
       rolId: Number(rolId),
     }
-    if (esResponsableDestino) data.ubicacionId = Number(ubicacionId)
+    if (requiereUbicacion) data.ubicacionId = Number(ubicacionId)
     if (password) data.password = password
 
     mutation.mutate(data)
@@ -194,7 +194,7 @@ export function UsuarioForm({ open, onOpenChange, editUser }: Props) {
               </Select>
             </div>
 
-            {esResponsableDestino && (
+            {requiereUbicacion && (
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="ubicacion">Ubicación</Label>
                 <Select value={ubicacionId} onValueChange={(v) => setUbicacionId(v ?? '')}>
