@@ -9,19 +9,22 @@ import { RecibirViajeDto } from './dto/recibir-viaje.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
 import { CurrentUser } from '../common/decorators/current-user.decorator'
+import { CiudadFilter } from '../common/decorators/ciudad-filter.decorator'
+import { CiudadFilterGuard } from '../common/guards/ciudad-filter.guard'
 
 @ApiTags('Viajes')
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
 @Controller('viajes')
 export class ViajesController {
   constructor(private readonly viajesService: ViajesService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
   @ApiOperation({ summary: 'Crear viaje (genera código automáticamente)' })
-  crear(@Body() dto: CreateViajeDto) {
-    return this.viajesService.crear(dto)
+  crear(@Body() dto: CreateViajeDto, @CurrentUser() user: any, @CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null) {
+    return this.viajesService.crear(dto, user, ciudadFilter)
   }
 
   @Get('lotes-disponibles')
@@ -40,15 +43,16 @@ export class ViajesController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar todos los viajes' })
   @ApiQuery({ name: 'destinoId', type: Number, required: false, description: 'Filtrar por destino (se usa internamente para RESPONSABLE_DESTINO)' })
-  listar(@Query('destinoId') destinoId?: number, @CurrentUser() user?: any) {
-    // Auto-filtrar para RESPONSABLE_DESTINO
-    if (user?.rol === 'RESPONSABLE_DESTINO' && user.ubicacionId) {
-      return this.viajesService.listar(user.ubicacionId)
-    }
-    return this.viajesService.listar(destinoId)
+  listar(
+    @CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null,
+    @Query('destinoId') destinoId?: number,
+    @CurrentUser() user?: any,
+  ) {
+    return this.viajesService.listar(ciudadFilter, destinoId)
   }
 
   @Get(':id')

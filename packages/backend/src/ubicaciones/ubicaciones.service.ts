@@ -7,8 +7,11 @@ import { UpdateUbicacionDto } from './dto/update-ubicacion.dto'
 export class UbicacionesService {
   constructor(private prisma: PrismaService) {}
 
-  listar() {
+  listar(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null) {
     return this.prisma.ubicacion.findMany({
+      where: ciudadFilter
+        ? { ciudad: ciudadFilter.ciudad, estado: ciudadFilter.estado, pais: ciudadFilter.pais }
+        : undefined,
       include: { tipo: true },
       orderBy: { nombre: 'asc' },
     })

@@ -27,6 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: res.email,
         rol: res.rol,
         ubicacionId: res.ubicacionId,
+        ciudad: res.ciudad,
+        estado: res.estado,
+        pais: res.pais,
       })
     } catch {
       setUsuario(null)

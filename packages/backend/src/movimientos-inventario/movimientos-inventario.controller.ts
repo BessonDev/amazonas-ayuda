@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ParseIntPipe, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { MovimientosInventarioService } from './movimientos-inventario.service'
@@ -6,6 +6,9 @@ import { CreateMovimientoDto } from './dto/create-movimiento.dto'
 import { UpdateMovimientoDto } from './dto/update-movimiento.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
+import { CurrentUser } from '../common/decorators/current-user.decorator'
+import { CiudadFilter } from '../common/decorators/ciudad-filter.decorator'
+import { CiudadFilterGuard } from '../common/guards/ciudad-filter.guard'
 
 @ApiTags('Movimientos de Inventario')
 @ApiBearerAuth()
@@ -15,17 +18,23 @@ export class MovimientosInventarioController {
   constructor(private readonly movimientosService: MovimientosInventarioService) {}
 
   @Post()
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
   @ApiOperation({ summary: 'Crear movimiento (calcula saldos automáticamente)' })
-  crear(@Body() dto: CreateMovimientoDto) {
-    return this.movimientosService.crear(dto)
+  crear(
+    @Body() dto: CreateMovimientoDto,
+    @CurrentUser() user: any,
+    @CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null,
+  ) {
+    return this.movimientosService.crear(dto, user, ciudadFilter)
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar movimientos de inventario' })
-  listar() {
-    return this.movimientosService.listar()
+  listar(@CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null) {
+    return this.movimientosService.listar(ciudadFilter)
   }
 
   @Get(':id')

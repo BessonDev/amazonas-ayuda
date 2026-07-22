@@ -451,6 +451,22 @@ Este proyecto está bajo la licencia **MIT**.
 
 ## 📋 Changelog
 
+### 2026-07-22
+
+- **feat(backend+frontend):** Sistema multi-ciudad — filtrado de inventario, lotes, viajes y ubicaciones por ciudad
+  - **Schema:** `Ubicacion.ciudad` y `Ubicacion.estado` cambiados de opcional a requerido (`String`), con índice compuesto `@@index([ciudad,estado])` y unique `@@unique([ciudad,estado,pais])`
+  - **Auth:** JWT strategies y `AuthService` ahora incluyen `ciudad`, `estado`, `pais` en la respuesta de login/refresh (extraídos de la ubicación del usuario)
+  - **CiudadFilterGuard:** guard reutilizable que para ADMIN/COORD retorna `null` (ve todo), para OPERADOR retorna `{ciudad,estado,pais}` del JWT. Aplicado a: inventario, lotes, viajes, movimientos-inventario, ubicaciones
+  - **Services:** `listar()` en inventario, lotes, viajes, movimientos-inventario y ubicaciones ahora acepta `ciudadFilter` y filtra por `ubicacion.ciudad/estado/pais`
+  - **Lotes:** `crear()` valida que ubicacionId pertenezca a la ciudad del operador; `transferir()` restringe a ADMIN/COORD (OPERADOR no puede transferir)
+  - **Viajes:** `crear()` valida que origen pertenezca a la ciudad del usuario
+  - **MovimientosInventario:** `crear()` valida ubicacion para operadores
+  - **DTOs:** `CreateUbicacionDto` ahora requiere `ciudad` y `estado` (antes opcionales)
+  - **Seed:** datos demo actualizados con `estado: 'Amazonas'` y `pais: 'Venezuela'`
+  - **Frontend:** `UsuarioSesion` y `LoginResponse` incluyen `ciudad`, `estado`, `pais`; admin shell muestra ciudad actual en el header
+  - **Progreso de solicitudes:** filtro de estados en `actualizarSolicitudConLote` ahora incluye `APROBADA` (fix: progreso no se actualizaba)
+  - Lección: el guard se aplica a nivel de endpoint, no de controller — cada endpoint que necesita filtrado por ciudad debe tener `@UseGuards(CiudadFilterGuard)` y `@CiudadFilter()`
+
 ### 2026-07-09
 
 - **fix(backend):** Conexión a MinIO S3 API — diagnosticados y resueltos 5 errores consecutivos

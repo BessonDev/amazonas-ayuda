@@ -231,6 +231,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <Separator orientation="vertical" className="h-6" />
           <span className="text-sm text-muted-foreground">
             {formatRol(usuario.rol)}
+            {usuario.ciudad && (
+              <span className="ml-2 text-xs text-muted-foreground/70">
+                · {usuario.ciudad}, {usuario.estado}
+              </span>
+            )}
           </span>
         </header>
         <main className="flex-1 p-6">{children}</main>

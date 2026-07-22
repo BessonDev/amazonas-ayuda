@@ -30,20 +30,23 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
 
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: payload.sub },
-      include: { rol: true },
+      include: { rol: true, ubicacion: true },
     })
 
     if (!usuario || !usuario.activo) {
       throw new UnauthorizedException('Usuario no encontrado o inactivo')
     }
 
-    return {
-      id: usuario.id,
-      email: usuario.email,
-      nombre: usuario.nombre,
-      rol: usuario.rol.nombre,
-      refreshToken,
-      ubicacionId: usuario.ubicacionId,
-    }
+     return {
+       id: usuario.id,
+       email: usuario.email,
+       nombre: usuario.nombre,
+       rol: usuario.rol.nombre,
+       refreshToken,
+       ubicacionId: usuario.ubicacionId,
+       ciudad: usuario.ubicacion?.ciudad ?? null,
+       estado: usuario.ubicacion?.estado ?? null,
+       pais: usuario.ubicacion?.pais ?? 'Venezuela',
+     }
   }
 }

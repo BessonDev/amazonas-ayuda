@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateViajeDto } from './dto/create-viaje.dto'
 import { UpdateViajeDto } from './dto/update-viaje.dto'
@@ -47,9 +47,17 @@ export class ViajesService {
     return origen
   }
 
-  async listar(destinoId?: number) {
+  async listar(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null, destinoId?: number) {
     const where: any = {}
     if (destinoId) where.destinoId = destinoId
+
+    if (ciudadFilter) {
+      where.OR = [
+        { origen: { ciudad: ciudadFilter.ciudad, estado: ciudadFilter.estado, pais: ciudadFilter.pais } },
+        { destino: { ciudad: ciudadFilter.ciudad, estado: ciudadFilter.estado, pais: ciudadFilter.pais } },
+      ]
+    }
+
     return this.prisma.viaje.findMany({
       where,
       include: this.include,
@@ -66,9 +74,24 @@ export class ViajesService {
     return viaje
   }
 
-  async crear(dto: CreateViajeDto) {
+  async crear(
+    dto: CreateViajeDto,
+    user?: { id: number; rol: string },
+    ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null
+  ) {
     await this.validarOrigen(dto.origenId)
     const codigo = this.generarCodigo()
+
+    // If user is an operator, enforce that origen belongs to their city
+    if (ciudadFilter) {
+      const origen = await this.prisma.ubicacion.findUnique({
+        where: { id: dto.origenId },
+        select: { ciudad: true, estado: true, pais: true },
+      })
+      if (!origen || origen.ciudad !== ciudadFilter.ciudad || origen.estado !== ciudadFilter.estado || origen.pais !== ciudadFilter.pais) {
+        throw new ForbiddenException('El origen del viaje debe ser de su ciudad')
+      }
+    }
 
     return this.prisma.viaje.create({
       data: {

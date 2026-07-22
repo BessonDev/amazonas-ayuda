@@ -53,10 +53,10 @@ async function main() {
 
   // Ubicaciones
   const ubicacionesData = [
-    { nombre: 'Centro de Acopio Puerto Ayacucho', direccion: 'Av. Principal, Puerto Ayacucho', ciudad: 'Puerto Ayacucho', tipoId: tipoCentroAcopio.id, campaniaId: campania.id },
-    { nombre: 'Hospital de Maroa', direccion: 'Calle 5, Maroa', ciudad: 'Maroa', tipoId: tipoHospital.id, campaniaId: campania.id },
-    { nombre: 'Refugio Comunitario La Esmeralda', direccion: 'Sector El Centro, La Esmeralda', ciudad: 'La Esmeralda', tipoId: tipoRefugio.id, campaniaId: campania.id },
-    { nombre: 'Iglesia San José de Atabapo', direccion: 'Plaza Bolívar, San Fernando de Atabapo', ciudad: 'San Fernando de Atabapo', tipoId: tipoIglesia.id, campaniaId: campania.id },
+    { nombre: 'Centro de Acopio Puerto Ayacucho', direccion: 'Av. Principal, Puerto Ayacucho', ciudad: 'Puerto Ayacucho', estado: 'Amazonas', pais: 'Venezuela', tipoId: tipoCentroAcopio.id, campaniaId: campania.id },
+    { nombre: 'Hospital de Maroa', direccion: 'Calle 5, Maroa', ciudad: 'Maroa', estado: 'Amazonas', pais: 'Venezuela', tipoId: tipoHospital.id, campaniaId: campania.id },
+    { nombre: 'Refugio Comunitario La Esmeralda', direccion: 'Sector El Centro, La Esmeralda', ciudad: 'La Esmeralda', estado: 'Amazonas', pais: 'Venezuela', tipoId: tipoRefugio.id, campaniaId: campania.id },
+    { nombre: 'Iglesia San José de Atabapo', direccion: 'Plaza Bolívar, San Fernando de Atabapo', ciudad: 'San Fernando de Atabapo', estado: 'Amazonas', pais: 'Venezuela', tipoId: tipoIglesia.id, campaniaId: campania.id },
   ]
 
   const ubicaciones: Record<string, any> = {}

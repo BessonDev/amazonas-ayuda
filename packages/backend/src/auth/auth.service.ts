@@ -30,7 +30,7 @@ export class AuthService {
   async login(dto: LoginDto, res: Response) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { email: dto.email },
-      include: { rol: true },
+      include: { rol: true, ubicacion: true },
     })
 
     if (!usuario || !usuario.activo) {
@@ -90,7 +90,7 @@ export class AuthService {
 
       const usuario = await this.prisma.usuario.findUnique({
         where: { id: payload.sub },
-        include: { rol: true },
+        include: { rol: true, ubicacion: true },
       })
 
       if (!usuario || !usuario.activo) {
@@ -165,6 +165,9 @@ export class AuthService {
       rol: usuario.rol.nombre,
       accessToken,
       ubicacionId: usuario.ubicacionId ?? undefined,
+      ciudad: usuario.ubicacion?.ciudad ?? null,
+      estado: usuario.ubicacion?.estado ?? null,
+      pais: usuario.ubicacion?.pais ?? 'Venezuela',
     }
   }
 }

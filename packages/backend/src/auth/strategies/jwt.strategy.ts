@@ -10,6 +10,9 @@ interface JwtPayload {
   sub: number
   email: string
   rol: string
+  ciudad?: string
+  estado?: string
+  pais?: string
 }
 
 @Injectable()
@@ -30,20 +33,23 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: JwtPayload) {
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: payload.sub },
-      include: { rol: true },
+      include: { rol: true, ubicacion: true },
     })
 
     if (!usuario || !usuario.activo) {
       throw new UnauthorizedException('Usuario no encontrado o inactivo')
     }
 
-    return {
-      id: usuario.id,
-      email: usuario.email,
-      nombre: usuario.nombre,
-      rol: usuario.rol.nombre,
-      rolId: usuario.rolId,
-      ubicacionId: usuario.ubicacionId,
-    }
+     return {
+       id: usuario.id,
+       email: usuario.email,
+       nombre: usuario.nombre,
+       rol: usuario.rol.nombre,
+       rolId: usuario.rolId,
+       ubicacionId: usuario.ubicacionId,
+       ciudad: usuario.ubicacion?.ciudad ?? null,
+       estado: usuario.ubicacion?.estado ?? null,
+       pais: usuario.ubicacion?.pais ?? 'Venezuela',
+     }
   }
 }

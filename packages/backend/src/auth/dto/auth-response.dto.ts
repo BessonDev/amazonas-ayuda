@@ -18,4 +18,13 @@ export class AuthResponseDto {
 
   @ApiPropertyOptional({ type: Number })
   ubicacionId?: number
+
+  @ApiPropertyOptional({ type: String })
+  ciudad?: string | null
+
+  @ApiPropertyOptional({ type: String })
+  estado?: string | null
+
+  @ApiPropertyOptional({ type: String })
+  pais?: string
 }

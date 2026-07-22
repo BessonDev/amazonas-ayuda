@@ -23,16 +23,26 @@ export class LotesService {
     return `LOTE-${yymmdd}-${rand}`
   }
 
-  async listar(ubicacionId?: number) {
-    return this.prisma.lote.findMany({
-      where: {
-        deletedAt: null,
-        ...(ubicacionId ? { ubicacionId } : {}),
-      },
-      include: this.include,
-      orderBy: { createdAt: 'desc' },
-    })
+async listar(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null, ubicacionId?: number) {
+  const where: any = {
+    deletedAt: null,
+    ...(ubicacionId ? { ubicacionId } : {}),
   }
+
+  if (ciudadFilter) {
+    where.ubicacion = {
+      ciudad: ciudadFilter.ciudad,
+      estado: ciudadFilter.estado,
+      pais: ciudadFilter.pais,
+    }
+  }
+
+  return this.prisma.lote.findMany({
+    where,
+    include: this.include,
+    orderBy: { createdAt: 'desc' },
+  })
+}
 
   async obtener(id: number) {
     const lote = await this.prisma.lote.findUnique({
@@ -43,46 +53,60 @@ export class LotesService {
     return lote
   }
 
-  async crear(dto: CreateLoteDto, user?: { id: number; rol: string }) {
-    const codigo = this.generarCodigo()
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
-    const qrData = `${baseUrl}/lotes/${codigo}`
-    const qrUrl = await QRCode.toDataURL(qrData)
+async crear(dto: CreateLoteDto, user?: { id: number; rol: string }, ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null) {
+  const codigo = this.generarCodigo()
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const qrData = `${baseUrl}/lotes/${codigo}`
+  const qrUrl = await QRCode.toDataURL(qrData)
 
-    return this.prisma.$transaction(async (tx) => {
-      const lote = await tx.lote.create({
-        data: {
-          codigo,
-          cantidad: dto.cantidad,
-          observaciones: dto.observaciones,
-          qrUrl,
-          campaniaId: dto.campaniaId,
-          ubicacionId: dto.ubicacionId,
-          productoId: dto.productoId,
-          donanteId: dto.donanteId,
-          responsableId: user?.id, // Track who created it
-        },
-        include: this.include,
-      })
-
-      await tx.movimientoInventario.create({
-        data: {
-          tipo: 'ENTRADA',
-          cantidad: dto.cantidad,
-          saldoAnterior: 0,
-          saldoNuevo: dto.cantidad,
-          observaciones: `Entrada automática del lote ${codigo}`,
-          loteId: lote.id,
-          ubicacionId: dto.ubicacionId,
-          campaniaId: dto.campaniaId,
-        },
-      })
-
-      await this.actualizarSolicitudConLote(tx, dto, codigo)
-
-      return lote
+  // If user is an operator, enforce that the lote belongs to their city
+  if (ciudadFilter && user?.rol === 'OPERADOR_INVENTARIO') {
+    if (!dto.ubicacionId) {
+      throw new ForbiddenException('Debe especificar una ubicación para el lote')
+    }
+    const ubicacion = await this.prisma.ubicacion.findUnique({
+      where: { id: dto.ubicacionId },
+      select: { ciudad: true, estado: true, pais: true },
     })
+    if (!ubicacion || ubicacion.ciudad !== ciudadFilter.ciudad || ubicacion.estado !== ciudadFilter.estado || ubicacion.pais !== ciudadFilter.pais) {
+      throw new ForbiddenException('La ubicación seleccionada no pertenece a su ciudad')
+    }
   }
+
+  return this.prisma.$transaction(async (tx) => {
+    const lote = await tx.lote.create({
+      data: {
+        codigo,
+        cantidad: dto.cantidad,
+        observaciones: dto.observaciones,
+        qrUrl,
+        campaniaId: dto.campaniaId,
+        ubicacionId: dto.ubicacionId,
+        productoId: dto.productoId,
+        donanteId: dto.donanteId,
+        responsableId: user?.id, // Track who created it
+      },
+      include: this.include,
+    })
+
+    await tx.movimientoInventario.create({
+      data: {
+        tipo: 'ENTRADA',
+        cantidad: dto.cantidad,
+        saldoAnterior: 0,
+        saldoNuevo: dto.cantidad,
+        observaciones: `Entrada automática del lote ${codigo}`,
+        loteId: lote.id,
+        ubicacionId: dto.ubicacionId,
+        campaniaId: dto.campaniaId,
+      },
+    })
+
+    await this.actualizarSolicitudConLote(tx, dto, codigo)
+
+    return lote
+  })
+}
 
   private async actualizarSolicitudConLote(
     tx: any,
@@ -153,7 +177,15 @@ export class LotesService {
     })
   }
 
-  async transferir(dto: TransferirLotesDto) {
+  async transferir(
+    dto: TransferirLotesDto,
+    user?: { id: number; rol: string },
+    ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null
+  ) {
+    // Only ADMIN and COORDINADOR_LOGISTICO can transfer lotes (operators cannot)
+    if (user?.rol === 'OPERADOR_INVENTARIO') {
+      throw new ForbiddenException('Operadores de inventario no pueden transferir lotes')
+    }
     const lotes = await this.prisma.lote.findMany({
       where: { id: { in: dto.loteIds }, deletedAt: null },
     })
@@ -167,6 +199,24 @@ export class LotesService {
       throw new BadRequestException(
         `Solo se pueden transferir lotes DISPONIBLES. No disponibles: ${noDisponibles.map(l => l.codigo).join(', ')}`
       )
+    }
+
+    // If ciudadFilter is provided, validate that all lotes origen are in the user's city
+    if (ciudadFilter) {
+      const lotesConUbicacion = await this.prisma.lote.findMany({
+        where: { id: { in: dto.loteIds } },
+        select: { id: true, ubicacion: { select: { ciudad: true, estado: true, pais: true } } },
+      })
+
+      const lotesFueraCiudad = lotesConUbicacion.filter(lote =>
+        lote.ubicacion.ciudad !== ciudadFilter.ciudad ||
+        lote.ubicacion.estado !== ciudadFilter.estado ||
+        lote.ubicacion.pais !== ciudadFilter.pais
+      )
+
+      if (lotesFueraCiudad.length > 0) {
+        throw new ForbiddenException('Solo puede transferir lotes desde su ciudad')
+      }
     }
 
     return this.prisma.$transaction(async (tx) => {

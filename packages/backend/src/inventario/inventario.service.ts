@@ -30,40 +30,39 @@ export interface InventarioItem {
 export class InventarioService {
   constructor(private prisma: PrismaService) {}
 
-  async listar(ubicacionId?: number): Promise<InventarioItem[]> {
-    const whereLote = ubicacionId
-      ? Prisma.sql`AND l."ubicacionId" = ${ubicacionId}`
+  async listar(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null, ubicacionId?: number): Promise<InventarioItem[]> {
+    const whereLote = ciudadFilter
+      ? Prisma.sql`AND l."ubicacionId" = u.id AND u."ciudad" = ${ciudadFilter.ciudad} AND u."estado" = ${ciudadFilter.estado} AND u."pais" = ${ciudadFilter.pais}`
+      : ubicacionId
+      ? Prisma.sql`AND l."ubicacionId" = ${ubicacionId} AND u.id = ${ubicacionId}`
       : Prisma.sql``
 
-    const whereUbicacion = ubicacionId
-      ? Prisma.sql`AND u.id = ${ubicacionId}`
-      : Prisma.sql``
+    // No separate whereUbicacion needed when using ciudadFilter
 
     const rows = await this.prisma.$queryRaw<InventarioRow[]>`
-      SELECT
-        p.id AS "productoId",
-        p.nombre AS producto,
-        c.nombre AS categoria,
-        u.id AS "ubicacionId",
-        u.nombre AS ubicacion,
-        COALESCE(SUM(l.cantidad), 0) AS cantidad,
-        COUNT(l.id) AS "numLotes",
-        COALESCE(string_agg(l.codigo, ', ' ORDER BY l.codigo), '') AS lotes
-      FROM productos p
-      JOIN categorias c ON c.id = p."categoriaId"
-      CROSS JOIN ubicaciones u
-      LEFT JOIN lotes l
-        ON l."productoId" = p.id
-        AND l."ubicacionId" = u.id
-        AND l."deleted_at" IS NULL
-        AND l.estado = 'DISPONIBLE'
-        ${whereLote}
-      WHERE u.activo = true
-        ${whereUbicacion}
-      GROUP BY p.id, p.nombre, c.nombre, u.id, u.nombre
-      HAVING COALESCE(SUM(l.cantidad), 0) > 0
-      ORDER BY u.nombre, c.nombre, p.nombre
-    `
+       SELECT
+         p.id AS "productoId",
+         p.nombre AS producto,
+         c.nombre AS categoria,
+         u.id AS "ubicacionId",
+         u.nombre AS ubicacion,
+         COALESCE(SUM(l.cantidad), 0) AS cantidad,
+         COUNT(l.id) AS "numLotes",
+         COALESCE(string_agg(l.codigo, ', ' ORDER BY l.codigo), '') AS lotes
+       FROM productos p
+       JOIN categorias c ON c.id = p."categoriaId"
+       JOIN ubicaciones u ON u.activo = true
+       ${ciudadFilter ? Prisma.sql`AND u."ciudad" = ${ciudadFilter.ciudad} AND u."estado" = ${ciudadFilter.estado} AND u."pais" = ${ciudadFilter.pais}` : Prisma.sql``}
+       LEFT JOIN lotes l
+         ON l."productoId" = p.id
+         AND l."ubicacionId" = u.id
+         AND l."deleted_at" IS NULL
+         AND l.estado = 'DISPONIBLE'
+       WHERE 1=1
+       GROUP BY p.id, p.nombre, c.nombre, u.id, u.nombre
+       HAVING COALESCE(SUM(l.cantidad), 0) > 0
+       ORDER BY u.nombre, c.nombre, p.nombre
+     `
 
     return rows.map((r) => ({
       productoId: Number(r.productoId),
@@ -78,7 +77,7 @@ export class InventarioService {
   }
 
   async generarPDF(res: Response, ubicacionId?: number) {
-    const data = await this.listar(ubicacionId)
+    const data = await this.listar(null, ubicacionId)
 
     const ubicacionNombre = ubicacionId && data.length > 0
       ? data[0].ubicacion

@@ -21,6 +21,7 @@ import { InventarioModule } from './inventario/inventario.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
 import { MinioModule } from './common/minio/minio.module';
+import { CiudadModule } from './common/ciudad/ciudad.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { MinioModule } from './common/minio/minio.module';
     InventarioModule,
     ReportesModule,
     AuditoriaModule,
+    CiudadModule,
   ],
 })
 export class AppModule {}

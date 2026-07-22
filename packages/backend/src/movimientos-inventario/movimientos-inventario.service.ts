@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateMovimientoDto } from './dto/create-movimiento.dto'
 import { UpdateMovimientoDto } from './dto/update-movimiento.dto'
@@ -14,9 +14,19 @@ export class MovimientosInventarioService {
     ubicacion: true,
   }
 
-  listar() {
+  listar(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null) {
+    const where: any = { deletedAt: null }
+
+    if (ciudadFilter) {
+      where.ubicacion = {
+        ciudad: ciudadFilter.ciudad,
+        estado: ciudadFilter.estado,
+        pais: ciudadFilter.pais,
+      }
+    }
+
     return this.prisma.movimientoInventario.findMany({
-      where: { deletedAt: null },
+      where,
       include: this.include,
       orderBy: { createdAt: 'desc' },
     })
@@ -31,7 +41,21 @@ export class MovimientosInventarioService {
     return mov
   }
 
-  async crear(dto: CreateMovimientoDto) {
+  async crear(dto: CreateMovimientoDto, user?: { id: number; rol: string }, ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null) {
+    // Validate city for operators
+    if (ciudadFilter && user?.rol === 'OPERADOR_INVENTARIO') {
+      if (!dto.ubicacionId) {
+        throw new ForbiddenException('Debe especificar una ubicación para el movimiento')
+      }
+      const ubicacion = await this.prisma.ubicacion.findUnique({
+        where: { id: dto.ubicacionId },
+        select: { ciudad: true, estado: true, pais: true },
+      })
+      if (!ubicacion || ubicacion.ciudad !== ciudadFilter.ciudad || ubicacion.estado !== ciudadFilter.estado || ubicacion.pais !== ciudadFilter.pais) {
+        throw new ForbiddenException('La ubicación seleccionada no pertenece a su ciudad')
+      }
+    }
+
     return this.prisma.$transaction(async (tx) => {
       const ultimo = await tx.movimientoInventario.findFirst({
         where: { loteId: dto.loteId, ubicacionId: dto.ubicacionId },
@@ -49,13 +73,13 @@ export class MovimientosInventarioService {
           tipo: dto.tipo as any,
           cantidad: dto.cantidad,
           saldoAnterior,
-          saldoNuevo,
+          saldoNuevo: esEntrada ? saldoAnterior + dto.cantidad : saldoAnterior - dto.cantidad,
           observaciones: dto.observaciones,
           loteId: dto.loteId,
           ubicacionId: dto.ubicacionId,
           campaniaId: dto.campaniaId,
         },
-        include: this.include,
+        include: { lote: true, ubicacion: true },
       })
 
       // AJUSTE: actualizar cantidad del lote
@@ -85,7 +109,7 @@ export class MovimientosInventarioService {
         ubicacionId: dto.ubicacionId,
         campaniaId: dto.campaniaId,
       },
-      include: this.include,
+      include: { lote: true, ubicacion: true },
     })
   }
 

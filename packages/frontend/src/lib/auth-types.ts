@@ -4,6 +4,9 @@ export interface UsuarioSesion {
   email: string
   rol: string
   ubicacionId?: number
+  ciudad?: string | null
+  estado?: string | null
+  pais?: string
 }
 
 export interface LoginRequest {
@@ -18,4 +21,7 @@ export interface LoginResponse {
   rol: string
   accessToken: string
   ubicacionId?: number
+  ciudad?: string | null
+  estado?: string | null
+  pais?: string
 }

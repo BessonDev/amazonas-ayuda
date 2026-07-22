@@ -9,6 +9,8 @@ import { CreateUbicacionDto } from './dto/create-ubicacion.dto'
 import { UpdateUbicacionDto } from './dto/update-ubicacion.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
+import { CiudadFilter } from '../common/decorators/ciudad-filter.decorator'
+import { CiudadFilterGuard } from '../common/guards/ciudad-filter.guard'
 
 @ApiTags('Ubicaciones')
 @ApiBearerAuth()
@@ -18,10 +20,11 @@ export class UbicacionesController {
   constructor(private ubicacionesService: UbicacionesService) {}
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
-  @ApiOperation({ summary: 'Listar ubicaciones' })
-  listar() {
-    return this.ubicacionesService.listar()
+  @ApiOperation({ summary: 'Listar ubicaciones (filtradas por ciudad para operadores)' })
+  listar(@CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null) {
+    return this.ubicacionesService.listar(ciudadFilter)
   }
 
   @Get('tipos')

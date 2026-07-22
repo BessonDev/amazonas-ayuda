@@ -11,15 +11,13 @@ export class CreateUbicacionDto {
   @IsOptional()
   direccion?: string
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
-  @IsOptional()
-  ciudad?: string
+  ciudad: string
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
-  @IsOptional()
-  estado?: string
+  estado: string
 
   @ApiPropertyOptional()
   @IsString()
