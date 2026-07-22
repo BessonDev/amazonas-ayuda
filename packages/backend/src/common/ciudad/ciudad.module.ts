@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { CiudadService } from './ciudad.service';
 
+@Global()
 @Module({
   providers: [CiudadService],
   exports: [CiudadService],
