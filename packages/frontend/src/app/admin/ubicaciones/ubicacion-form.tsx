@@ -40,8 +40,8 @@ interface Ubicacion {
   id: number
   nombre: string
   direccion: string | null
-  ciudad: string | null
-  estado: string | null
+  ciudad: string
+  estado: string
   pais: string | null
   contacto: string | null
   telefono: string | null
@@ -55,6 +55,17 @@ interface Props {
   ubicacion?: Ubicacion | null
 }
 
+const CIUDADES_AMAZONAS = [
+  'Puerto Ayacucho',
+  'Maroa',
+  'La Esmeralda',
+  'San Fernando de Atabapo',
+  'Casiquiare',
+  'San Carlos de Río Negro',
+  'Timotes',
+  'Piacoa',
+]
+
 const TIPOS_VALIDOS = ['CENTRO_ACOPIO', 'HOSPITAL', 'REFUGIO', 'IGLESIA', 'COMUNIDAD', 'OTRO']
 
 export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
@@ -63,7 +74,7 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
   const [nombre, setNombre] = useState('')
   const [direccion, setDireccion] = useState('')
   const [ciudad, setCiudad] = useState('')
-  const [estado, setEstado] = useState('')
+  const [estado, setEstado] = useState('Amazonas')
   const [pais, setPais] = useState('Venezuela')
   const [contacto, setContacto] = useState('')
   const [telefono, setTelefono] = useState('')
@@ -86,7 +97,7 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
       setNombre(ubicacion?.nombre ?? '')
       setDireccion(ubicacion?.direccion ?? '')
       setCiudad(ubicacion?.ciudad ?? '')
-      setEstado(ubicacion?.estado ?? '')
+      setEstado(ubicacion?.estado ?? 'Amazonas')
       setPais(ubicacion?.pais ?? 'Venezuela')
       setContacto(ubicacion?.contacto ?? '')
       setTelefono(ubicacion?.telefono ?? '')
@@ -118,6 +129,14 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
       setError('El nombre es obligatorio')
       return
     }
+    if (!ciudad) {
+      setError('Selecciona una ciudad')
+      return
+    }
+    if (!estado.trim()) {
+      setError('El estado es obligatorio')
+      return
+    }
     if (!tipoId) {
       setError('Selecciona un tipo de ubicación')
       return
@@ -129,8 +148,8 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
     mutation.mutate({
       nombre: nombre.trim(),
       direccion: direccion.trim() || undefined,
-      ciudad: ciudad.trim() || undefined,
-      estado: estado.trim() || undefined,
+      ciudad,
+      estado: estado.trim(),
       pais: pais.trim() || undefined,
       contacto: contacto.trim() || undefined,
       telefono: telefono.trim() || undefined,
@@ -174,22 +193,34 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ciudad">Ciudad</Label>
-              <Input
-                id="ciudad"
-                value={ciudad}
-                onChange={(e) => setCiudad(e.target.value)}
-                placeholder="Ej: Puerto Ayacucho"
-              />
+              <Label htmlFor="ciudad">Ciudad *</Label>
+              <Select value={ciudad} onValueChange={(v) => setCiudad(v ?? '')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {(value: string | null) => {
+                      if (!value) return 'Seleccionar ciudad...'
+                      return value
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {CIUDADES_AMAZONAS.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="estado">Estado</Label>
+              <Label htmlFor="estado">Estado *</Label>
               <Input
                 id="estado"
                 value={estado}
                 onChange={(e) => setEstado(e.target.value)}
                 placeholder="Ej: Amazonas"
+                required
               />
             </div>
 

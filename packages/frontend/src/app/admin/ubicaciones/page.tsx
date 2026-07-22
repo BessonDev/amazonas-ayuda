@@ -18,8 +18,8 @@ interface Ubicacion {
   id: number
   nombre: string
   direccion: string | null
-  ciudad: string | null
-  estado: string | null
+  ciudad: string
+  estado: string
   pais: string | null
   contacto: string | null
   telefono: string | null
