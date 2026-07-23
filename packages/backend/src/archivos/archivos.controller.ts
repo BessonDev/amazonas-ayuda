@@ -7,13 +7,13 @@ import { Roles } from '../common/decorators/roles.decorator'
 import { RolesGuard } from '../common/guards/roles.guard'
 
 @ApiTags('Archivos')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('archivos')
 export class ArchivosController {
   constructor(private readonly archivosService: ArchivosService) {}
 
   @Post('upload')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Subir archivo' })
   @ApiConsumes('multipart/form-data')
@@ -45,6 +45,8 @@ export class ArchivosController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Listar archivos (opcional: filtrar por entidad)' })
   listar(
@@ -55,6 +57,8 @@ export class ArchivosController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener archivo por ID' })
   obtener(@Param('id', ParseIntPipe) id: number) {
@@ -62,13 +66,14 @@ export class ArchivosController {
   }
 
   @Get(':id/descargar')
-  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
-  @ApiOperation({ summary: 'Descargar archivo' })
+  @ApiOperation({ summary: 'Descargar archivo (público)' })
   descargar(@Param('id', ParseIntPipe) id: number) {
     return this.archivosService.descargar(id)
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMINISTRADOR')
   @ApiOperation({ summary: 'Eliminar archivo' })
   eliminar(@Param('id', ParseIntPipe) id: number) {
