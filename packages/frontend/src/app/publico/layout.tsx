@@ -1,38 +1,24 @@
-import type { ReactNode } from 'react'
-import { DM_Serif_Display, DM_Sans } from 'next/font/google'
+import type { Metadata } from 'next'
 
-const dmSerif = DM_Serif_Display({
-  weight: ['400'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-display',
-})
+export const metadata: Metadata = {
+  title: 'Portal Público — La Red Solidaria',
+  description:
+    'Conoce el impacto de las donaciones: solicitudes activas, viajes en curso y centros de acopio de La Red Solidaria en Venezuela.',
+  alternates: {
+    canonical: '/publico',
+  },
+  openGraph: {
+    title: 'Portal Público — La Red Solidaria',
+    description:
+      'Conoce el impacto de las donaciones: solicitudes activas, viajes en curso y centros de acopio.',
+    url: 'https://laredsolidaria.org/publico',
+  },
+}
 
-const dmSans = DM_Sans({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-body',
-})
-
-export default function PublicoLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className={`${dmSerif.variable} ${dmSans.variable}`}>
-      <style>{`
-        :root {
-          --font-display: 'DM Serif Display', serif;
-          --font-body: 'DM Sans', sans-serif;
-        }
-        .publico-page {
-          font-family: var(--font-body);
-        }
-        .publico-page h1, .publico-page h2, .publico-page h3,
-        .publico-page .heading {
-          font-family: var(--font-display);
-          font-weight: 400;
-        }
-      `}</style>
-      {children}
-    </div>
-  )
+export default function PublicoLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return children
 }
