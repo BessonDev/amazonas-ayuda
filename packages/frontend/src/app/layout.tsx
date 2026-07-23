@@ -41,10 +41,10 @@ export const metadata: Metadata = {
     url: SITE_URL,
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "La Red Solidaria — Logo",
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "La Red Solidaria — Donaciones Humanitarias Venezuela",
       },
     ],
   },
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     title: "La Red Solidaria — Donaciones Humanitarias Venezuela",
     description:
       "Plataforma de gestión logística para donaciones humanitarias. Trazabilidad completa desde la recepción hasta la entrega.",
-    images: ["/logo.png"],
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
