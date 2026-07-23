@@ -7,16 +7,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     {
-      url: BASE_URL,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 1.0,
-    },
-    {
       url: `${BASE_URL}/publico`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.9,
+      priority: 1.0,
     },
   ]
 }
