@@ -46,6 +46,18 @@ export class UbicacionesService {
     })
   }
 
+  async listarCiudades(ciudadFilter: { ciudad: string; estado: string; pais: string } | null = null) {
+    const rows = await this.prisma.ubicacion.findMany({
+      where: ciudadFilter
+        ? { ciudad: ciudadFilter.ciudad, estado: ciudadFilter.estado, pais: ciudadFilter.pais }
+        : undefined,
+      select: { ciudad: true },
+      distinct: ['ciudad'],
+      orderBy: { ciudad: 'asc' },
+    })
+    return rows.map((r) => r.ciudad)
+  }
+
   async eliminar(id: number) {
     await this.obtener(id)
     return this.prisma.ubicacion.delete({ where: { id } })

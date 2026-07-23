@@ -34,6 +34,14 @@ export class UbicacionesController {
     return this.ubicacionesService.listarTipos()
   }
 
+  @Get('ciudades')
+  @UseGuards(AuthGuard('jwt'), RolesGuard, CiudadFilterGuard)
+  @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO')
+  @ApiOperation({ summary: 'Listar ciudades distintas de las ubicaciones existentes' })
+  listarCiudades(@CiudadFilter() ciudadFilter: { ciudad: string; estado: string; pais: string } | null) {
+    return this.ubicacionesService.listarCiudades(ciudadFilter)
+  }
+
   @Get(':id')
   @Roles('ADMINISTRADOR', 'COORDINADOR_LOGISTICO', 'OPERADOR_INVENTARIO', 'RESPONSABLE_DESTINO')
   @ApiOperation({ summary: 'Obtener ubicación por ID' })

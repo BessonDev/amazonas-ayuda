@@ -55,17 +55,6 @@ interface Props {
   ubicacion?: Ubicacion | null
 }
 
-const CIUDADES_AMAZONAS = [
-  'Puerto Ayacucho',
-  'Maroa',
-  'La Esmeralda',
-  'San Fernando de Atabapo',
-  'Casiquiare',
-  'San Carlos de Río Negro',
-  'Timotes',
-  'Piacoa',
-]
-
 const TIPOS_VALIDOS = ['CENTRO_ACOPIO', 'HOSPITAL', 'REFUGIO', 'IGLESIA', 'COMUNIDAD', 'OTRO']
 
 export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
@@ -90,6 +79,11 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
   const { data: campanias = [] } = useQuery<Campania[]>({
     queryKey: ['campanias'],
     queryFn: () => api.get('/campanias'),
+  })
+
+  const { data: ciudadesExistentes = [] } = useQuery<string[]>({
+    queryKey: ['ubicaciones-ciudades'],
+    queryFn: () => api.get('/ubicaciones/ciudades'),
   })
 
   useEffect(() => {
@@ -194,23 +188,19 @@ export function UbicacionForm({ open, onOpenChange, ubicacion }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="ciudad">Ciudad *</Label>
-              <Select value={ciudad} onValueChange={(v) => setCiudad(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {(value: string | null) => {
-                      if (!value) return 'Seleccionar ciudad...'
-                      return value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {CIUDADES_AMAZONAS.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="ciudad"
+                list="ciudades-list"
+                value={ciudad}
+                onChange={(e) => setCiudad(e.target.value)}
+                placeholder="Escribe o selecciona una ciudad"
+                required
+              />
+              <datalist id="ciudades-list">
+                {ciudadesExistentes.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
             </div>
 
             <div className="space-y-2">
