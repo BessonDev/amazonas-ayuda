@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Donaciones Amazonas", template: "%s | Donaciones Amazonas" },
-  description: "Plataforma de gestión logística para donaciones humanitarias — Estado Amazonas, Venezuela",
+  title: { default: "La Red Solidaria", template: "%s | La Red Solidaria" },
+  description: "Plataforma de gestión logística para donaciones humanitarias — La Red Solidaria",
   icons: {
     icon: "/favicon.ico",
     apple: "/logo.png",

@@ -74,7 +74,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="usuario@donaciones.com"
+                  placeholder="usuario@laredsolidaria.org"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

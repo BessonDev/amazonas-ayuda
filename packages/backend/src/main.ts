@@ -29,8 +29,8 @@ async function bootstrap() {
   )
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Donaciones Amazonas API')
-    .setDescription('API de gestión logística para donaciones humanitarias')
+    .setTitle('La Red Solidaria API')
+    .setDescription('API de gestión logística para donaciones humanitarias — La Red Solidaria')
     .setVersion('1.0')
     .addCookieAuth('access_token')
     .build()

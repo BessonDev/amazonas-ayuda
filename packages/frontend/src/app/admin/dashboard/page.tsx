@@ -108,7 +108,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Panel de Control</h1>
-        <p className="text-muted-foreground">Resumen operativo del sistema de donaciones</p>
+        <p className="text-muted-foreground">Resumen operativo de La Red Solidaria</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

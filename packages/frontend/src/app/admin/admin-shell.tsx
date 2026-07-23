@@ -171,7 +171,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               priority
             />
             <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">
-              Donaciones Amazonas
+              La Red Solidaria
             </span>
           </Link>
         </SidebarHeader>

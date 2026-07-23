@@ -74,16 +74,16 @@ async function main() {
   // Usuario admin por defecto
   const passwordHash = await bcrypt.hash('admin123', 10)
   await prisma.usuario.upsert({
-    where: { email: 'admin@donaciones.org' },
+    where: { email: 'admin@laredsolidaria.org' },
     update: {},
     create: {
       nombre: 'Administrador',
-      email: 'admin@donaciones.org',
+      email: 'admin@laredsolidaria.org',
       passwordHash,
       rolId: adminRol.id,
     },
   })
-  console.log('✓ Usuario admin creado (admin@donaciones.org / admin123)')
+  console.log('✓ Usuario admin creado (admin@laredsolidaria.org / admin123)')
 
   // Tipos de ubicación
   const tiposUbicacion = [
@@ -127,7 +127,7 @@ async function main() {
 
   // Configuración base
   const configs = [
-    { clave: 'organizacion_nombre', valor: 'Donaciones Amazonas' },
+    { clave: 'organizacion_nombre', valor: 'La Red Solidaria' },
     { clave: 'organizacion_descripcion', valor: 'Plataforma de gestión logística para donaciones humanitarias' },
     { clave: 'campania_activa_id', valor: '' },
   ]

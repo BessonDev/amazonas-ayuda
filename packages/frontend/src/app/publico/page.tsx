@@ -73,7 +73,7 @@ export default function PublicoPage() {
             <div className="size-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
               <Heart className="size-5 text-[#D4A373]" />
             </div>
-            <span className="text-sm font-semibold tracking-wide">Amazonas Donaciones</span>
+            <span className="text-sm font-semibold tracking-wide">La Red Solidaria</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="#impact" className="text-sm text-white/70 hover:text-white transition-colors hidden sm:block">
@@ -268,7 +268,7 @@ export default function PublicoPage() {
             <div className="size-8 rounded-lg bg-white/5 flex items-center justify-center">
               <Heart className="size-4 text-[#D4A373]/70" />
             </div>
-            <span className="text-sm font-medium text-white/60">Amazonas Donaciones</span>
+            <span className="text-sm font-medium text-white/60">La Red Solidaria</span>
           </div>
           <div className="flex items-center gap-6 text-xs">
             <span>© {new Date().getFullYear()}</span>

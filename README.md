@@ -10,12 +10,12 @@
 </p>
 
 <h1 align="center">
-  🌴 Amazonas Ayuda
+  🌴 La Red Solidaria
 </h1>
 
 <p align="center">
   <strong>Plataforma de gestión logística para donaciones humanitarias</strong><br>
-  Estado Amazonas — Venezuela
+  La Red Solidaria — Venezuela
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@
 
 ## 🎯 Visión General
 
-**Amazonas Ayuda** es una plataforma web diseñada para gestionar el ciclo completo de donaciones humanitarias en el Estado Amazonas, Venezuela. Desde el registro de donantes y la recepción de alimentos/insumos, hasta la distribución en comunidades indígenas y centros de salud.
+**La Red Solidaria** es una plataforma web diseñada para gestionar el ciclo completo de donaciones humanitarias en el Estado Amazonas, Venezuela. Desde el registro de donantes y la recepción de alimentos/insumos, hasta la distribución en comunidades indígenas y centros de salud.
 
 ### ¿Por qué?
 
