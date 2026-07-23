@@ -4,6 +4,16 @@ const nextConfig: NextConfig = {
   output: "standalone",
   allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS || "").split(",").filter(Boolean),
 
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/publico',
+        permanent: true,
+      },
+    ]
+  },
+
   async rewrites() {
     return [
       {
