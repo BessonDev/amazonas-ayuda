@@ -120,4 +120,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .heading {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
