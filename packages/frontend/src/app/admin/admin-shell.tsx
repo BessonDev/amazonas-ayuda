@@ -163,11 +163,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
             className="flex items-center gap-2 px-2 py-1"
           >
             <Image
-              src="/logo.png"
+              src="/logob.png"
               alt="Logo"
-              width={32}
-              height={32}
-              className="size-8 rounded-lg brightness-0 invert"
+              width={35}
+              height={35}
+              className="size-8"
               priority
             />
             <span className="truncate text-sm font-semibold group-data-[collapsible=icon]:hidden">

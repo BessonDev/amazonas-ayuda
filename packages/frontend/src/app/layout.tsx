@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 const SITE_URL = "https://laredsolidaria.org"
 
 export const metadata: Metadata = {
-  title: { default: "La Red Solidaria", template: "%s | La Red Solidaria" },
+  title: { default: "La Red Solidaria", template: "%s" },
   description:
     "Plataforma de gestión logística para donaciones humanitarias — conectando donantes con comunidades que más lo necesitan en Venezuela.",
   metadataBase: new URL(SITE_URL),

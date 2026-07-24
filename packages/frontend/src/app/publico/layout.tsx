@@ -17,14 +17,14 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Portal Público — La Red Solidaria',
+  title: 'La Red Solidaria — Portal Público',
   description:
     'Conoce el impacto de las donaciones: solicitudes activas, viajes en curso y centros de acopio de La Red Solidaria en Venezuela.',
   alternates: {
     canonical: '/publico',
   },
   openGraph: {
-    title: 'Portal Público — La Red Solidaria',
+    title: 'La Red Solidaria - Portal Público',
     description:
       'Conoce el impacto de las donaciones: solicitudes activas, viajes en curso y centros de acopio.',
     url: 'https://laredsolidaria.org/publico',

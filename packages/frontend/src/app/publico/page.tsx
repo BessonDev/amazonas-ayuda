@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, MapPin, Truck, Heart, Package, ChevronRight, AlertTriangle, Clock, ArrowRight, Users, Route, CheckCircle2, HandHeart } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCountUp, useFotosRecepciones, type FotoRecepcion } from '@/lib/hooks'
 import { UNIDAD_MEDIDA_ABREV } from '@/lib/enums'
 import { getApiBase } from '@/lib/api'
@@ -70,8 +71,8 @@ export default function PublicoPage() {
 
         <nav className="relative z-10 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              <Heart className="size-5 text-[#D4A373]" />
+            <div className="size-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+              <Image src="/logo.png" alt="La Red Solidaria" width={36} height={36} className="object-contain" />
             </div>
             <span className="text-sm font-semibold tracking-wide">La Red Solidaria</span>
           </div>
@@ -265,8 +266,8 @@ export default function PublicoPage() {
       <footer className="bg-[#1B4332]/95 text-white/50 py-12 px-6 border-t border-white/5">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-white/5 flex items-center justify-center">
-              <Heart className="size-4 text-[#D4A373]/70" />
+            <div className="size-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
+              <Image src="/logo.png" alt="La Red Solidaria" width={32} height={32} className="object-contain" />
             </div>
             <span className="text-sm font-medium text-white/60">La Red Solidaria</span>
           </div>
