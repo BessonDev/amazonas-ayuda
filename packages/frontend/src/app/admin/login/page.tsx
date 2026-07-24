@@ -58,7 +58,7 @@ export default function LoginPage() {
         <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-0">
-              <Image src="/logo.png" alt="Logo" width={100} height={100} priority className="brightness-0 invert" />
+              <Image src="/logo.png" alt="Logo de La Red Solidaria" width={100} height={100} priority />
             </div>
             {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D4A373]/20 border border-[#D4A373]/30 mb-4">
               <span className="size-2 rounded-full bg-[#D4A373] animate-pulse" />
