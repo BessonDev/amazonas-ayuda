@@ -1,7 +1,10 @@
-import { Controller, Post, Headers, Body, Logger } from '@nestjs/common'
-import { ApiExcludeEndpoint } from '@nestjs/swagger'
+import { Controller, Post, Headers, Body, Logger, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import { ApiExcludeEndpoint, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { ConfigService } from '@nestjs/config'
 import { TelegramService } from './telegram.service'
+import { Roles } from '../common/decorators/roles.decorator'
+import { RolesGuard } from '../common/guards/roles.guard'
 
 @Controller('telegram')
 export class TelegramController {
@@ -13,6 +16,22 @@ export class TelegramController {
     private readonly config: ConfigService,
   ) {
     this.secretToken = this.config.get<string>('TELEGRAM_WEBHOOK_SECRET') ?? ''
+  }
+
+  @Post('test')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @ApiBearerAuth()
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Enviar mensaje de prueba al grupo de Telegram' })
+  async test() {
+    await this.telegramService.sendMessage(
+      '🟢 *Prueba exitosa*\n\nEl bot de *La Red Solidaria* funciona correctamente\\!\n\n' +
+      'Recibirás notificaciones de:\n' +
+      '• Solicitudes nuevas y completadas\n' +
+      '• Viajes creados y actualizados\n' +
+      '• Recepciones de viajes'
+    )
+    return { ok: true, message: 'Mensaje de prueba enviado al grupo de Telegram' }
   }
 
   @Post('webhook')

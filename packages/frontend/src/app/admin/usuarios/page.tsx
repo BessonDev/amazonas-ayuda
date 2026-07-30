@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Search, Edit, UserX, UserCheck, User, Mail, Phone, Shield, Activity, Calendar, Settings2 } from 'lucide-react'
+import { Plus, Search, Edit, UserX, UserCheck, User, Mail, Phone, Shield, Activity, Calendar, Settings2, Send } from 'lucide-react'
 import { UsuarioForm } from './usuario-form'
 import { api } from '@/lib/api'
 import { toast } from 'sonner'
@@ -56,6 +56,12 @@ export default function UsuariosPage() {
     },
   })
 
+  const testTelegramMutation = useMutation({
+    mutationFn: () => api.post('/telegram/test'),
+    onSuccess: () => toast.success('Mensaje de prueba enviado al grupo de Telegram'),
+    onError: () => toast.error('Error al enviar mensaje de prueba'),
+  })
+
   const filtered = usuarios.filter((u) =>
     u.nombre.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -73,6 +79,16 @@ export default function UsuariosPage() {
           <Button onClick={() => { setEditUser(undefined); setFormOpen(true) }}>
             <Plus className="size-4 mr-2" />
             Nuevo usuario
+          </Button>
+        )}
+        {isAdmin && (
+          <Button
+            variant="outline"
+            onClick={() => testTelegramMutation.mutate()}
+            disabled={testTelegramMutation.isPending}
+          >
+            <Send className="size-4 mr-2" />
+            Test Telegram
           </Button>
         )}
       </div>
