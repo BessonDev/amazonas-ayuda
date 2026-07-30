@@ -22,6 +22,7 @@ import { ReportesModule } from './reportes/reportes.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
 import { MinioModule } from './common/minio/minio.module';
 import { CiudadModule } from './common/ciudad/ciudad.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { CiudadModule } from './common/ciudad/ciudad.module';
     ReportesModule,
     AuditoriaModule,
     CiudadModule,
+    TelegramModule,
   ],
 })
 export class AppModule {}

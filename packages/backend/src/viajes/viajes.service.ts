@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateViajeDto } from './dto/create-viaje.dto'
 import { UpdateViajeDto } from './dto/update-viaje.dto'
 import { EstadoViaje } from '@prisma/client'
+import { TelegramService } from '../telegram/telegram.service'
 
 @Injectable()
 export class ViajesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private telegram: TelegramService,
+  ) {}
 
   private readonly include = {
     campania: true,
@@ -93,7 +97,7 @@ export class ViajesService {
       }
     }
 
-    return this.prisma.viaje.create({
+    const viajeCreado = await this.prisma.viaje.create({
       data: {
         codigo,
         nombreResponsable: dto.nombreResponsable,
@@ -119,6 +123,8 @@ export class ViajesService {
       },
       include: this.include,
     })
+    this.telegram.notifyViajeCreado(viajeCreado).catch(() => {})
+    return viajeCreado
   }
 
   async actualizar(id: number, dto: UpdateViajeDto) {
@@ -156,11 +162,13 @@ export class ViajesService {
         })
       }
 
-      return tx.viaje.update({
+      const viajeActualizado = await tx.viaje.update({
         where: { id },
         data,
         include: this.include,
       })
+      this.telegram.notifyViajeActualizado(viajeActualizado, 'Datos del viaje modificados').catch(() => {})
+      return viajeActualizado
     })
   }
 
@@ -544,7 +552,7 @@ export class ViajesService {
         }
       }
 
-      return tx.viaje.update({
+      const viajeResultado = await tx.viaje.update({
         where: { id },
         data: {
           estado: nuevoEstado,
@@ -554,6 +562,18 @@ export class ViajesService {
         },
         include: this.include,
       })
+
+      if (nuevoEstado === 'COMPLETADO' || nuevoEstado === 'RECEPCION_PARCIAL') {
+        const viajeCompleto = await this.prisma.viaje.findUnique({
+          where: { id },
+          include: { ...this.include, recepciones: true },
+        })
+        this.telegram.notifyViajeRecibido(viajeCompleto).catch(() => {})
+      } else {
+        this.telegram.notifyViajeActualizado(viajeResultado, `Estado cambiado a ${nuevoEstado}`).catch(() => {})
+      }
+
+      return viajeResultado
     })
   }
 

@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateSolicitudDto } from './dto/create-solicitud.dto'
 import { UpdateSolicitudDto } from './dto/update-solicitud.dto'
 import { UpdateDetalleSolicitudDto } from './dto/update-detalle-solicitud.dto'
+import { TelegramService } from '../telegram/telegram.service'
 
 @Injectable()
 export class SolicitudesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private telegram: TelegramService,
+  ) {}
 
   private readonly include = {
     campania: true,
@@ -35,7 +39,7 @@ export class SolicitudesService {
   }
 
   async crear(dto: CreateSolicitudDto) {
-    return this.prisma.solicitud.create({
+    const solicitud = await this.prisma.solicitud.create({
       data: {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
@@ -55,6 +59,8 @@ export class SolicitudesService {
       },
       include: this.include,
     })
+    this.telegram.notifySolicitudCreada(solicitud).catch(() => {})
+    return solicitud
   }
 
   async actualizar(id: number, dto: UpdateSolicitudDto) {
@@ -119,6 +125,8 @@ export class SolicitudesService {
         where: { id: solicitudId },
         data: { estado: 'COMPLETADA' },
       })
+      const completada = await this.obtener(solicitudId)
+      this.telegram.notifySolicitudCompletada(completada).catch(() => {})
     }
 
     return this.obtener(solicitudId)
