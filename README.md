@@ -101,6 +101,13 @@ El Estado Amazonas enfrenta desafíos logísticos únicos: comunidades dispersas
 | | Generación de reportes en PDF y Excel |
 | | Panel administrativo con métricas en tiempo real |
 
+| 🤖 | **Bot de Telegram** |
+|:--:|:---------------------------|
+| | Notificaciones automáticas de solicitudes (creadas/completadas) y viajes (creados/actualizados/recibidos) |
+| | Comandos: `/estado` (resumen del sistema), `/lote <código>` (rastreo completo de un lote con recorrido), `/ayuda` |
+| | Botón "Test Telegram" en el panel de Usuarios (solo ADMINISTRADOR) |
+| | Webhook vía Telegram Bot API con retry y backoff exponencial |
+
 ---
 
 ## 👥 Matriz de Roles
@@ -342,6 +349,7 @@ Luego desde cualquier dispositivo en la misma red entrá a `http://192.168.x.x:3
 | ⚙️ **Configuración** | ✅ | Pares clave-valor |
 | 📊 **Reportes** | ✅ | PDF (pdfkit) y Excel (exceljs): inventario, donaciones, viajes |
 | 📋 **Auditoría** | ✅ | Auto-logging de acciones + consulta con filtros |
+| 🤖 **Telegram** | ✅ | Bot con webhook, notificaciones de solicitudes/viajes y comandos `/estado` `/lote` `/ayuda` |
 
 ### Backend — Tests
 
@@ -415,7 +423,9 @@ pnpm --filter @donaciones/backend test:coverage
 - [ ] Pruebas E2E
 
 ### Fase 5 — Producción 🚀
-- [ ] Despliegue (Docker Compose full)
+- [x] Despliegue (Docker Compose full en Dokploy)
+- [x] Bot de Telegram operativo (webhook, comandos, notificaciones)
+- [ ] Pruebas E2E
 
 ---
 
@@ -450,6 +460,26 @@ Este proyecto está bajo la licencia **MIT**.
 </p>
 
 ## 📋 Changelog
+
+### 2026-07-30
+
+- **feat(backend):** Bot de Telegram operativo en producción
+  - Notificaciones automáticas al crear/completar solicitudes y al crear/actualizar/recibir viajes
+  - Comandos `/start`, `/ayuda`, `/estado` (solicitudes activas/pendientes, campañas activas, viajes en curso, lotes) y `/lote <código>` (rastreo completo: producto, cantidad, ubicación, campaña, donante, estado y último 10 movimientos del recorrido)
+  - Webhook con auto-descubrimiento de URL: `TELEGRAM_WEBHOOK_URL` se deriva de `FRONTEND_URL` si no está definida (necesario porque `.env` queda fuera del contenedor)
+  - Retry con backoff exponencial (2s/4s/8s) y envío fire & forget
+  - Lección: `.env` está excluida del build Docker, por eso las variables deben inyectarse vía panel de Dokploy o derivarse en runtime
+
+- **feat(backend+frontend):** Botón "Test Telegram" en panel de Usuarios
+  - Endpoint `POST /telegram/test` (solo ADMINISTRADOR) que envía un mensaje de prueba al grupo configurado
+  - Botón en la página admin de usuarios con toast de resultado
+
+- **perf(backend):** Dockerfile optimizado — imagen hasta 80% más liviana
+  - El stage runner ahora hace `COPY --from=builder /app .` en lugar de reinstalar dependencias: una sola descarga de `node_modules` y de binarios de Prisma
+  - `.dockerignore` ampliado (28 entradas) para excluir `.env`, reportes, node_modules, artefactos de build y archivos de desarrollo del contexto de build
+  - Impacto: build sin colapsar la VPN y despliegues mucho más rápidos
+
+- **feat(backend):** `/estado` ampliado con solicitudes pendientes (ABIERTA) y campañas activas (ACTIVA)
 
 ### 2026-07-22
 
