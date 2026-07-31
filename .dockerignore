@@ -1,10 +1,47 @@
+# Dependencies
 node_modules
+.pnpm-store
+
+# Build outputs
 dist
 .next
+build
+*.tsbuildinfo
+
+# Environment
 .env
 .env.local
-.git
-.gitignore
-*.md
+.env.*.local
+
+# IDE
 .vscode
 .idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test
+coverage
+.nyc_output
+test/
+tests/
+__mocks__/
+
+# Turbo
+.turbo
+
+# Documentation
+*.md

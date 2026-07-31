@@ -18,17 +18,7 @@ FROM node:22-alpine AS runner
 RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/backend/package.json packages/backend/
-COPY packages/shared/package.json packages/shared/
-
-RUN pnpm install --frozen-lockfile
-
-COPY --from=builder /app/packages/backend/prisma ./packages/backend/prisma
-RUN cd packages/backend && npx prisma generate
-
-COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app .
 
 COPY packages/backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
