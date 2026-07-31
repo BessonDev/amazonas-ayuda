@@ -63,15 +63,19 @@ export class TelegramService implements OnModuleInit {
       try {
         const { PrismaClient } = await import('@prisma/client')
         const prisma = new PrismaClient()
-        const [solicitudes, viajes, lotes] = await Promise.all([
+        const [solicitudes, viajes, lotes, solicitudesPendientes, campaniasActivas] = await Promise.all([
           prisma.solicitud.count({ where: { estado: 'APROBADA' } }),
           prisma.viaje.count({ where: { estado: { in: ['PLANIFICADO', 'EN_TRANSITO'] } } }),
           prisma.lote.count({ where: { deletedAt: null } }),
+          prisma.solicitud.count({ where: { estado: 'ABIERTA' } }),
+          prisma.campania.count({ where: { estado: 'ACTIVA' } }),
         ])
         await prisma.$disconnect()
         ctx.reply(
           '📊 *Resumen del sistema*\n\n' +
           `• Solicitudes activas: ${solicitudes}\n` +
+          `• Solicitudes pendientes: ${solicitudesPendientes}\n` +
+          `• Campañas activas: ${campaniasActivas}\n` +
           `• Viajes en curso: ${viajes}\n` +
           `• Lotes registrados: ${lotes}`,
           { parse_mode: 'Markdown' }
