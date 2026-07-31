@@ -32,7 +32,8 @@ export class TelegramService implements OnModuleInit {
         'Recibirás notificaciones sobre solicitudes y viajes en este grupo.\n\n' +
         'Comandos disponibles:\n' +
         '/ayuda — Muestra esta ayuda\n' +
-        '/estado — Resumen rápido del sistema',
+        '/estado — Resumen rápido del sistema\n' +
+        '/lote <código> — Rastrear un lote (ej: /lote LOT-001)',
         { parse_mode: 'Markdown' }
       )
     })
@@ -42,7 +43,8 @@ export class TelegramService implements OnModuleInit {
         '*Comandos disponibles:*\n\n' +
         '/start — Iniciar bot\n' +
         '/ayuda — Mostrar esta ayuda\n' +
-        '/estado — Resumen rápido del sistema\n\n' +
+        '/estado — Resumen rápido del sistema\n' +
+        '/lote <código> — Rastrear un lote (ej: /lote LOT-001)\n\n' +
         '_Las notificaciones se envían automáticamente cuando ocurren eventos._',
         { parse_mode: 'Markdown' }
       )
@@ -53,7 +55,8 @@ export class TelegramService implements OnModuleInit {
         '*Comandos disponibles:*\n\n' +
         '/start — Iniciar bot\n' +
         '/ayuda — Mostrar esta ayuda\n' +
-        '/estado — Resumen rápido del sistema\n\n' +
+        '/estado — Resumen rápido del sistema\n' +
+        '/lote <código> — Rastrear un lote (ej: /lote LOT-001)\n\n' +
         '_Las notificaciones se envían automáticamente cuando ocurren eventos._',
         { parse_mode: 'Markdown' }
       )
@@ -82,6 +85,98 @@ export class TelegramService implements OnModuleInit {
         )
       } catch {
         ctx.reply('❌ Error al obtener el estado del sistema.')
+      }
+    })
+
+    this.bot.command('lote', async (ctx) => {
+      const args = ctx.message?.text?.split(' ')
+      const codigo = args?.[1]?.toUpperCase().trim()
+
+      if (!codigo) {
+        ctx.reply('❌ Uso: `/lote <código>`\nEjemplo: `/lote LOT-001`', { parse_mode: 'Markdown' })
+        return
+      }
+
+      try {
+        const { PrismaClient } = await import('@prisma/client')
+        const prisma = new PrismaClient()
+
+        const lote = await prisma.lote.findUnique({
+          where: { codigo },
+          include: {
+            producto: { select: { nombre: true, unidad: true } },
+            donante: { select: { nombre: true, tipo: true } },
+            ubicacion: { select: { nombre: true } },
+            campania: { select: { nombre: true } },
+            movimientos: {
+              orderBy: { createdAt: 'asc' },
+              include: { ubicacion: { select: { nombre: true } } },
+            },
+          },
+        })
+
+        await prisma.$disconnect()
+
+        if (!lote) {
+          ctx.reply(`❌ Lote *${codigo}* no encontrado.`, { parse_mode: 'Markdown' })
+          return
+        }
+
+        const estadoEmoji = {
+          DISPONIBLE: '📦',
+          EN_TRANSITO: '🚚',
+          ENTREGADO: '✅',
+        }[lote.estado] ?? '📦'
+
+        const tipoEmoji = {
+          ENTRADA: '📥',
+          TRANSFERENCIA: '🔄',
+          ENVIO: '📤',
+          RECEPCION: '📥',
+          AJUSTE: '⚖️',
+        }
+
+        const tipoLabel = {
+          ENTRADA: 'Registrado',
+          ENVIO: 'Despachado',
+          RECEPCION: 'Recibido',
+          TRANSFERENCIA: 'Transferido',
+          AJUSTE: 'Ajustado',
+        }
+
+        const fechaCompacta = (fecha: Date) =>
+          new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+        const LIMITE = 10
+        const movAMostrar = lote.movimientos.slice(-LIMITE)
+
+        let movimientosTexto = movAMostrar.map((m, i) => {
+          const idx = lote.movimientos.length - movAMostrar.length + i + 1
+          const marca = idx === lote.movimientos.length ? '✅' : `${idx}.`
+          return `${marca} ${tipoEmoji[m.tipo] ?? '•'} ${tipoLabel[m.tipo] ?? m.tipo} — ${fechaCompacta(m.createdAt)} — ${m.ubicacion?.nombre ?? '—'}${m.observaciones ? ` (${m.observaciones})` : ''}`
+        }).join('\n')
+
+        if (lote.movimientos.length > LIMITE) {
+          const baseUrl = process.env.FRONTEND_URL ?? 'https://laredsolidaria.org'
+          movimientosTexto += `\n\n_y ${lote.movimientos.length - LIMITE} más en ${baseUrl}/lotes/${lote.codigo}_`
+        }
+
+        const donanteTexto = lote.donante
+          ? `👤 *Donante:* ${lote.donante.nombre} (${lote.donante.tipo})\n`
+          : ''
+
+        ctx.reply(
+          `${estadoEmoji} *Lote ${lote.codigo}*\n\n` +
+          `📦 *Producto:* ${lote.producto?.nombre ?? '-'} (${lote.cantidad} ${lote.producto?.unidad?.toLowerCase() ?? 'u'})\n` +
+          `📍 *Ubicación actual:* ${lote.ubicacion?.nombre ?? '-'}\n` +
+          `🎯 *Campaña:* ${lote.campania?.nombre ?? '-'}\n` +
+          donanteTexto +
+          `📊 *Estado:* ${lote.estado}\n\n` +
+          `🗒 *Recorrido (${lote.movimientos.length}):*\n${movimientosTexto}`,
+          { parse_mode: 'Markdown' }
+        )
+      } catch {
+        ctx.reply('❌ Error al consultar el lote.')
       }
     })
 
