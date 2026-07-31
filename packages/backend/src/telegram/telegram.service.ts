@@ -82,6 +82,7 @@ export class TelegramService implements OnModuleInit {
     })
 
     const webhookUrl = this.config.get<string>('TELEGRAM_WEBHOOK_URL')
+      ?? `${this.config.get<string>('FRONTEND_URL') ?? 'https://laredsolidaria.org'}/api/telegram/webhook`
     if (webhookUrl) {
       try {
         await this.bot.telegram.setWebhook(webhookUrl, {
